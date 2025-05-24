@@ -9,13 +9,15 @@ import gspread
 from gspread import Worksheet
 from gspread.utils import rowcol_to_a1
 from google.oauth2.service_account import Credentials
+import config
 
 # -----------------------------
 # CONFIGURATION
 # -----------------------------
 SERVICE_ACCOUNT_FILE = "credentials.json"  # For Google Sheets sync
 
-SHEET_ID = "10T1umWJko_HOvnEfMn_giLFYFk4O2zONAfdltA2FBv4"
+# Read the Google Sheet ID from the shared config module
+SHEET_ID = getattr(config, "GOOGLE_SHEET_ID", "")
 SHEET_NAME = "Sheet1"
 CSV_FILE_PATH = "bet_tracking.csv"
 

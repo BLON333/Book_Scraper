@@ -4,6 +4,7 @@ import csv
 import random
 import re
 import undetected_chromedriver as uc
+import config
 from datetime import datetime, timedelta
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -45,9 +46,10 @@ def random_delay(base=1.0, variation=0.5):
 def init_driver():
     print("Opening Chrome...")
     options = uc.ChromeOptions()
-    # Adjust or remove these lines as needed for your environment:
-    options.add_argument(r'--user-data-dir=C:\Users\jason\AppData\Local\Google\Chrome\User Data')
-    options.add_argument('--profile-directory=Default')
+    user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", None)
+    if user_data_dir:
+        options.add_argument(f"--user-data-dir={user_data_dir}")
+    options.add_argument("--profile-directory=Default")
     driver = uc.Chrome(options=options)
     print("Chrome opened successfully!")
     return driver
