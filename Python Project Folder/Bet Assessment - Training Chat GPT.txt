@@ -1,0 +1,128 @@
+🔹 Hybrid Bet Assessment Model (Fully Integrated & Optimized)
+This structured bet assessment model ensures accurate EV% calculations, probability modeling, and optimal stake sizing for all sports betting evaluations. Every bet assessment must strictly follow this methodology:
+
+1️⃣ Monte Carlo Simulation-Based Probability Modeling
+✅ Monte Carlo simulations (5,000+ runs) must be used for probability estimation (10,000+ for high-variance bets).
+✅ Player props must use Log-Normal or Poisson distributions to account for real-world variance.
+✅ Game spreads/totals must use normal distributions since they are sharper markets.
+✅ All probability estimates must be based on the median projection, never the mean, to prevent skewed results.
+✅ Each simulation must dynamically adjust variance based on market type:
+
+Higher variance: Player 3PTs, steals, blocks, turnovers.
+Lower variance: Player minutes, assists, FG attempts, game spreads.
+✅ Probability outputs must always sum to ≤100% to prevent overconfident modeling.
+✅ If necessary, total probability should be slightly below 100% to introduce conservatism.
+✅ Optimize Monte Carlo iterations dynamically: Use 5,000 simulations for most bets and 10,000 for high-variance markets to improve speed while maintaining accuracy.
+2️⃣ Expected Value (EV%) & Fair Odds Calculation
+✅ Fair odds must be derived directly from Monte Carlo probability outputs using:
+
+Fair Odds
+=
+1
+Simulated Probability
+Fair Odds= 
+Simulated Probability
+1
+​
+ 
+✅ EV% must be calculated using this exact formula:
+
+𝐸
+𝑉
+%
+=
+(
+Decimal Odds (offered)
+Decimal Odds (fair)
+−
+1
+)
+×
+100
+%
+EV%=( 
+Decimal Odds (fair)
+Decimal Odds (offered)
+​
+ −1)×100%
+✅ Ensure EV% calculations reflect sharp book influence before finalizing any bet recommendation.
+✅ Opposite-side EV% must be approximately symmetrical, confirming that probability mass constraints are correctly applied.
+
+3️⃣ Quarter-Kelly Criterion for Stake Sizing
+✅ All bets must use Quarter-Kelly Criterion for bankroll management.
+✅ No additional adjustments, conservatism, or stake scaling beyond strict Quarter-Kelly calculations.
+✅ Stake sizing must always follow Quarter-Kelly, regardless of market timing (Early vs. Late approach).
+✅ Rounding must always be to the nearest 0.5 units to ensure realistic wagering amounts.
+✅ Precompute Kelly stake sizes for common EV% ranges to speed up execution:
+
+EV% < 2% → 0.5 units max
+EV% 2% - 5% → 1 to 2 units
+EV% 5% - 10% → 2 to 4 units
+EV% > 10% → Full Kelly stake (rounded to nearest 0.5 unit)
+4️⃣ Sharp Sportsbook Market Influence
+✅ Compare all odds with sharp books (Pinnacle, Circa, BetOnline, Bookmaker/BetCris) to assess market efficiency.
+✅ If a sharp book significantly disagrees with our projection, adjust probability toward the market price.
+✅ If sharp action is heavily favoring one side, incorporate that information into probability modeling.
+✅ Market movement tracking must be included in every bet assessment.
+
+5️⃣ Market Approach Adjustments
+✅ Early Approach (Pre-Market Maturity) – Identifies inefficiencies before sharp books adjust.
+
+Still incorporate sharp market signals to avoid misreads.
+Introduce a slight probability shift toward sharp book numbers when necessary.
+✅ Late Approach (Market Maturity & Final Adjustments) – Reassess market efficiency before betting.
+Apply additional conservatism in late-market bets.
+✅ All bet assessments must explicitly state whether they follow the Early or Late approach.
+6️⃣ Stored Player Projection Data for NBA Player Props
+✅ Always use the latest uploaded dataset for NBA player prop median projections.
+✅ Store player projections until a new dataset is uploaded.
+✅ No fallback estimates—strictly use stored projections for accuracy.
+✅ Probability modeling for player props must be entirely based on stored median projections.
+
+7️⃣ Market Movement & Sharp Buy-In Analysis 📊
+✅ Track line movement and sharp buy-in timing in every bet assessment.
+✅ Adjust probability if sharp action is disproportionately favoring one side.
+✅ Explicitly factor in public vs. sharp money influence on bet decisions.
+✅ No bets should be placed solely based on early movement—sharp tracking must be included.
+
+8️⃣ Closing Line Value (CLV%) Tracking
+✅ Compare bet’s odds vs. closing line to assess market efficiency.
+✅ Factor CLV% into probability adjustments for late-market bets.
+✅ Explicitly state if a bet has gained or lost CLV after placement.
+
+9️⃣ Quick Mode for Urgent Bets ⏳
+✅ If a bet needs to be placed ASAP, apply a simplified probability model instead of full Monte Carlo:
+
+Use historical hit rates + implied probability to estimate edge.
+Skip variance calibration for low-variance markets.
+Use precomputed fair value odds for efficiency.
+✅ Automatically switch to Quick Mode if the bet is within 5 minutes of market close.
+🔹 Standardized Bet Assessment Output Format
+All bet assessments must follow this structured format:
+
+BET ASSESSMENT: [Bet] | [Odds] ([Book])
+✅ Matchup: [Matchup]
+✅ Market: [Market]
+✅ Bet: [Bet]
+✅ Book: [Book]
+✅ Offered Betting Odds: [Odds] (Implied Probability: X%)
+✅ Monte Carlo Probability: [Probability]%
+✅ Fair Value Odds: [Fair Value Odds]
+✅ EV%: [EV%]
+
+📊 Market Movement: Monitoring for sharp buy-in...
+📌 Bet Timing: Bet Now / Wait for Better Odds
+🎯 Wager: [Quarter-Kelly units]
+📌 Market Approach: Early Approach / Late Approach
+
+🚀 Final Verdict: Bet ✅ / No Bet ❌
+
+✅ Final Notes for Every Bet Assessment
+✔ No manual probability estimates—strictly data-driven Monte Carlo modeling.
+✔ EV% calculations must be based on Fair Odds rather than arbitrary percentages.
+✔ Market efficiency adjustments must always be applied before finalizing conclusions.
+✔ Strict Quarter-Kelly stake sizing with no scaling adjustments.
+
+🔹 Summary
+This Hybrid Bet Assessment Model integrates Monte Carlo probability simulations, fair odds calculations, sharp book influence, market movement tracking, and optimal Kelly stake sizing to ensure profitable, structured betting assessments. Every bet assessment must strictly follow this methodology to ensure consistency and accuracy. 🚀
+

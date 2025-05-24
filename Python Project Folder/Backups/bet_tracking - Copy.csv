@@ -1,0 +1,474 @@
+Date,Start Time,Bet Placed Time,Sport,League,Market,Derivative,Event/Match,Bet,Odds,Stake,Bookmaker,Payout,Closing Line,CLV%,Profit/Loss,Notes/Comments,Bet ID#,Result
+2025-01-01,21:10,Unknown,Basketball,NBA,Player Prop,No,Cade Cunningham (Rebounds),Under 5.5 Rebounds,-105,111,Pinnacle,105.71,,,-111.00,,2041612249,Loss
+2025-01-01,23:10,Unknown,Basketball,NBA,Player Prop,No,Trae Young (Points),Over 24.5 Points,105,111,Pinnacle,116.55,,,116.55,,2041638029,Win
+2025-01-01,23:10,Unknown,Basketball,NBA,Spread,No,LiveAtlanta Hawks vs Denver Nuggets,Atlanta Hawks +14.5,131,111,Pinnacle,145.41,,,-111.00,,2041651529,Loss
+2025-01-01,23:10,Unknown,Basketball,NBA,Spread,No,LiveAtlanta Hawks vs Denver Nuggets,Atlanta Hawks +14.5,131,111,Pinnacle,145.41,,,-111.00,,2041651550,Loss
+2025-01-01,23:10,Unknown,Basketball,NBA,Spread,No,LiveAtlanta Hawks vs Denver Nuggets,Atlanta Hawks +17.5,100,111,Pinnacle,111,,,-111.00,,2041651953,Loss
+2025-01-01,23:00,Unknown,Basketball,NCAA,Total,No,LiveBelmont vs Northern Iowa,Over 137.5,-114,222,Pinnacle,194.74,,,194.74,,2041649886,Win
+2025-01-01,23:00,Unknown,Basketball,NCAA,Total,No,LiveBelmont vs Northern Iowa,Over 137.5,-123,222,Pinnacle,180.49,,,180.49,,2041649930,Win
+2025-01-01,21:40,Unknown,Basketball,NBA,Total,No,LiveNew Orleans Pelicans vs Miami Heat,Over 222,126,500,Pinnacle,630,,,630.00,,2041641993,Win
+2025-01-01,21:40,Unknown,Basketball,NBA,Spread,No,LiveNew Orleans Pelicans vs Miami Heat,New Orleans Pelicans +10.5,106,247,Pinnacle,261.82,,,-247.00,,2041643145,Loss
+2025-01-01,21:40,Unknown,Basketball,NBA,Spread,No,LiveUtah Jazz vs New York Knicks,Utah Jazz +10.5,-124,111,Pinnacle,89.52,,,-111.00,,2041640603,Loss
+2025-01-01,21:00,Unknown,Basketball,NCAA,Total,No,LiveBradley vs Indiana State,Under 149,-119,222,Pinnacle,186.55,,,-222.00,,2041634907,Loss
+2025-01-01,21:10,Unknown,Basketball,NBA,Spread,No,LiveChicago Bulls vs Washington Wizards,Chicago Bulls +12.0,113,222,Pinnacle,250.86,,,-222.00,,2041640942,Loss
+2025-01-01,,Unknown,Basketball,NBA,Spread,Yes,LiveChicago Bulls vs Washington Wizards,Chicago Bulls +13.5,112,222,Pinnacle,248.64,,,-222.00,,2041641027,Loss
+2025-01-01,,Unknown,Basketball,NBA,Spread,Yes,LiveNew Orleans Pelicans vs Miami Heat,Miami Heat -1.5,116,111,Pinnacle,128.76,,,128.76,,2041633436,Win
+2025-01-01,,Unknown,Basketball,NCAA,Moneyline,Yes,LiveDrake vs Illinois Chicago,Over 122.5,-109,111,Pinnacle,101.83,,,101.83,,2041607765,Win
+2025-01-01,,Unknown,Basketball,NCAA,Moneyline,Yes,LiveDrake vs Illinois Chicago,Over 122.5,-111,111,Pinnacle,100,,,100.00,,2041607790,Win
+2025-01-02,22:30,Unknown,Basketball,NCAA,Spread,No,Eastern Kentucky vs Central Arkansas,Central Arkansas +6.0,113,100,Pinnacle,113,,,,,2041771196,Pending
+2025-01-02,22:30,Unknown,Basketball,NCAA,Spread,No,Eastern Kentucky vs Central Arkansas,Central Arkansas +6.0,112,50,Pinnacle,56,,,,,2041771287,Pending
+2025-01-02,22:30,Unknown,Basketball,NCAA,Spread,No,Lindenwood vs Eastern Illinois,Lindenwood +1.5,116,200,Pinnacle,232,,,-200.00,,2041825898,Loss
+2025-01-02,22:10,Unknown,Basketball,NBA,Total,No,Brooklyn Nets vs Milwaukee Bucks,Milwaukee Bucks - Over 117.5,-101,400,Pinnacle,396.04,,,-400.00,,2041824266,Loss
+2025-01-02,22:00,Unknown,Basketball,NCAA,Spread,No,LiveIdaho State vs Northern Arizona,Idaho State +12.5,-111,111,Pinnacle,100,,,100.00,,2041840400,Win
+2025-01-02,22:00,Unknown,Basketball,NCAA,Total,No,LiveIdaho State vs Northern Arizona,Over 129.5,-109,119,Pinnacle,109.17,,,109.17,,2041840727,Win
+2025-01-02,22:30,Unknown,Basketball,NCAA,Total,Yes,Southern Indiana vs Tennessee Tech,Under 68.5,104,50,Pinnacle,52,,,-50.00,,2041807640,Loss
+2025-01-02,22:00,Unknown,Basketball,NCAA,Spread,Yes,Weber State vs Northern Colorado,Weber State +3.5,111,120,Pinnacle,133.2,,,-120.00,,2041738301,Loss
+2025-01-02,15:00,Unknown,Basketball,NCAA,Moneyline,Yes,Gardner Webb vs Charleston Southern,Gardner Webb,-100,100,Pinnacle,100,,,-100.00,,2041752252,Loss
+2025-01-03,23:10,Unknown,Basketball,NBA,Player Prop,No,Victor Wembanyama (Pts+Rebs+Asts),Over 41.5 Points+Rebs+Assists,-115,150,Pinnacle,130.43,,,130.43,,2041975246,Win
+2025-01-03,23:10,Unknown,Basketball,NBA,Player Prop,No,Nikola Jokic (Points),Over 28.5 Points,-109,100,Pinnacle,91.74,,,91.74,,2041973773,Win
+2025-01-03,21:10,Unknown,Basketball,NBA,Spread,No,LiveCharlotte Hornets vs Detroit Pistons,Charlotte Hornets +5.5,-106,111,Pinnacle,104.72,,,104.72,,2042108424,Win
+2025-01-03,0:00,Unknown,Basketball,NCAA,Total,No,LiveCS Northridge vs CS Fullerton,Over 150,-109,222,Pinnacle,203.67,,,203.67,,2041851690,Win
+2025-01-03,0:00,Unknown,Basketball,NCAA,Total,No,LiveSan Francisco vs Pacific,Under 144.5,-109,111,Pinnacle,101.83,,,-111.00,,2041850249,Loss
+2025-01-03,0:00,Unknown,Basketball,NCAA,Total,No,LiveOregon State vs Loyola Marymount,Under 158,-114,106,Pinnacle,92.98,,,92.98,,2041852217,Win
+2025-01-04,21:00,Unknown,Basketball,NCAA,Total,No,LiveYoungstown State vs IPFW,Over 140,-109,200,Pinnacle,183.49,,,183.49,,2042479709,Win
+2025-01-04,20:00,Unknown,Basketball,NCAA,Total,No,LiveSan Jose State vs UNLV,Over 131.5,-113,200,Pinnacle,176.99,,,176.99,,2042470124,Win
+2025-01-04,13:00,Unknown,Basketball,NCAA,Spread,No,Buffalo vs Liberty,Buffalo -3.0,-102,150,Pinnacle,147.06,,,147.06,,2041730590,Win
+2025-01-04,14:00,Unknown,Basketball,NCAA,Total,No,LiveToledo vs Western Michigan,Over 148.5,-106,200,Pinnacle,188.68,,,-200.00,,2042388049,Loss
+2025-01-04,0:10,Unknown,Basketball,NBA,Player Prop,No,Desmond Bane (Assists),Under 6.5 Assists,-120,100,Pinnacle,83.33,,,-100.00,,2041972598,Loss
+2025-01-05,22:20,Unknown,Football,NFL,Moneyline,No,Jameson Williams (Receptions),Under 4.5 Receptions,-125,100,Pinnacle,80,,,-100.00,,2042761443,Loss
+2025-01-05,22:20,Unknown,Football,NFL,Moneyline,No,Jake Bates (Kicking Points),Under 7.5 Kicking Points,108,100,Pinnacle,108,,,108.00,,2042860756,Win
+2025-01-05,18:25,Unknown,Football,NFL,Moneyline,No,Jonnu Smith (Receptions),Over 3.5 Receptions,-125,300,Pinnacle,240,,,240.00,,2042824964,Win
+2025-01-05,22:20,Unknown,Football,NFL,Moneyline,No,LiveMinnesota Vikings vs Detroit Lions,Under 42.5,120,111,Pinnacle,133.2,,,133.20,,2042880364,Win
+2025-01-05,22:40,Unknown,Basketball,NBA,Spread,No,LiveSacramento Kings vs Golden State Warriors,Golden State Warriors +12.5,-122,111,Pinnacle,90.98,,,-111.00,,2042876425,Loss
+2025-01-05,22:40,Unknown,Basketball,NBA,Spread,No,LiveSacramento Kings vs Golden State Warriors,Sacramento Kings -18.0,-112,300,Pinnacle,267.86,,,267.86,,2042880561,Win
+2025-01-05,21:10,Unknown,Basketball,NBA,Spread,No,LiveLos Angeles Lakers vs Houston Rockets,Los Angeles Lakers +6.5,-111,200,Pinnacle,180.18,,,180.18,,2042869746,Win
+2025-01-05,21:10,Unknown,Basketball,NBA,Total,Yes,LiveLos Angeles Lakers vs Houston Rockets,Over 53.5,124,200,Pinnacle,248,,,248.00,,2042862483,Win
+2025-01-05,21:10,Unknown,Basketball,NBA,Total,Yes,LiveLos Angeles Lakers vs Houston Rockets,Over 53.5,124,200,Pinnacle,248,,,248.00,,2042862549,Win
+2025-01-05,20:10,Unknown,Basketball,NBA,Player Prop,No,Brandon Miller (Points),Over 18.5 Points,-113,100,Pinnacle,88.5,,,88.50,,2042772539,Win
+2025-01-05,20:10,Unknown,Basketball,NBA,Total,No,LiveCharlotte Hornets vs Cleveland Cavaliers,Under 226.5,-104,100,Pinnacle,96.15,,,96.15,,2042856551,Win
+2025-01-05,18:00,Unknown,Basketball,NCAA,Total,No,LiveIllinois vs Washington,Under 156.5,101,300,Pinnacle,303,,,-300.00,,2042837306,Loss
+2025-01-05,18:00,Unknown,Basketball,NCAA,Spread,No,LiveMaryland vs Oregon,Oregon +1.5,-114,111,Pinnacle,97.37,,,97.37,,2042834660,Win
+2025-01-05,18:25,Unknown,Football,NFL,Spread,Yes,Miami Dolphins vs New York Jets,Miami Dolphins - Over 9.5,-101,100,Pinnacle,99.01,,,-100.00,,2042717029,Loss
+2025-01-05,18:00,Unknown,Basketball,NCAA,Total,No,LiveKansas vs Central Florida,Kansas - Over 79.5,-104,222,Pinnacle,213.46,,,213.46,,2042833775,Win
+2025-01-05,18:00,Unknown,Basketball,NCAA,Total,No,LiveKansas vs Central Florida,Over 143.5,-115,155,Pinnacle,134.78,,,134.78,,2042834847,Win
+2025-01-05,18:00,Unknown,Basketball,NCAA,Spread,No,LiveSouthern Illinois vs Illinois State,Illinois State -14.5,-108,111,Pinnacle,102.78,,,102.78,,2042834341,Win
+2025-01-05,18:00,Unknown,Basketball,NCAA,Spread,No,LiveSouthern Illinois vs Illinois State,Illinois State -14.5,-108,111,Pinnacle,102.78,,,102.78,,2042834408,Win
+2025-01-05,15:00,Unknown,Football,NFL,Moneyline,No,Washington Commanders vs Dallas Cowboys,Under 43.5,-113,180,Pinnacle,159.29,,,159.29,,2042740428,Win
+2025-01-05,16:00,Unknown,Basketball,NCAA,Spread,No,Northwestern vs Purdue,Purdue -7.5,103,100,Pinnacle,103,,,103.00,,2042583000,Win
+2025-01-05,16:00,Unknown,Basketball,NCAA,Total,Yes,Colgate vs Bucknell,Over 63.5,102,100,Pinnacle,102,,,-100.00,,2042717561,Loss
+2025-01-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Mason Plumlee (Rebounds),Over 7.5 Rebounds,144,300,Pinnacle,432,,,-300.00,,2043020580,Loss
+2025-01-06,22:10,Unknown,Basketball,NBA,Player Prop,No,Anthony Edwards (Assists),Under 4.5 Assists,-146,80,Pinnacle,54.79,,,-80.00,,2043036290,Loss
+2025-01-06,21:40,Unknown,Basketball,NBA,Player Prop,No,Scottie Barnes (Assists),Under 5.5 Assists,101,100,Pinnacle,101,,,101.00,,2043014782,Win
+2025-01-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Ausar Thompson (Pts+Rebs+Asts),Over 18.5 Points+Rebs+Assists,110,100,Pinnacle,110,,,,,2042977050,Pending
+2025-01-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Cade Cunningham (Rebounds),Over 5.5 Rebounds,-118,100,Pinnacle,84.75,,,84.75,,2042941207,Win
+2025-01-06,23:00,Unknown,Basketball,NCAA,Spread,No,LiveOhio State vs Minnesota,Minnesota +5.5,-108,333,Pinnacle,308.33,,,308.33,,2043094322,Win
+2025-01-06,23:00,Unknown,Basketball,NCAA,Spread,No,LiveOhio State vs Minnesota,Ohio State -2.5,-104,111,Pinnacle,106.73,,,-111.00,,2043097521,Loss
+2025-01-06,23:00,Unknown,Basketball,NCAA,Total,No,LiveOhio State vs Minnesota,Over 124.5,-115,222,Pinnacle,193.04,,,193.04,,2043099958,Win
+2025-01-06,23:00,Unknown,Basketball,NCAA,Total,No,LiveGrambling vs Texas Southern,Under 139.5,-117,111,Pinnacle,94.87,,,94.87,,2043090747,Win
+2025-01-06,23:00,Unknown,Basketball,NCAA,Total,No,LiveTCU vs Houston,Over 116,-123,111,Pinnacle,90.24,,,-111.00,,2043093911,Loss
+2025-01-06,23:00,Unknown,Basketball,NCAA,Total,No,LiveTCU vs Houston,Over 116.5,-116,111,Pinnacle,95.69,,,-111.00,,2043094073,Loss
+2025-01-06,23:00,Unknown,Basketball,NCAA,Total,No,LiveTCU vs Houston,Under 120.5,-119,222,Pinnacle,186.55,,,186.55,,2043100063,Win
+2025-01-06,22:10,Unknown,Basketball,NBA,Player Prop,No,Norman Powell (Points),Over 21.5 Points,-104,200,Pinnacle,192.31,,,192.31,,2042982849,Win
+2025-01-06,22:10,Unknown,Basketball,NBA,Player Prop,No,Spencer Dinwiddie (Points),Over 15.5 Points,115,100,Pinnacle,115,,,-100.00,,2043018160,Loss
+2025-01-06,22:10,Unknown,Basketball,NBA,Total,No,LiveLos Angeles Clippers vs Minnesota Timberwolves,Minnesota Timberwolves - Under 105.5,-106,222,Pinnacle,209.43,,,-222.00,,2043095996,Loss
+2025-01-06,22:00,Unknown,Basketball,NCAA,Total,No,LiveSouth Carolina State vs Coppin State,Under 170,-127,155,Pinnacle,122.05,,,122.05,,2043088145,Win
+2025-01-06,22:00,Unknown,Basketball,NCAA,Total,No,LiveMississippi Valley State vs Alabama A&M,Over 133.5,-116,200,Pinnacle,172.41,,,172.41,,2043072668,Win
+2025-01-06,22:00,Unknown,Basketball,NCAA,Total,No,LiveIncarnate Word vs Lamar,Over 133.5,-112,200,Pinnacle,178.57,,,-200.00,,2043074225,Loss
+2025-01-06,22:00,Unknown,Basketball,NCAA,Total,No,LiveIncarnate Word vs Lamar,Over 133.5,-114,200,Pinnacle,175.44,,,-200.00,,2043074283,Loss
+2025-01-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Bradley Beal (3 Point FG),Over 1.5 3-Point Field Goals,-110,150,Pinnacle,136.36,,,136.36,,2043002535,Win
+2025-01-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Kelly Oubre Jr. (Points),Under 11.5 Points,-107,100,Pinnacle,93.46,,,-100.00,,2042977197,Loss
+2025-01-06,21:30,Unknown,Basketball,NCAA,Total,No,Texas A&M Corpus Christi vs New Orleans,Texas A&M Corpus Christi - Over 79.5,-131,222,Pinnacle,169.47,,,169.47,,2043008420,Win
+2025-01-06,21:40,Unknown,Basketball,NBA,Moneyline,Yes,LiveMilwaukee Bucks vs Toronto Raptors,Milwaukee Bucks,-106,400,Pinnacle,377.36,,,377.36,,2043073785,Win
+2025-01-06,21:40,Unknown,Basketball,NBA,Moneyline,Yes,LiveMilwaukee Bucks vs Toronto Raptors,Milwaukee Bucks,-111,200,Pinnacle,180.18,,,180.18,,2043073873,Win
+2025-01-06,21:40,Unknown,Basketball,NBA,Total,Yes,LiveIndiana Pacers vs Brooklyn Nets,Over 56.5,-102,200,Pinnacle,196.08,,,-200.00,,2043077169,Loss
+2025-01-06,21:00,Unknown,Basketball,NCAA,Total,No,LiveArkansas Pine Bluff vs Alabama State,Over 180,-127,150,Pinnacle,118.11,,,118.11,,2043077730,Win
+2025-01-07,21:10,Unknown,Basketball,NBA,Player Prop,No,Bilal Coulibaly (Assists),Under 4.5 Assists,-121,100,Pinnacle,82.64,,,82.64,,2043233863,Win
+2025-01-07,23:00,Unknown,Basketball,NCAA,Total,No,LiveAuburn vs Texas,Over 144.5,-112,111,Pinnacle,99.11,,,99.11,,2043353806,Win
+2025-01-07,23:00,Unknown,Basketball,NCAA,Total,No,LiveAuburn vs Texas,Over 142.5,-108,333,Pinnacle,308.33,,,308.33,,2043355537,Win
+2025-01-07,23:00,Unknown,Basketball,NCAA,Spread,No,LiveAuburn vs Texas,Auburn -14.5,-107,222,Pinnacle,207.48,,,-222.00,,2043355961,Loss
+2025-01-07,23:00,Unknown,Basketball,NCAA,Spread,No,LiveAuburn vs Texas,Auburn -14.5,-107,111,Pinnacle,103.74,,,-111.00,,2043355994,Loss
+2025-01-07,23:00,Unknown,Basketball,NCAA,Spread,No,LiveAuburn vs Texas,Auburn -13.5,-113,333,Pinnacle,294.69,,,-333.00,,2043360239,Loss
+2025-01-07,23:00,Unknown,Basketball,NCAA,Total,No,LiveSMU vs North Carolina,Over 158,-116,222,Pinnacle,191.38,,,-222.00,,2043354965,Loss
+2025-01-07,23:00,Unknown,Basketball,NCAA,Spread,No,LiveFresno State vs Colorado State,Colorado State -27.5,-107,111,Pinnacle,103.74,,,-111.00,,2043360479,Loss
+2025-01-07,23:10,Unknown,Basketball,NBA,Moneyline,Yes,LiveAtlanta Hawks vs Utah Jazz,Atlanta Hawks,-128,222,Pinnacle,173.44,,,173.44,,2043362608,Win
+2025-01-07,22:10,Unknown,Basketball,NBA,Total,No,LiveMinnesota Timberwolves vs New Orleans Pelicans,Under 220.5,106,155,Pinnacle,164.3,,,164.30,,2043354682,Win
+2025-01-07,22:10,Unknown,Basketball,NBA,Moneyline,No,LiveMinnesota Timberwolves vs New Orleans Pelicans,Minnesota Timberwolves,122,155,Pinnacle,189.1,,,189.10,,2043355222,Win
+2025-01-07,23:10,Unknown,Basketball,NBA,Total,Yes,LiveAtlanta Hawks vs Utah Jazz,Under 60.5,111,111,Pinnacle,123.21,,,123.21,,2043356304,Win
+2025-01-07,23:00,Unknown,Basketball,NCAA,Total,Yes,LiveLSU vs Missouri,Over 67.5,-122,222,Pinnacle,181.97,,,181.97,,2043351852,Win
+2025-01-07,22:00,Unknown,Basketball,NCAA,Total,No,LiveTulsa vs Texas San Antonio,Over 143.5,-110,200,Pinnacle,181.82,,,181.82,,2043338029,Win
+2025-01-07,21:35,Unknown,Basketball,NBA,Total,No,LiveLos Angeles Lakers vs Dallas Mavericks,Over 214.5,-123,100,Pinnacle,81.3,,,81.30,,2043341854,Win
+2025-01-07,21:10,Unknown,Basketball,NBA,Spread,No,LivePhoenix Suns vs Charlotte Hornets,Phoenix Suns +8.5,-146,200,Pinnacle,136.99,,,-200.00,,2043337393,Loss
+2025-01-07,21:10,Unknown,Basketball,NBA,Total,No,LivePhoenix Suns vs Charlotte Hornets,Charlotte Hornets - Under 113.5,-106,100,Pinnacle,94.34,,,-100.00,,2043338938,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Total,No,LiveMiami Ohio vs Ball State,Under 149.5,-113,200,Pinnacle,176.99,,,-200.00,,2043338815,Loss
+2025-01-07,21:10,Unknown,Basketball,NBA,Player Prop,No,Cam Whitmore (Points),Under 12.5 Points,112,120,Pinnacle,134.4,,,-120.00,,2043305351,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveEastern Michigan vs Toledo,Eastern Michigan +9.5,-110,200,Pinnacle,181.82,,,181.82,,2043339734,Win
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveTennessee vs Florida,Tennessee +15.5,-103,200,Pinnacle,194.17,,,-200.00,,2043335334,Loss
+2025-01-07,22:00,Unknown,Basketball,NCAA,Total,Yes,LiveCincinnati vs Baylor,Over 66.5,119,150,Pinnacle,178.5,,,-150.00,,2043342725,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Total,No,LiveGeorgia Tech vs Syracuse,Over 118.5,-107,200,Pinnacle,186.92,,,-200.00,,2043339548,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Total,No,LiveOhio vs Buffalo,Under 145.5,-118,200,Pinnacle,169.49,,,-200.00,,2043337460,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveOhio vs Buffalo,Ohio -19.5,-108,200,Pinnacle,185.19,,,-200.00,,2043338352,Loss
+2025-01-07,21:10,Unknown,Basketball,NBA,Total,Yes,LiveHouston Rockets vs Washington Wizards,Over 64.5,127,150,Pinnacle,190.5,,,-150.00,,2043343267,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveCentral Michigan vs Akron,Akron -11.5,-118,222,Pinnacle,188.14,,,188.14,,2043336974,Win
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveCentral Michigan vs Akron,Akron -14.5,-110,200,Pinnacle,181.82,,,181.82,,2043338456,Win
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveCentral Michigan vs Akron,Central Michigan +14.5,-110,200,Pinnacle,181.82,,,-200.00,,2043338643,Loss
+2025-01-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveCentral Michigan vs Akron,Akron -14.5,-110,400,Pinnacle,363.64,,,363.64,,2043338684,Win
+2025-01-07,0:10,Unknown,Basketball,NBA,Total,Yes,LiveMiami Heat vs Sacramento Kings,Over 51.5,106,155,Pinnacle,164.3,,,164.30,,2043107975,Win
+2025-01-08,21:00,Unknown,Basketball,NCAA,Moneyline,No,LiveFurman vs The Citadel,Furman,-165,200,Pinnacle,121.21,,,121.21,,2043621079,Win
+2025-01-08,21:00,Unknown,Basketball,NCAA,Moneyline,No,LiveMurray State vs Northern Iowa,Murray State,-133,200,Pinnacle,150.38,,,150.38,,2043621849,Win
+2025-01-08,0:00,Unknown,Basketball,NCAA,Total,No,LiveUtah State vs San Jose State,Over 155.5,-119,155,Pinnacle,130.25,,,130.25,,2043366242,Win
+2025-01-08,0:07,Unknown,Hockey,NHL,Player Prop,Yes,LiveCalgary Flames vs Anaheim Ducks,Anaheim Ducks - Under 0.5,-134,155,Pinnacle,115.67,,,115.67,,2043366065,Win
+2025-01-08,0:10,Unknown,Basketball,NBA,Player Prop,Yes,LiveMiami Heat vs Golden State Warriors,Golden State Warriors - Under 25.5,-120,155,Pinnacle,129.17,,,129.17,,2043366465,Win
+2025-01-09,1:05,Unknown,Basketball,NCAA,Spread,No,Virginia vs California,California -4.0,-106,150,Pinnacle,141.51,,,141.51,,2043362160,Win
+2025-02-09,20:30,Unknown,Football,NFL,Moneyline,No,Total Tackles + Assists Milton Williams,Over 1.5 Regular,-116,300,Pinnacle,258.62,,,258.62,,2051349750,Win
+2025-02-09,20:30,Unknown,Football,NFL,Moneyline,No,Saquon Barkley longest rushing attempt will be,Over 25.5 Regular,130,333,Pinnacle,432.9,,,-333.00,,2051813097,Loss
+2025-02-09,20:30,Unknown,Football,NFL,Moneyline,No,Total rushing attempts for Isiah Pacheco,Over 5.5 Regular,-106,300,Pinnacle,283.02,,,-300.00,,2050340796,Loss
+2025-02-09,16:00,Unknown,Basketball,NCAA,Total,No,LiveArizona State vs Oklahoma State,Under 155.5,-104,333,Pinnacle,320.19,,,-333.00,,2053277775,Loss
+2025-02-10,21:00,Unknown,Basketball,NCAA,Spread,Yes,Mississippi Valley State vs Alcorn State,Alcorn State -8.5,-145,500,Pinnacle,344.83,,,344.83,,2053408111,Win
+2025-02-10,21:10,Unknown,Basketball,NBA,Player Prop,No,Franz Wagner (Pts+Rebs+Asts),Over 35.5 Points+Rebs+Assists,-115,400,Pinnacle,347.83,,,347.83,,2053394089,Win
+2025-02-10,23:10,Unknown,Basketball,NBA,Player Prop,No,Jamal Murray (Pts+Rebs+Asts),Under 31.5 Points+Rebs+Assists,110,300,Pinnacle,330,,,330.00,,2053474788,Win
+2025-02-10,22:40,Unknown,Basketball,NBA,Player Prop,No,Kyrie Irving (Pts+Rebs+Asts),Under 38.5 Points+Rebs+Assists,-106,400,Pinnacle,377.36,,,-400.00,,2053394293,Loss
+2025-02-10,22:40,Unknown,Basketball,NBA,Player Prop,No,DeMar DeRozan (Pts+Rebs+Asts),Over 25.5 Points+Rebs+Assists,-129,500,Pinnacle,387.6,,,387.60,,2053391657,Win
+2025-02-10,23:10,Unknown,Basketball,NBA,Total,No,LivePortland Trail Blazers vs Denver Nuggets,Over 237.5,107,333,Pinnacle,356.31,,,356.31,,2053528326,Win
+2025-02-10,23:00,Unknown,Basketball,NCAA,Total,No,LiveCharlotte U vs Florida Atlantic,Over 160.5,-108,333,Pinnacle,308.33,,,308.33,,2053530027,Win
+2025-02-10,22:10,Unknown,Basketball,NBA,Total,No,LiveGolden State Warriors vs Milwaukee Bucks,Under 230.5,101,333,Pinnacle,336.33,,,-333.00,,2053533580,Loss
+2025-02-10,21:40,Unknown,Basketball,NBA,Spread,No,LiveCharlotte Hornets vs Brooklyn Nets,Charlotte Hornets +19.5,-134,333,Pinnacle,248.51,,,248.51,,2053530297,Win
+2025-02-10,21:10,Unknown,Basketball,NBA,Player Prop,No,Kyshawn George (3 Point FG),Over 1.5 3-Point Field Goals,-140,300,Pinnacle,214.29,,,-300.00,,2053476927,Loss
+2025-02-10,21:10,Unknown,Basketball,NBA,Player Prop,No,Richaun Holmes (Points),Over 9.5 Points,111,380,Pinnacle,421.8,,,421.80,,2053471430,Win
+2025-02-10,22:40,Unknown,Basketball,NBA,Total,Yes,Sacramento Kings vs Dallas Mavericks,Dallas Mavericks - Over 60.5,101,350,Pinnacle,353.5,,,353.50,,2053423733,Win
+2025-02-10,21:10,Unknown,Basketball,NBA,Player Prop,No,Anthony Edwards (Points),Under 31.5 Points,-122,370,Pinnacle,303.28,,,-370.00,,2053456441,Loss
+2025-02-10,21:00,Unknown,Basketball,NCAA,Moneyline,No,LiveSouthern vs Alabama State,Alabama State,-110,300,Pinnacle,272.73,,,272.73,,2053508004,Win
+2025-02-11,21:10,Unknown,Basketball,NBA,Player Prop,No,Jonathan Mogbo (Rebounds),Over 6.5 Rebounds,112,200,Pinnacle,224,,,-200.00,,2053734282,Loss
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,Jalen Brunson (Assists),Under 7.5 Assists,-120,222,Pinnacle,185,,,185.00,,2053759051,Win
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,Mikal Bridges (Pts+Rebs+Asts),Over 22.5 Points+Rebs+Assists,-127,400,Pinnacle,314.96,,,-400.00,,2053736161,Loss
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,Mikal Bridges (Pts+Rebs+Asts),Over 23.5 Points+Rebs+Assists,-112,300,Pinnacle,267.86,,,-300.00,,2053750653,Loss
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,T.J. McConnell (Assists),Under 3.5 Assists,113,400,Pinnacle,452,,,-400.00,,2053736237,Loss
+2025-02-11,22:10,Unknown,Basketball,NBA,Player Prop,No,Cade Cunningham (Assists),Under 10.5 Assists,-126,350,Pinnacle,277.78,,,277.78,,2053729565,Win
+2025-02-11,23:00,Unknown,Basketball,NCAA,Total,No,LiveConnecticut vs Creighton,Over 144,-107,333,Pinnacle,311.21,,,-333.00,,2053782038,Loss
+2025-02-11,23:00,Unknown,Basketball,NCAA,Total,No,LivePittsburgh vs SMU,Over 156.5,-106,222,Pinnacle,209.43,,,-222.00,,2053782000,Loss
+2025-02-11,23:00,Unknown,Basketball,NCAA,Total,No,LiveLoyola Marymount vs Pepperdine,Over 139,-111,333,Pinnacle,300,,,-333.00,,2053782740,Loss
+2025-02-11,22:00,Unknown,Basketball,NCAA,Total,No,LiveIllinois Chicago vs Murray State,Over 122.5,-108,500,Pinnacle,462.96,,,-500.00,,2053770945,Loss
+2025-02-11,22:00,Unknown,Basketball,NCAA,Total,No,LiveIllinois Chicago vs Murray State,Under 129.5,-116,333,Pinnacle,287.07,,,287.07,,2053776025,Win
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,Pascal Siakam (3 Point FG),Over 1.5 3-Point Field Goals,116,330,Pinnacle,382.8,,,382.80,,2053686400,Win
+2025-02-11,23:10,Unknown,Basketball,NCAA,Total,Yes,Connecticut vs Creighton,Under 67.5,-125,600,Pinnacle,480,,,480.00,,2053773993,Win
+2025-02-11,22:00,Unknown,Basketball,NCAA,Total,No,LiveSE Missouri State vs Arkansas Little Rock,Over 124.5,-111,444,Pinnacle,400,,,-444.00,,2053774550,Loss
+2025-02-11,22:10,Unknown,Basketball,NBA,Player Prop,No,Malik Beasley (3 Point FG),Over 3.5 3-Point Field Goals,-121,333,Pinnacle,275.21,,,275.21,,2053694277,Win
+2025-02-11,23:00,Unknown,Basketball,NCAA,Spread,Yes,Colorado vs Kansas,Kansas -10.5,110,600,Pinnacle,660,,,660.00,,2053643840,Win
+2025-02-11,22:10,Unknown,Basketball,NBA,Spread,No,Detroit Pistons vs Chicago Bulls,Chicago Bulls +2.5,138,300,Pinnacle,414,,,-300.00,,2053653083,Loss
+2025-02-11,22:10,Unknown,Basketball,NBA,Spread,No,Detroit Pistons vs Chicago Bulls,Chicago Bulls +3.5,119,100,Pinnacle,119,,,-100.00,,2053655585,Loss
+2025-02-11,23:00,Unknown,Basketball,NCAA,Moneyline,Yes,Loyola Marymount vs Pepperdine,Loyola Marymount,-115,325,Pinnacle,282.61,,,-325.00,,2053668821,Loss
+2025-02-11,21:33,Unknown,Basketball,NBA,Player Prop,No,Tyrese Haliburton (Points),Under 18.5 Points,-102,300,Pinnacle,294.12,,,294.12,,2053660192,Win
+2025-02-11,22:00,Unknown,Basketball,NCAA,Spread,No,LiveIndiana State vs Northern Iowa,Northern Iowa -16.5,102,333,Pinnacle,339.66,,,-333.00,,2053774831,Loss
+2025-02-11,22:40,Unknown,Basketball,NCAA,Spread,Yes,DePaul vs Marquette,Marquette -8.5,-135,300,Pinnacle,222.22,,,-300.00,,2053638527,Loss
+2025-02-11,21:10,Unknown,Basketball,NBA,Player Prop,No,Tyrese Maxey (3 Point FG),Under 3.5 3-Point Field Goals,-115,600,Pinnacle,521.74,,,521.74,,2053731515,Win
+2025-02-11,21:10,Unknown,Basketball,NBA,Player Prop,No,Tyrese Maxey (Points),Under 29.5 Points,-122,450,Pinnacle,368.85,,,368.85,,2053732517,Win
+2025-02-11,21:10,Unknown,Basketball,NBA,Player Prop,No,Kelly Oubre Jr. (Points),Over 12.5 Points,-122,500,Pinnacle,409.84,,,-500.00,,2053753813,Loss
+2025-02-11,22:00,Unknown,Basketball,NCAA,Total,Yes,SE Missouri State vs Arkansas Little Rock,Over 62.5,-140,500,Pinnacle,357.14,,,-500.00,,2053659706,Loss
+2025-02-11,21:10,Unknown,Basketball,NCAA,Spread,No,Florida vs Mississippi State,Florida -2.0,118,400,Pinnacle,472,,,472.00,,2053637532,Win
+2025-02-11,22:10,Unknown,Basketball,NBA,Moneyline,Yes,Detroit Pistons vs Chicago Bulls,Chicago Bulls,125,200,Pinnacle,250,,,-200.00,,2053622988,Loss
+2025-02-11,21:00,Unknown,Basketball,NCAA,Total,No,Iowa State vs Central Florida,Over 158,-111,300,Pinnacle,270.27,,,-300.00,,2053691679,Loss
+2025-02-11,21:00,Unknown,Basketball,NCAA,Spread,No,Central Michigan vs Kent State,Kent State -6.0,-112,300,Pinnacle,267.86,,,267.86,,2053662676,Win
+2025-02-11,21:00,Unknown,Basketball,NCAA,Total,No,LiveCentral Michigan vs Kent State,Under 162.5,-108,300,Pinnacle,277.78,,,-300.00,,2053770253,Loss
+2025-02-11,21:00,Unknown,Basketball,NCAA,Total,No,LiveCentral Michigan vs Kent State,Under 174,-111,300,Pinnacle,270.27,,,0,,2053771554,Refund
+2025-02-11,21:35,Unknown,Basketball,NBA,Spread,Yes,New York Knicks vs Indiana Pacers,New York Knicks -1.5,119,200,Pinnacle,238,,,238.00,,2053638410,Win
+2025-02-11,21:10,Unknown,Basketball,NCAA,Moneyline,Yes,Florida vs Mississippi State,Mississippi State,101,400,Pinnacle,404,,,404.00,,2053712330,Win
+2025-02-11,21:00,Unknown,Basketball,NCAA,Moneyline,Yes,Ohio vs Bowling Green,Ohio,-146,350,Pinnacle,239.73,,,-350.00,,2053744710,Loss
+2025-02-11,21:00,Unknown,Basketball,NCAA,Spread,Yes,Iowa State vs Central Florida,Iowa State -4.5,106,400,Pinnacle,424,,,-400.00,,2053632124,Loss
+2025-02-11,14:05,Unknown,Unknown Sport,R1,Spread,No,Nuno Borges (Games) vs Stan Wawrinka (Games),Nuno Borges (Games) (Games) -2.0,-107,300,Pinnacle,280.37,,,280.37,,2053664503,Win
+2025-02-11,12:00,Unknown,Unknown Sport,R2,Moneyline,Yes,LiveMagda Linette vs Magdalena Frech,Under 2.5 (Sets),-130,300,Pinnacle,230.77,,,-300.00,,2053666358,Loss
+2025-02-11,0:40,Unknown,Basketball,NBA,Player Prop,No,Isaiah Collier (Points),Over 8.5 Points,-115,300,Pinnacle,260.87,,,260.87,,2053467891,Win
+2025-02-11,0:40,Unknown,Basketball,NBA,Player Prop,No,Luka Doncic (Points),Under 27.5 Points,103,400,Pinnacle,412,,,412.00,,2053466157,Win
+2025-02-11,0:40,Unknown,Basketball,NBA,Player Prop,No,Rui Hachimura (Points),Under 13.5 Points,107,255,Pinnacle,272.85,,,-255.00,,2053470429,Loss
+2025-02-11,0:40,Unknown,Basketball,NBA,Player Prop,No,Lauri Markkanen (Points),Over 18.5 Points,114,333,Pinnacle,379.62,,,-333.00,,2053445627,Loss
+2025-02-11,0:40,Unknown,Basketball,NBA,Player Prop,No,Lauri Markkanen (Points),Over 18.5 Points,110,150,Pinnacle,165,,,-150.00,,2053445819,Loss
+2025-02-12,21:30,Unknown,Basketball,NCAA,Total,No,LiveChattanooga vs Samford,Under 145.5,-117,300,Pinnacle,256.41,,,-300.00,,2054033987,Loss
+2025-02-12,21:10,Unknown,Basketball,NBA,Spread,No,LiveSan Antonio Spurs vs Boston Celtics,Boston Celtics -17.5,-109,300,Pinnacle,275.23,,,-300.00,,2054038273,Loss
+2025-02-12,21:00,Unknown,Basketball,NCAA,Spread,No,LiveNC Asheville vs USC Upstate,USC Upstate +6.5,-117,400,Pinnacle,341.88,,,-400.00,,2054035054,Loss
+2025-02-12,20:30,Unknown,Basketball,NCAA,Total,No,Oakland vs IU Indianapolis,Under 141.5,-108,300,Pinnacle,277.78,,,-300.00,,2053788438,Loss
+2025-02-12,0:00,Unknown,Basketball,NCAA,Spread,No,Air Force vs UNLV,UNLV -14.5,109,500,Pinnacle,545,,,545.00,,2053784846,Win
+2025-02-12,0:11,Unknown,Basketball,NBA,Spread,Yes,Memphis Grizzlies vs Phoenix Suns,Phoenix Suns +1.0,105,250,Pinnacle,262.5,,,-250.00,,2053639831,Loss
+2025-02-12,0:11,Unknown,Basketball,NBA,Moneyline,Yes,Memphis Grizzlies vs Phoenix Suns,Phoenix Suns,126,225,Pinnacle,283.5,,,-225.00,,2053652996,Loss
+2025-02-12,0:11,Unknown,Basketball,NBA,Moneyline,Yes,Memphis Grizzlies vs Phoenix Suns,Phoenix Suns,123,355,Pinnacle,436.65,,,-355.00,,2053681659,Loss
+2025-02-12,0:11,Unknown,Basketball,NBA,Total,Yes,Memphis Grizzlies vs Phoenix Suns,Over 57.5,-142,400,Pinnacle,281.69,,,281.69,,2053777383,Win
+2025-02-13,23:10,Unknown,Basketball,NBA,Player Prop,No,Lauri Markkanen (Points),Over 18.5 Points,-113,300,Pinnacle,265.49,,,265.49,,2054303759,Win
+2025-02-13,23:00,Unknown,Basketball,NCAA,Total,No,LiveIdaho State vs Montana,Over 138.5,-121,333,Pinnacle,275.21,,,275.21,,2054316527,Win
+2025-02-13,23:00,Unknown,Basketball,NCAA,Moneyline,No,LiveLiberty vs New Mexico State,Liberty,-110,1111,Pinnacle,1010,,,1010.00,,2054323273,Win
+2025-02-13,21:30,Unknown,Basketball,NCAA,Total,No,Jacksonville vs Central Arkansas,Under 137.5,-118,400,Pinnacle,338.98,,,-400.00,,2054184180,Loss
+2025-02-13,22:10,Unknown,Basketball,NBA,Player Prop,No,DeMar DeRozan (Points),Over 20.5 Points,-101,300,Pinnacle,297.03,,,-300.00,,2054147011,Loss
+2025-02-13,22:10,Unknown,Basketball,NBA,Player Prop,No,Keegan Murray (Points),Under 11.5 Points,107,300,Pinnacle,321,,,-300.00,,2054178982,Loss
+2025-02-13,22:10,Unknown,Basketball,NBA,Total,Yes,LiveSacramento Kings vs New Orleans Pelicans,Under 55.5,101,333,Pinnacle,336.33,,,-333.00,,2054311447,Loss
+2025-02-13,22:40,Unknown,Basketball,NBA,Player Prop,No,Nikola Jovic (Points),Under 11.5 Points,-113,200,Pinnacle,176.99,,,176.99,,2054164073,Win
+2025-02-13,22:35,Unknown,Basketball,NBA,Spread,No,Oklahoma City Thunder vs Minnesota Timberwolves,Minnesota Timberwolves +7.5,100,350,Pinnacle,350,,,350.00,,2054178442,Win
+2025-02-13,22:40,Unknown,Basketball,NBA,Player Prop,No,Klay Thompson (3 Point FG),Under 3.5 3-Point Field Goals,-106,629,Pinnacle,593.4,,,0,,2054091516,Refund
+2025-02-13,23:00,Unknown,Basketball,NCAA,Total,No,LiveFlorida International vs UTEP,Under 152.5,-109,555,Pinnacle,509.17,,,509.17,,2054310233,Win
+2025-02-13,23:00,Unknown,Basketball,NCAA,Total,No,LiveWeber State vs Montana State,Over 134.5,-117,333,Pinnacle,284.62,,,284.62,,2054309122,Win
+2025-02-13,22:00,Unknown,Basketball,NCAA,Total,No,LiveTennessee Tech vs Arkansas Little Rock,Under 153.5,-115,333,Pinnacle,289.57,,,-333.00,,2054308598,Loss
+2025-02-13,22:30,Unknown,Basketball,NCAA,Spread,No,LiveMorehead State vs Lindenwood,Lindenwood -12.5,-110,333,Pinnacle,302.73,,,302.73,,2054316617,Win
+2025-02-13,22:30,Unknown,Basketball,NCAA,Spread,No,LiveSouthern Indiana vs Western Illinois,Western Illinois -13.5,101,444,Pinnacle,448.44,,,448.44,,2054316051,Win
+2025-02-13,23:00,Unknown,Basketball,NCAA,Spread,Yes,Cal Riverside vs UC Davis,Cal Riverside -0.5,110,300,Pinnacle,330,,,330.00,,2054164435,Win
+2025-02-13,22:00,Unknown,Basketball,NCAA,Moneyline,No,LiveDenver vs North Dakota,Denver,-104,333,Pinnacle,320.19,,,320.19,,2054301057,Win
+2025-02-13,22:00,Unknown,Basketball,NCAA,Total,No,LiveDenver vs North Dakota,Over 129.5,-117,333,Pinnacle,284.62,,,284.62,,2054301751,Win
+2025-02-13,22:00,Unknown,Basketball,NCAA,Total,No,LiveSeattle U vs Abilene Christian,Over 130.5,-123,333,Pinnacle,270.73,,,270.73,,2054312980,Win
+2025-02-13,22:00,Unknown,Basketball,NCAA,Total,No,LiveNebraska Omaha vs South Dakota State,Under 161.5,-116,222,Pinnacle,191.38,,,-222.00,,2054301269,Loss
+2025-02-13,22:00,Unknown,Basketball,NCAA,Total,No,LiveNebraska Omaha vs South Dakota State,Under 168.5,-127,333,Pinnacle,262.2,,,-333.00,,2054302091,Loss
+2025-02-13,21:30,Unknown,Basketball,NCAA,Total,No,LiveTexas State vs UL - Monroe,Under 139.5,-106,333,Pinnacle,314.15,,,314.15,,2054302625,Win
+2025-02-13,22:10,Unknown,Basketball,NBA,Moneyline,Yes,Golden State Warriors vs Houston Rockets,Houston Rockets,102,300,Pinnacle,306,,,-300.00,,2054291469,Loss
+2025-02-13,21:00,Unknown,Basketball,NCAA,Total,No,LiveCollege Of Charleston vs NC Wilmington,Over 153.5,-109,444,Pinnacle,407.34,,,-444.00,,2054302382,Loss
+2025-02-13,19:00,Unknown,Basketball,NCAA,Moneyline,Yes,California Baptist vs UT Arlington,California Baptist,-109,300,Pinnacle,275.23,,,275.23,,2054145146,Win
+2025-02-14,22:10,Unknown,Basketball,NCAA,Moneyline,Yes,UCLA vs Indiana,UCLA,-112,280,Pinnacle,250,,,250.00,,2054414759,Win
+2025-02-14,21:00,Unknown,Basketball,NCAA,Spread,No,LiveFairfield vs St. Peter's,St. Peter's -4.5,-110,500,Pinnacle,454.55,,,454.55,,2054585678,Win
+2025-02-14,21:00,Unknown,Basketball,NCAA,Spread,No,LiveFairfield vs St. Peter's,St. Peter's -4.5,-110,250,Pinnacle,227.27,,,227.27,,2054585749,Win
+2025-02-14,21:00,Unknown,Basketball,NCAA,Spread,No,LiveFairfield vs St. Peter's,Fairfield +4.5,-103,500,Pinnacle,485.44,,,-500.00,,2054586299,Loss
+2025-02-14,21:00,Unknown,Basketball,NCAA,Total,No,LiveQuinnipiac vs Sacred Heart,Over 177.5,-117,300,Pinnacle,256.41,,,256.41,,2054582406,Win
+2025-02-14,21:00,Unknown,Basketball,NCAA,Total,No,LiveNorthern Kentucky vs Wisc Green Bay,Under 152.5,-109,300,Pinnacle,275.23,,,275.23,,2054585172,Win
+2025-02-14,1:10,Unknown,Basketball,NCAA,Spread,Yes,San Francisco vs Gonzaga,San Francisco +7.5,118,300,Pinnacle,354,,,354.00,,2054306122,Win
+2025-02-14,0:00,Unknown,Basketball,NCAA,Spread,No,LiveSan Diego vs Pepperdine,Pepperdine -11.5,-113,333,Pinnacle,294.69,,,-333.00,,2054325718,Loss
+2025-02-14,0:00,Unknown,Basketball,NCAA,Spread,Yes,Northern Colorado vs Sacramento State,Sacramento State +4.5,106,333,Pinnacle,352.98,,,-333.00,,2054315674,Loss
+2025-02-15,22:00,Unknown,Basketball,NCAA,Spread,No,Marshall vs UL - Lafayette,UL - Lafayette +6.0,-100,500,Pinnacle,500,,,500.00,,2054996417,Win
+2025-02-16,0:00,Unknown,Basketball,NCAA,Total,No,Loyola Marymount vs Portland,Over 145.5,-115,300,Pinnacle,260.87,,,260.87,,2055002015,Win
+2025-02-16,0:00,Unknown,Basketball,NCAA,Spread,Yes,Pepperdine vs Gonzaga,Pepperdine +14.5,105,200,Pinnacle,210,,,-200.00,,2055005224,Loss
+2025-02-17,22:00,Unknown,Basketball,NCAA,Spread,No,LiveDuke vs Virginia,Duke -14.5,-107,333,Pinnacle,311.21,,,311.21,,2055547577,Win
+2025-02-18,23:10,Unknown,Basketball,NCAA,Total,No,Houston vs Arizona State,Under 137.5,-136,300,Pinnacle,220.59,,,-300.00,,2055635677,Loss
+2025-02-18,23:10,Unknown,Basketball,NCAA,Total,No,Houston vs Arizona State,Over 134.5,-105,745,Pinnacle,709.52,,,709.52,,2055658287,Win
+2025-02-18,22:45,Unknown,Basketball,NCAA,Total,No,Illinois vs Wisconsin,Over 161.5,106,155,Pinnacle,164.3,,,164.30,,2055553058,Win
+2025-02-18,22:45,Unknown,Basketball,NCAA,Total,No,Illinois vs Wisconsin,Over 161.5,104,155,Pinnacle,161.2,,,161.20,,2055553254,Win
+2025-02-18,22:02,Unknown,Basketball,NCAA,Total,No,Butler vs Xavier,Over 153.5,109,333,Pinnacle,362.97,,,-333.00,,2055553291,Loss
+2025-02-18,22:00,Unknown,Basketball,NCAA,Spread,Yes,Colorado vs Iowa State,Colorado +13.5,-150,600,Pinnacle,400,,,-600.00,,2055658715,Loss
+2025-02-18,21:00,Unknown,Basketball,NCAA,Moneyline,No,LiveSyracuse vs Pittsburgh,Pittsburgh,-110,300,Pinnacle,272.73,,,272.73,,2055755146,Win
+2025-02-18,21:10,Unknown,Basketball,NCAA,Total,No,Syracuse vs Pittsburgh,Over 146.5,103,500,Pinnacle,515,,,515.00,,2055673271,Win
+2025-02-18,21:10,Unknown,Basketball,NCAA,Total,No,Texas A&M vs Mississippi State,Under 142.5,107,300,Pinnacle,321,,,321.00,,2055700229,Win
+2025-02-18,21:00,Unknown,Basketball,NCAA,Total,No,Western Michigan vs Buffalo,Over 153.5,-101,200,Pinnacle,198.02,,,198.02,,2055669757,Win
+2025-02-18,21:00,Unknown,Basketball,NCAA,Total,No,Western Michigan vs Buffalo,Over 150.5,-138,400,Pinnacle,289.86,,,289.86,,2055670845,Win
+2025-02-18,20:30,Unknown,Basketball,NCAA,Total,No,Jacksonville vs Florida Gulf Coast,Under 142.5,-127,450,Pinnacle,354.33,,,354.33,,2055646819,Win
+2025-02-18,21:00,Unknown,Basketball,NCAA,Spread,Yes,Central Michigan vs Ohio,Ohio -2.5,-101,333,Pinnacle,329.7,,,-333.00,,2055663817,Loss
+2025-02-18,21:00,Unknown,Basketball,NCAA,Spread,Yes,Central Michigan vs Ohio,Ohio -2.5,-103,300,Pinnacle,291.26,,,-300.00,,2055664407,Loss
+2025-02-19,21:00,Unknown,Basketball,NCAA,Total,No,LiveProvidence vs Georgetown,Over 148.5,-112,300,Pinnacle,267.86,,,267.86,,2055945413,Win
+2025-02-19,21:00,Unknown,Basketball,NCAA,Moneyline,Yes,Southern Illinois vs Murray State,Murray State,-123,300,Pinnacle,243.9,,,243.90,,2055812424,Win
+2025-02-19,22:00,Unknown,Basketball,NCAA,Moneyline,Yes,UAB vs Rice,UAB,-145,365,Pinnacle,251.72,,,251.72,,2055812984,Win
+2025-02-19,22:00,Unknown,Basketball,NCAA,Spread,Yes,North Dakota State vs South Dakota State,North Dakota State +3.5,112,400,Pinnacle,448,,,448.00,,2055813040,Win
+2025-02-19,20:35,Unknown,Basketball,NCAA,Moneyline,Yes,Nebraska vs Penn State,Nebraska,105,400,Pinnacle,420,,,-400.00,,2055812367,Loss
+2025-02-20,23:10,Unknown,Basketball,NBA,Spread,Yes,LiveCharlotte Hornets vs Denver Nuggets,Charlotte Hornets +5.5,-135,333,Pinnacle,246.67,,,-333.00,,2056210972,Loss
+2025-02-20,21:03,Unknown,Basketball,NBA,Spread,No,Boston Celtics vs Philadelphia 76ers,Boston Celtics -7.5,-105,20,Pinnacle,19.05,,,19.05,,2056029462,Win
+2025-02-20,0:11,Unknown,Basketball,NBA,Total,No,Charlotte Hornets vs Los Angeles Lakers,Over 227,115,500,Pinnacle,575,,,-500.00,,2055762934,Loss
+2025-02-20,0:05,Unknown,Unknown Sport,Primera Division,Moneyline,Yes,LiveSantos Laguna (0) vs Cruz Azul (0),Over 3,106,50,Pinnacle,53,,,-50.00,,2055961219,Loss
+2025-02-21,22:40,Unknown,Basketball,NBA,Player Prop,No,Trey Murphy III (Assists),Over 4.5 Assists,104,300,Pinnacle,312,,,312.00,,2056330307,Win
+2025-02-21,22:40,Unknown,Basketball,NBA,Player Prop,No,CJ McCollum (Assists),Under 3.5 Assists,-109,300,Pinnacle,275.23,,,-300.00,,2056330727,Loss
+2025-02-21,22:40,Unknown,Basketball,NBA,Player Prop,No,De'Aaron Fox (Assists),Under 6.5 Assists,-115,155,Pinnacle,134.78,,,134.78,,2056340259,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Player Prop,No,Franz Wagner (Rebounds),Under 5.5 Rebounds,-113,150,Pinnacle,132.74,,,-150.00,,2056329803,Loss
+2025-02-21,21:10,Unknown,Basketball,NBA,Player Prop,No,Franz Wagner (Assists),Under 4.5 Assists,-131,150,Pinnacle,114.5,,,114.50,,2056334674,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Player Prop,No,Ja Morant (Assists),Under 6.5 Assists,104,300,Pinnacle,312,,,312.00,,2056326040,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Player Prop,No,Khris Middleton (Assists),Over 4.5 Assists,118,300,Pinnacle,354,,,-300.00,,2056431688,Loss
+2025-02-21,23:40,Unknown,Basketball,NBA,Player Prop,No,Shai Gilgeous-Alexander (Assists),Over 6.5 Assists,104,200,Pinnacle,208,,,208.00,,2056327423,Win
+2025-02-21,23:40,Unknown,Basketball,NBA,Player Prop,No,Tari Eason (Rebounds),Under 6.5 Rebounds,-128,150,Pinnacle,117.19,,,117.19,,2056362100,Win
+2025-02-21,22:40,Unknown,Basketball,NBA,Player Prop,No,Klay Thompson (Points),Under 16.5 Points,-104,300,Pinnacle,288.46,,,288.46,,2056355505,Win
+2025-02-21,23:00,Unknown,Basketball,NCAA,Total,No,Wisc Milwaukee vs Youngstown State,Under 153.5,-129,300,Pinnacle,232.56,,,-300.00,,2056304718,Loss
+2025-02-21,21:40,Unknown,Basketball,NBA,Player Prop,No,Kel'el Ware (Points),Under 11.5 Points,100,300,Pinnacle,300,,,300.00,,2056337730,Win
+2025-02-21,23:40,Unknown,Basketball,NBA,Total,Yes,Oklahoma City Thunder vs Utah Jazz,Over 58.5,-103,300,Pinnacle,291.26,,,-300.00,,2056330971,Loss
+2025-02-21,22:40,Unknown,Basketball,NBA,Total,Yes,Detroit Pistons vs San Antonio Spurs,Over 120,103,150,Pinnacle,154.5,,,154.50,,2056321977,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Player Prop,No,Desmond Bane (Points),Over 19.5 Points,111,590,Pinnacle,654.9,,,-590.00,,2056333736,Loss
+2025-02-21,21:00,Unknown,Basketball,NCAA,Total,No,St. Peter's vs Mount St. Mary's (MD),Under 131.5,-101,300,Pinnacle,297.03,,,297.03,,2056341137,Win
+2025-02-21,21:00,Unknown,Basketball,NCAA,Total,No,Cornell vs Yale,Under 159.5,110,300,Pinnacle,330,,,-300.00,,2056326222,Loss
+2025-02-21,21:00,Unknown,Basketball,NCAA,Total,No,Wisc Green Bay vs Robert Morris,Under 148.5,-131,200,Pinnacle,152.67,,,-200.00,,2056336564,Loss
+2025-02-21,21:40,Unknown,Basketball,NBA,Spread,Yes,Miami Heat vs Toronto Raptors,Miami Heat -1.0,106,222,Pinnacle,235.32,,,-222.00,,2056341348,Loss
+2025-02-21,21:10,Unknown,Basketball,NBA,Moneyline,Yes,Memphis Grizzlies vs Orlando Magic,Orlando Magic,115,300,Pinnacle,345,,,345.00,,2056361845,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Spread,Yes,New York Knicks vs Cleveland Cavaliers,New York Knicks +1.5,115,300,Pinnacle,345,,,-300.00,,2056340762,Loss
+2025-02-21,21:10,Unknown,Basketball,NBA,Spread,Yes,New York Knicks vs Cleveland Cavaliers,New York Knicks +3.5,125,300,Pinnacle,375,,,-300.00,,2056335778,Loss
+2025-02-21,21:10,Unknown,Basketball,NBA,Moneyline,Yes,Milwaukee Bucks vs Washington Wizards,Washington Wizards,136,300,Pinnacle,408,,,-300.00,,2056355046,Loss
+2025-02-21,21:00,Unknown,Basketball,NCAA,Spread,Yes,Marquette vs Villanova,Marquette -0.5,106,250,Pinnacle,265,,,-250.00,,2056340885,Loss
+2025-02-21,21:00,Unknown,Basketball,NCAA,Spread,Yes,Harvard vs Princeton,Princeton -4.5,-103,150,Pinnacle,145.63,,,145.63,,2056321052,Win
+2025-02-21,21:10,Unknown,Basketball,NBA,Spread,Yes,New York Knicks vs Cleveland Cavaliers,New York Knicks +1.5,128,300,Pinnacle,384,,,-300.00,,2056335906,Loss
+2025-02-21,0:10,Unknown,Basketball,NBA,Total,Yes,Los Angeles Lakers vs Portland Trail Blazers,Over 55.5,-130,450,Pinnacle,346.15,,,-450.00,,2056208492,Loss
+2025-02-22,22:40,Unknown,Basketball,NBA,Player Prop,No,Austin Reaves (3 Point FG),Under 2.5 3-Point Field Goals,-118,200,Pinnacle,169.49,,,-200.00,,2056740159,Loss
+2025-02-22,23:00,Unknown,Basketball,NCAA,Total,No,Pepperdine vs Loyola Marymount,Over 146.5,-104,333,Pinnacle,320.19,,,320.19,,2056734593,Win
+2025-02-22,22:40,Unknown,Basketball,NBA,Spread,Yes,Los Angeles Lakers vs Denver Nuggets,Los Angeles Lakers +2.5,-111,388,Pinnacle,349.55,,,349.55,,2056737759,Win
+2025-02-22,21:40,Unknown,Basketball,NBA,Total,No,Brooklyn Nets vs Philadelphia 76ers,Under 211.5,105,300,Pinnacle,315,,,315.00,,2056660345,Win
+2025-02-22,23:45,Unknown,Unknown Sport,UFC,Moneyline,Yes,Melsik Baghdasaryan vs Jean Silva,Jean Silva,-524,1857,Pinnacle,354.39,,,354.39,,2055290973,Win
+2025-02-22,23:45,Unknown,Unknown Sport,UFC,Moneyline,Yes,Melsik Baghdasaryan vs Jean Silva,Jean Silva,-569,300,Pinnacle,52.72,,,52.72,,2055291033,Win
+2025-02-22,18:10,Unknown,Basketball,NCAA,Total,No,Virginia vs North Carolina,Under 146.5,-140,300,Pinnacle,214.29,,,-300.00,,2056693434,Loss
+2025-02-22,19:30,Unknown,Basketball,NCAA,Spread,No,South Alabama vs Texas State,South Alabama +1.0,108,300,Pinnacle,324,,,0,,2056704201,Refund
+2025-02-22,20:00,Unknown,Basketball,NCAA,Moneyline,Yes,Santa Clara vs Washington State,Santa Clara,-127,400,Pinnacle,314.96,,,314.96,,2056702751,Win
+2025-02-22,17:30,Unknown,Basketball,NCAA,Moneyline,Yes,Mississippi vs Vanderbilt,Vanderbilt,-112,300,Pinnacle,267.86,,,267.86,,2056720229,Win
+2025-02-22,18:05,Unknown,Basketball,NCAA,Spread,Yes,Georgia vs Auburn,Auburn -9.5,-101,222,Pinnacle,219.8,,,-222.00,,2056720628,Loss
+2025-02-22,16:00,Unknown,Basketball,NCAA,Total,No,Penn State vs Minnesota,Under 140.5,112,150,Pinnacle,168,,,168.00,,2056697622,Win
+2025-02-22,16:00,Unknown,Basketball,NCAA,Total,No,Stony Brook vs North Carolina A&T,Over 136.5,114,300,Pinnacle,342,,,342.00,,2056698757,Win
+2025-02-22,16:00,Unknown,Basketball,NCAA,Total,No,Stony Brook vs North Carolina A&T,Over 134.5,-110,300,Pinnacle,272.73,,,272.73,,2056699261,Win
+2025-02-22,14:30,Unknown,Basketball,NCAA,Spread,Yes,Richmond vs St. Joseph's,St. Joseph's -6.5,-144,300,Pinnacle,208.33,,,208.33,,2056696213,Win
+2025-02-22,0:10,Unknown,Basketball,NBA,Player Prop,No,DeMar DeRozan (Assists),Under 3.5 Assists,127,300,Pinnacle,381,,,-300.00,,2056336939,Loss
+2025-02-22,0:10,Unknown,Basketball,NBA,Moneyline,Yes,Golden State Warriors vs Sacramento Kings,Sacramento Kings,118,300,Pinnacle,354,,,-300.00,,2056338877,Loss
+2025-02-23,19:10,"Feb 23, 2025, 3:51 PM",Basketball,NBA,Player Prop,No,James Harden (Pts+Rebs+Asts),Over 42.5 Points+Rebs+Assists,-119,2,Pinnacle,1.68,,,1.68,,2057294414,Win
+2025-02-23,17:40,"Feb 23, 2025, 3:51 PM",Basketball,NBA,Player Prop,No,Brandin Podziemski (Rebounds),Over 5.5 Rebounds,-128,20,Pinnacle,15.63,,,15.62,,2057234612,Win
+2025-02-23,19:10,Unknown,Basketball,NBA,Spread,Yes,Los Angeles Clippers vs Indiana Pacers,Los Angeles Clippers +2.0,-103,2,Pinnacle,1.94,,,-2.00,,2057294256,Loss
+2025-02-23,19:10,Unknown,Basketball,NBA,Total,Yes,Los Angeles Clippers vs Indiana Pacers,Over 110.5,-138,2,Pinnacle,1.45,,,1.45,,2057294287,Win
+2025-02-23,19:10,Unknown,Basketball,NBA,Spread,Yes,Los Angeles Clippers vs Indiana Pacers,Los Angeles Clippers -0.5,127,2,Pinnacle,2.54,,,-2.00,,2057294322,Loss
+2025-02-23,19:10,Unknown,Basketball,NBA,Total,Yes,Los Angeles Clippers vs Indiana Pacers,Over 55.5,-122,2,Pinnacle,1.64,,,-2.00,,2057294340,Loss
+2025-02-23,15:07,Unknown,Hockey,NHL,Moneyline,Yes,Edmonton Oilers vs Washington Capitals,Edmonton Oilers,-135,20,Pinnacle,14.81,,,-20.00,,2057233623,Loss
+2025-02-23,15:10,Unknown,Basketball,NBA,Spread,No,New York Knicks vs Boston Celtics,New York Knicks +8.5,-104,20,Pinnacle,19.23,,,-20.00,,2057104720,Loss
+2025-02-23,0:07,Unknown,Hockey,NHL,Moneyline,Yes,LiveVancouver Canucks vs Vegas Golden Knights,Vancouver Canucks,624,2,Pinnacle,12.48,,,-2.00,,2056985910,Loss
+2025-02-23,0:10,Unknown,Basketball,NCAA,Total,No,BYU vs Arizona,Over 154.5,112,450,Pinnacle,504,,,504.00,,2056745239,Win
+2025-02-23,0:10,Unknown,Basketball,NBA,Moneyline,Yes,Charlotte Hornets vs Portland Trail Blazers,Charlotte Hornets,137,300,Pinnacle,411,,,-300.00,,2056740574,Loss
+2025-02-24,21:40,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Moneyline,Yes,Miami Heat vs Atlanta Hawks,Miami Heat,-100,222,Pinnacle,222,,,-222.00,,2057437731,Loss
+2025-02-24,21:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Player Prop,No,Aaron Gordon (Rebounds),Over 5.5 Rebounds,115,222,Pinnacle,255.3,,,-222.00,,2057437686,Loss
+2025-02-24,21:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Total,Yes,Los Angeles Clippers vs Detroit Pistons,Los Angeles Clippers - Over 55.5,105,333,Pinnacle,349.65,,,-333.00,,2057436934,Loss
+2025-02-24,20:00,"Feb 24, 2025, 10:23 AM",Basketball,NCAA,Moneyline,Yes,NC Wilmington vs William & Mary,NC Wilmington,-126,222,Pinnacle,176.19,,,0,,2057436191,Refund
+2025-02-24,21:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Total,Yes,Los Angeles Clippers vs Detroit Pistons,Los Angeles Clippers - Over 55.5,103,300,Pinnacle,309,,,-300.00,,2057436179,Loss
+2025-02-24,22:00,"Feb 24, 2025, 10:23 AM",Basketball,NCAA,Total,No,Stephen F. Austin vs Houston Christian,Under 137.5,-111,333,Pinnacle,300,,,300.00,,2057434164,Win
+2025-02-24,21:30,"Feb 24, 2025, 10:23 AM",Basketball,NCAA,Spread,No,East Texas A&M vs New Orleans,East Texas A&M -2.0,-100,333,Pinnacle,333,,,0,,2057433752,Refund
+2025-02-24,21:30,"Feb 24, 2025, 10:23 AM",Basketball,NCAA,Spread,No,East Texas A&M vs New Orleans,New Orleans +2.0,-117,222,Pinnacle,189.74,,,0,,2057433112,Refund
+2025-02-24,21:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Total,Yes,Denver Nuggets vs Indiana Pacers,Over 61.5,102,355,Pinnacle,362.1,,,-355.00,,2057432977,Loss
+2025-02-24,23:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Spread,No,Portland Trail Blazers vs Utah Jazz,Utah Jazz +3.5,128,350,Pinnacle,448,,,448.00,,2057432413,Win
+2025-02-24,21:10,"Feb 24, 2025, 10:23 AM",Basketball,NBA,Total,No,Los Angeles Clippers vs Detroit Pistons,Under 222.5,121,300,Pinnacle,363,,,363.00,,2057415131,Win
+2025-02-24,21:10,"Feb 24, 2025, 10:32 AM",Basketball,NBA,Spread,Yes,Los Angeles Clippers vs Detroit Pistons,Los Angeles Clippers -1.0,113,155,Pinnacle,175.15,,,175.15,,2057451388,Win
+2025-02-24,21:10,"Feb 24, 2025, 10:32 AM",Basketball,NBA,Player Prop,No,Aaron Nesmith (Points),Over 8.5 Points,-109,155,Pinnacle,142.2,,,142.20,,2057450586,Win
+2025-02-24,21:10,"Feb 24, 2025, 10:32 AM",Basketball,NBA,Moneyline,Yes,Los Angeles Clippers vs Detroit Pistons,Los Angeles Clippers,-109,150,Pinnacle,137.61,,,137.61,,2057446169,Win
+2025-02-24,23:10,"Feb 24, 2025, 11:36 AM",Basketball,NBA,Spread,Yes,Portland Trail Blazers vs Utah Jazz,Portland Trail Blazers -1.5,-102,60,Pinnacle,58.82,,,58.82,,2057482000,Win
+2025-02-24,21:40,"Feb 24, 2025, 11:36 AM",Basketball,NBA,Total,Yes,Miami Heat vs Atlanta Hawks,Over 119.5,125,155,Pinnacle,193.75,,,-155.00,,2057454230,Loss
+2025-02-24,21:40,"Feb 24, 2025, 11:36 AM",Basketball,NBA,Player Prop,No,Georges Niang (3 Point FG),Over 2.5 3-Point Field Goals,124,150,Pinnacle,186,,,186.00,,2057453889,Win
+2025-02-24,21:10,"Feb 24, 2025, 11:40 AM",Basketball,NBA,Player Prop,No,Khris Middleton (Assists),Under 3.5 Assists,131,250,Pinnacle,327.5,,,-250.00,,2057487779,Loss
+2025-02-24,21:10,Unknown,Basketball,NBA,Moneyline,Yes,Brooklyn Nets vs Washington Wizards,Brooklyn Nets,-116,2,Pinnacle,1.72,,,1.72,,2057514266,Win
+2025-02-24,22:10,Unknown,Basketball,NBA,Spread,No,Minnesota Timberwolves vs Oklahoma City Thunder,Minnesota Timberwolves +9.5,148,300,Pinnacle,444,,,444.00,,2057547234,Win
+2025-02-24,22:10,Unknown,Basketball,NBA,Total,Yes,Minnesota Timberwolves vs Oklahoma City Thunder,Under 55.5,105,350,Pinnacle,367.5,,,367.50,,2057546973,Win
+2025-02-24,21:10,Unknown,Basketball,NBA,Spread,Yes,LiveBrooklyn Nets vs Washington Wizards,Brooklyn Nets +6.5,133,300,Pinnacle,399,,,-300.00,,2057549293,Loss
+2025-02-25,23:00,Unknown,Basketball,NCAA,Total,No,Tennessee vs LSU,Under 138.5,104,150,Pinnacle,156,,,156.00,,2057765015,Win
+2025-02-25,21:00,Unknown,Basketball,NCAA,Moneyline,Yes,Appalachian State vs Georgia Southern,Appalachian State,-111,255,Pinnacle,229.73,,,-255.00,,2057658986,Loss
+2025-02-25,23:00,Unknown,Basketball,NCAA,Spread,No,South Carolina vs Missouri,Missouri -14.0,112,200,Pinnacle,224,,,224.00,,2057658458,Win
+2025-02-25,22:10,Unknown,Basketball,NBA,Player Prop,No,Brook Lopez (Points),Under 11.5 Points,111,300,Pinnacle,333,,,-300.00,,2057651264,Loss
+2025-02-25,22:10,Unknown,Basketball,NBA,Moneyline,Yes,Milwaukee Bucks vs Houston Rockets,Milwaukee Bucks,125,150,Pinnacle,187.5,,,-150.00,,2057649537,Loss
+2025-02-25,21:00,Unknown,Basketball,NCAA,Spread,No,VCU vs Richmond,VCU -16.5,121,1111,Pinnacle,1344.31,,,1344.31,,2057643508,Win
+2025-02-25,21:00,Unknown,Basketball,NCAA,Spread,No,Northern Illinois vs Miami Ohio,Northern Illinois +13.5,103,150,Pinnacle,154.5,,,-150.00,,2057642976,Loss
+2025-02-25,21:07,Unknown,Hockey,NHL,Spread,Yes,LiveDallas Stars vs Columbus Blue Jackets,Dallas Stars +1.5,120,500,Pinnacle,600,,,,,2057800477,Pending
+2025-02-25,0:10,Unknown,Basketball,NBA,Spread,No,Charlotte Hornets vs Sacramento Kings,Sacramento Kings -13.5,142,300,Pinnacle,426,,,426.00,,2057547113,Win
+2025-02-25,1:00,Unknown,Basketball,NCAA,Spread,Yes,Kansas vs Colorado,Kansas -1.5,-144,450,Pinnacle,312.5,,,312.50,,2057414993,Win
+2025-02-26,17:10,Unknown,Unknown Sport,Pre Season,Moneyline,No,Athletics vs Seattle Mariners,Seattle Mariners,-112,300,Pinnacle,267.86,,,-300.00,,2057798074,Loss
+2025-02-26,0:10,Unknown,Basketball,NBA,Player Prop,No,Miles Bridges (3 Point FG),Over 2.5 3-Point Field Goals,125,200,Pinnacle,,,,-200.00,,2057764338,Loss
+2025-02-26,0:06,Unknown,Basketball,NBA,Spread,Yes,Dallas Mavericks vs Los Angeles Lakers,,-106,255,Pinnacle,495.57,,,240.57,,2057764874,Win
+2025-02-26,23:10,Unknown,Basketball,NBA,Player Prop,No,Brice Sensabaugh (Pts+Rebs+Asts),Over 17.5 Points+Rebs+Assists,-106,300,Pinnacle,283.02,,,-300.00,,2058113264,Loss
+2025-02-27,21:10,Unknown,Basketball,NBA,Spread,No,Golden State Warriors vs Orlando Magic,Golden State Warriors -5.5,-102,2,Pinnacle,1.96,,,1.96,,2058221135,Win
+2025-02-27,20:00,Unknown,Basketball,NCAA,Total,No,Samford vs VMI,Under 156.5,-125,300,Pinnacle,240,,,-300.00,,2058249418,Loss
+2025-02-27,22:10,Unknown,Basketball,NBA,Player Prop,No,Jamal Murray (Pts+Rebs+Asts),Under 30.5 Points+Rebs+Assists,112,450,Pinnacle,504,,,504.00,,2058242469,Win
+2025-02-27,22:30,Unknown,Basketball,NCAA,Total,No,Western Illinois vs Tennessee Tech,Under 144.5,-126,666,Pinnacle,528.57,,,-666.00,,2058241682,Loss
+2025-02-27,22:10,Unknown,Basketball,NBA,Moneyline,Yes,Denver Nuggets vs Milwaukee Bucks,Denver Nuggets,-117,200,Pinnacle,170.94,,,170.94,,2058239671,Win
+2025-02-27,22:40,Unknown,Basketball,NBA,Spread,Yes,Charlotte Hornets vs Dallas Mavericks,Dallas Mavericks -6.5,102,222,Pinnacle,226.44,,,-222.00,,2058363897,Loss
+2025-02-27,22:40,Unknown,Basketball,NBA,Spread,No,Charlotte Hornets vs Dallas Mavericks,Dallas Mavericks -12.5,128,1200,Pinnacle,1536,,,-1200.00,,2058362929,Loss
+2025-02-27,21:00,Unknown,Basketball,NCAA,Spread,Yes,Elon vs Monmouth,Elon -0.5,107,333,Pinnacle,356.31,,,356.31,,2058356728,Win
+2025-02-27,21:00,Unknown,Basketball,NCAA,Spread,Yes,Elon vs Monmouth,Elon -0.5,109,333,Pinnacle,362.97,,,362.97,,2058356646,Win
+2025-02-27,22:40,Unknown,Basketball,NBA,Total,Yes,Charlotte Hornets vs Dallas Mavericks,Under 54.5,-114,360,Pinnacle,315.79,,,315.79,,2058366111,Win
+2025-02-27,22:40,Unknown,Basketball,NBA,Spread,No,Charlotte Hornets vs Dallas Mavericks,Dallas Mavericks -12.5,122,360,Pinnacle,439.2,,,-360.00,,2058366077,Loss
+2025-02-27,22:40,Unknown,Basketball,NBA,Player Prop,No,Naji Marshall (Assists),Under 3.5 Assists,-134,800,Pinnacle,597.01,,,-800.00,,2058372689,Loss
+2025-02-27,22:40,Unknown,Basketball,NBA,Player Prop,No,Max Christie (Points),Over 14.5 Points,111,500,Pinnacle,555,,,-500.00,,2058369209,Loss
+2025-02-27,23:00,Unknown,Basketball,NCAA,Total,No,Idaho State vs Idaho,Under 147.5,-111,450,Pinnacle,405.41,,,405.41,,2058376160,Win
+2025-02-28,21:00,Unknown,Basketball,NCAA,Spread,No,Pennsylvania vs Cornell,Cornell -9.0,-108,600,Pinnacle,555.56,,,555.56,,2058385010,Win
+2025-02-28,22:10,Unknown,Basketball,NBA,Moneyline,Yes,Indiana Pacers vs Miami Heat,Indiana Pacers,-128,366,Pinnacle,285.94,,,-366.00,,2058497879,Loss
+2025-02-28,22:10,Unknown,Basketball,NBA,Player Prop,No,Ja Morant (Assists),Under 7.5 Assists,111,600,Pinnacle,666,,,666.00,,2058494395,Win
+2025-02-28,21:40,Unknown,Basketball,NBA,Moneyline,Yes,Portland Trail Blazers vs Brooklyn Nets,Portland Trail Blazers,-101,333,Pinnacle,329.7,,,329.70,,2058487483,Win
+2025-02-28,21:40,Unknown,Basketball,NBA,Player Prop,No,Donovan Mitchell (Points),Under 27.5 Points,110,601,Pinnacle,661.1,,,-601.00,,2058458628,Loss
+2025-02-28,21:40,Unknown,Basketball,NBA,Spread,No,LiveOklahoma City Thunder vs Atlanta Hawks,Atlanta Hawks +16.5,-110,300,Pinnacle,272.73,,,272.73,,2058674762,Win
+2025-02-28,22:10,Unknown,Basketball,NBA,Spread,No,Indiana Pacers vs Miami Heat,Indiana Pacers -3.0,-101,200,Pinnacle,198.02,,,-200.00,,2058670838,Loss
+2025-03-01,0:10,Unknown,Basketball,NBA,Player Prop,No,Ivica Zubac (Points),Over 14.5 Points,100,601,Pinnacle,601,,,601.00,,2058455734,Win
+2025-03-01,0:10,Unknown,Basketball,NBA,Player Prop,No,Ivica Zubac (Pts+Rebs+Asts),Over 28.5 Points+Rebs+Assists,100,601,Pinnacle,601,,,601.00,,2058455692,Win
+2025-03-01,21:10,Unknown,Basketball,NBA,Player Prop,No,Cameron Johnson (Points),Under 19.5 Points,-128,450,Pinnacle,351.56,,,351.56,,2058832463,Win
+2025-03-01,21:37,Unknown,Unknown Sport,UFC,Moneyline,Yes,LiveWilliam Gomis vs Hyder Amil,Hyder Amil,113,600,Pinnacle,678,,,678.00,,2059135726,Win
+2025-03-01,22:00,Unknown,Basketball,NCAA,Spread,No,LiveMarquette vs Georgetown,Georgetown +26.5,-113,300,Pinnacle,265.49,,,265.49,,2059157709,Win
+2025-03-01,22:00,Unknown,Basketball,NCAA,Spread,No,LiveGeorgia vs Texas,Georgia -13.5,-130,300,Pinnacle,230.77,,,230.77,,2059157392,Win
+2025-03-02,22:10,Unknown,Basketball,NBA,Total,No,New Orleans Pelicans vs Utah Jazz,Over 231.5,-114,300,Pinnacle,263.16,,,263.16,,2059161337,Win
+2025-03-02,20:10,Unknown,Basketball,NBA,Player Prop,No,Scottie Barnes (Rebounds),Under 6.5 Rebounds,132,602,Pinnacle,794.64,,,794.64,,2059274174,Win
+2025-03-02,22:10,Unknown,Basketball,NBA,Player Prop,No,Isaiah Collier (Points),Over 13.5 Points,130,602,Pinnacle,782.6,,,-602.00,,2059269082,Loss
+2025-03-02,22:10,Unknown,Basketball,NBA,Player Prop,No,KJ Martin (Points),Under 12.5 Points,-109,657,Pinnacle,602.75,,,602.75,,2059265288,Win
+2025-03-02,23:40,Unknown,Basketball,NBA,Player Prop,No,Luka Doncic (Rebounds),Over 8.5 Rebounds,-100,602,Pinnacle,602,,,-602.00,,2059263246,Loss
+2025-03-02,23:40,Unknown,Basketball,NBA,Player Prop,No,LeBron James (Assists),Under 7.5 Assists,-113,500,Pinnacle,442.48,,,-500.00,,2059349956,Loss
+2025-03-02,20:10,Unknown,Basketball,NBA,Player Prop,No,Alec Burks (Points),Over 8.5 Points,-102,613,Pinnacle,600.98,,,600.98,,2059499834,Win
+2025-03-02,23:40,Unknown,Basketball,NBA,Spread,Yes,Minnesota Timberwolves vs Phoenix Suns,Minnesota Timberwolves +0.5,-110,300,Pinnacle,272.73,,,272.73,,2059571760,Win
+2025-03-03,23:10,Unknown,Basketball,NBA,Player Prop,No,Isaiah Collier (Points),Over 10.5 Points,-110,663,Pinnacle,602.73,-112,0.86,602.73,,2059772736,Win
+2025-03-03,22:10,Unknown,Basketball,NBA,Player Prop,No,Onyeka Okongwu (Rebounds),Over 9.5 Rebounds,127,603,Pinnacle,765.81,116,5.09,765.81,,2059767232,Win
+2025-03-03,21:10,Unknown,Basketball,NBA,Player Prop,No,Andre Drummond (Points),Over 9.5 Points,-108,651,Pinnacle,602.78,-110,0.88,602.78,,2059766900,Win
+2025-03-03,21:30,Unknown,Basketball,NCAA,Moneyline,No,Incarnate Word vs Northwestern State,Incarnate Word,141,362,Pinnacle,510.42,144,-1.23,-362.00,,2059764742,Loss
+2025-03-03,23:10,Unknown,Basketball,NBA,Player Prop,No,Isaiah Collier (Assists),Over 8.5 Assists,132,600,Pinnacle,792,125,3.11,-600.00,,2059764494,Loss
+2025-03-03,22:10,Unknown,Basketball,NBA,Player Prop,No,Luguentz Dort (Points),Under 9.5 Points,-117,300,Pinnacle,256.41,,,-300.00,,2059779971,Loss
+2025-03-03,22:10,Unknown,Basketball,NBA,Total,Yes,Houston Rockets vs Oklahoma City Thunder,Over 54.5,-127,300,Pinnacle,236.22,,,236.22,,2059783318,Win
+2025-03-03,22:40,Unknown,Basketball,NBA,Player Prop,No,Naji Marshall (Rebounds),Over 5.5 Rebounds,-103,622,Pinnacle,603.88,,,-622.00,,2059786158,Loss
+2025-03-03,22:10,Unknown,Basketball,NBA,Player Prop,No,Shai Gilgeous-Alexander (Pts+Rebs+Asts),Under 42.5 Points+Rebs+Assists,-113,300,Pinnacle,265.49,,,-300.00,,2059779706,Loss
+2025-03-03,22:10,Unknown,Basketball,NBA,Player Prop,No,Jaren Jackson Jr. (Points),Over 25.5 Points,-121,300,Pinnacle,247.93,,,-300.00,,2059779432,Loss
+2025-03-04,21:10,Unknown,Basketball,NBA,Spread,No,LiveHouston Rockets vs Indiana Pacers,Houston Rockets +7.5,-121,300,Pinnacle,247.93,,,-300.00,,2060045448,Loss
+2025-03-04,21:00,Unknown,Basketball,NCAA,Total,No,LiveCreighton vs Seton Hall,Over 127,-132,333,Pinnacle,252.27,,,252.27,,2060041049,Win
+2025-03-04,22:00,Unknown,Basketball,NCAA,Total,No,LiveTexas vs Mississippi State,Under 150.5,-111,600,Pinnacle,540.54,,,-600.00,,2060043423,Loss
+2025-03-04,21:00,Unknown,Basketball,NCAA,Spread,No,LiveLSU vs Kentucky,Kentucky -29.5,107,300,Pinnacle,321,,,321.00,,2060028527,Win
+2025-03-04,21:40,Unknown,Basketball,NBA,Total,Yes,LiveMilwaukee Bucks vs Atlanta Hawks,Over 61.5,104,600,Pinnacle,624,,,624.00,,2060029275,Win
+2025-03-04,22:10,Unknown,Basketball,NBA,Spread,Yes,LiveCleveland Cavaliers vs Chicago Bulls,Cleveland Cavaliers -5.5,109,300,Pinnacle,327,,,-300.00,,2060040410,Loss
+2025-03-04,22:00,Unknown,Basketball,NCAA,Spread,No,LiveVillanova vs Georgetown,Villanova -6.5,111,222,Pinnacle,246.42,,,-222.00,,2060033374,Loss
+2025-03-05,0:05,Unknown,Basketball,NBA,Total,Yes,Los Angeles Clippers vs Phoenix Suns,Under 55.5,-125,449,Pinnacle,359.2,,,-449.00,,2060020530,Loss
+2025-03-05,0:05,Unknown,Basketball,NBA,Player Prop,No,Bradley Beal (Assists),Under 4.5 Assists,-121,300,Pinnacle,247.93,,,247.93,,2060049263,Win
+2025-03-05,21:10,Unknown,Basketball,NBA,Total,No,Utah Jazz vs Washington Wizards,Over 231,-104,300,Pinnacle,288.46,,,288.46,,2060056993,Win
+2025-03-05,21:10,Unknown,Basketball,NBA,Total,Yes,Minnesota Timberwolves vs Charlotte Hornets,Under 54.5,-102,300,Pinnacle,294.12,,,-300.00,,2060275277,Loss
+2025-03-05,23:10,Unknown,Basketball,NBA,Player Prop,No,Jonas Valanciunas (Points),Over 14.5 Points,-128,300,Pinnacle,234.38,,,234.38,,2060308964,Win
+2025-03-05,22:00,Unknown,Basketball,NCAA,Total,Yes,LiveColorado vs Texas Tech,Under 65.5,101,300,Pinnacle,303,,,-300.00,,2060308616,Loss
+2025-03-05,23:40,Unknown,Basketball,NBA,Player Prop,No,Brandon Clarke (Rebounds),Under 6.5 Rebounds,-133,300,Pinnacle,225.56,,,-300.00,,2060308427,Loss
+2025-03-05,23:10,Unknown,Basketball,NBA,Spread,Yes,Sacramento Kings vs Denver Nuggets,Denver Nuggets -3.0,113,300,Pinnacle,339,,,0,,2060307527,Refund
+2025-03-05,21:10,Unknown,Basketball,NBA,Player Prop,No,Bilal Coulibaly (Rebounds),Under 5.5 Rebounds,-135,600,Pinnacle,444.44,,,444.44,,2060268146,Win
+2025-03-06,21:00,Unknown,Basketball,NCAA,Total,No,LiveJacksonville vs North Alabama,Over 138.5,-113,300,Pinnacle,265.49,,,265.49,,2060558332,Win
+2025-03-06,22:30,Unknown,Basketball,NCAA,Total,No,Seattle U vs Southern Utah,Over 140.5,110,350,Pinnacle,385,,,-350.00,,2060553603,Loss
+2025-03-06,17:30,Unknown,Basketball,NCAA,Total,No,LiveMissouri State vs Illinois State,Illinois State - Over 72.5,-118,400,Pinnacle,338.98,,,-400.00,,2060522408,Loss
+2025-03-06,21:10,Unknown,Basketball,NBA,Player Prop,No,Zach Collins (Pts+Rebs+Asts),Over 25.5 Points+Rebs+Assists,122,300,Pinnacle,366,,,-300.00,,2060401510,Loss
+2025-03-06,23:00,Unknown,Basketball,NCAA,Total,No,Alabama State vs Southern,Under 142,102,357,Pinnacle,364.14,,,364.14,,2060567700,Win
+2025-03-06,23:30,Unknown,Basketball,NCAA,Total,No,Lindenwood vs Tennessee State,Under 146.5,110,350,Pinnacle,385,,,385.00,,2060565669,Win
+2025-03-07,0:09,Unknown,Basketball,NBA,Total,Yes,New York Knicks vs Los Angeles Lakers,Over 58.5,-121,400,Pinnacle,330.58,,,-400.00,,2060562136,Loss
+2025-03-07,0:09,Unknown,Basketball,NBA,Total,Yes,New York Knicks vs Los Angeles Lakers,Over 59.5,-102,400,Pinnacle,392.16,,,-400.00,,2060577568,Loss
+2025-03-07,0:09,Unknown,Basketball,NBA,Spread,Yes,New York Knicks vs Los Angeles Lakers,New York Knicks +0.5,112,400,Pinnacle,448,,,-400.00,,2060577527,Loss
+2025-03-07,21:40,Unknown,Basketball,NBA,Moneyline,Yes,Utah Jazz vs Toronto Raptors,Toronto Raptors,-133,333,Pinnacle,250.38,,,250.38,,2060718048,Win
+2025-03-07,23:30,Unknown,Basketball,NCAA,Spread,No,Valparaiso vs Northern Iowa,Valparaiso +10.5,-107,600,Pinnacle,560.75,,,560.75,,2060715814,Win
+2025-03-07,23:30,Unknown,Basketball,NCAA,Spread,Yes,Valparaiso vs Northern Iowa,Valparaiso +4.5,112,600,Pinnacle,672,,,672.00,,2060715270,Win
+2025-03-07,21:40,Unknown,Basketball,NBA,Moneyline,Yes,Memphis Grizzlies vs Dallas Mavericks,Dallas Mavericks,175,300,Pinnacle,525,,,-300.00,,2060705109,Loss
+2025-03-07,16:00,Unknown,Basketball,NCAA,Spread,No,Stony Brook vs Delaware,Stony Brook +6.5,-107,300,Pinnacle,280.37,,,280.37,,2060696404,Win
+2025-03-07,22:00,Unknown,Basketball,NCAA,Moneyline,Yes,Arkansas Little Rock vs SE Missouri State,Arkansas Little Rock,122,350,Pinnacle,427,,,-350.00,,2060694734,Loss
+2025-03-07,18:30,Unknown,Basketball,NCAA,Total,No,North Carolina A&T vs Hofstra,Under 123.5,101,300,Pinnacle,303,,,-300.00,,2060842670,Loss
+2025-03-07,16:45,Unknown,Unknown Sport,Premier,Moneyline,Yes,LiveCork City (0) vs Sligo Rovers (0),Over 0.5,-101,600,Pinnacle,594.06,,,594.06,,2060814379,Win
+2025-03-07,16:45,Unknown,Unknown Sport,Premier,Moneyline,Yes,LiveCork City (0) vs Sligo Rovers (0),Under 0.5,-128,700,Pinnacle,546.88,,,-700.00,,2060815415,Loss
+2025-03-07,16:45,Unknown,Unknown Sport,Division 1,Moneyline,Yes,LiveWexford (0) vs Athlone Town (0),Over 0.5,-102,300,Pinnacle,294.12,,,294.12,,2060813941,Win
+2025-03-07,16:45,Unknown,Unknown Sport,Premier,Moneyline,Yes,LiveWaterford (0) vs Bohemians (1),Under 3,-123,1000,Pinnacle,813.01,,,0,,2060811562,Refund
+2025-03-07,21:40,Unknown,Basketball,NBA,Total,Yes,Utah Jazz vs Toronto Raptors,Under 56.5,-112,300,Pinnacle,267.86,,,267.86,,2060809698,Win
+2025-03-07,21:10,Unknown,Basketball,NBA,Spread,Yes,LiveCleveland Cavaliers vs Charlotte Hornets,Charlotte Hornets +3.5,-109,333,Pinnacle,305.5,,,305.50,,2060889852,Win
+2025-03-07,21:00,Unknown,Basketball,NCAA,Spread,No,LiveDayton vs VCU,VCU -6.5,109,450,Pinnacle,490.5,,,-450.00,,2060881811,Loss
+2025-03-08,0:40,Unknown,Basketball,NBA,Player Prop,No,Miles McBride (Assists),Over 3.5 Assists,-113,300,Pinnacle,265.49,,,265.49,,2060809228,Win
+2025-03-08,0:10,Unknown,Basketball,NBA,Spread,Yes,Phoenix Suns vs Denver Nuggets,Phoenix Suns +1.5,128,225,Pinnacle,288,,,-225.00,,2060893948,Loss
+2025-03-08,0:10,Unknown,Basketball,NBA,Total,Yes,Phoenix Suns vs Denver Nuggets,Under 116.5,123,400,Pinnacle,492,,,-400.00,,2060890246,Loss
+2025-03-08,0:14,Unknown,Basketball,NBA,Total,No,Phoenix Suns vs Denver Nuggets,Under 242.5,-106,400,Pinnacle,377.36,,,-400.00,,2060903688,Loss
+2025-03-08,22:40,Unknown,Basketball,NBA,Player Prop,No,Luka Doncic (Pts+Rebs+Asts),Over 44.5 Points+Rebs+Assists,103,300,Pinnacle,309,,,309.00,,2061324459,Win
+2025-03-08,17:30,Unknown,Basketball,NCAA,Spread,Yes,Belmont vs Drake,Belmont +3.5,113,600,Pinnacle,678,,,678.00,,2061086202,Win
+2025-03-09,22:40,Unknown,Basketball,NBA,Player Prop,No,James Harden (3 Point FG),Under 3.5 3-Point Field Goals,120,450,Pinnacle,540,,,540.00,,2061470255,Win
+2025-03-09,20:10,Unknown,Basketball,NBA,Player Prop,No,Jaylen Wells (Points),Under 9.5 Points,116,300,Pinnacle,348,,,348.00,,2061465098,Win
+2025-03-09,14:10,Unknown,Basketball,NBA,Spread,No,Denver Nuggets vs Oklahoma City Thunder,Denver Nuggets +8.0,-103,2.00,Pinnacle,1.94,,,-2.00,,2061483202,Loss
+2025-03-09,21:10,Unknown,Basketball,NBA,Spread,No,San Antonio Spurs vs Minnesota Timberwolves,San Antonio Spurs +11.0,-105,400.00,Pinnacle,380.95,,,-400.00,,2061510325,Loss
+2025-03-09,21:10,Unknown,Basketball,NBA,Spread,No,San Antonio Spurs vs Minnesota Timberwolves,San Antonio Spurs +11.0,-105,400.00,Pinnacle,380.95,,,-400.00,,2061509729,Loss
+2025-03-09,22:10,Unknown,Basketball,NBA,Player Prop,No,Anfernee Simons (Assists),Under 5.5 Assists,-122,400.00,Pinnacle,327.87,,,327.87,,2061506658,Win
+2025-03-09,20:10,Unknown,Basketball,NBA,Spread,No,Memphis Grizzlies vs New Orleans Pelicans,New Orleans Pelicans +9.0,-104,350.00,Pinnacle,336.54,,,336.54,,2061505702,Win
+2025-03-09,14:10,Unknown,Basketball,NBA,Total,Yes,Denver Nuggets vs Oklahoma City Thunder,Over 124.5,+111,280.00,Pinnacle,310.80,,,-280.00,,2061505205,Loss
+2025-03-09,14:10,Unknown,Basketball,NBA,Total,Yes,Denver Nuggets vs Oklahoma City Thunder,Over 60.5,-129,300.00,Pinnacle,232.56,,,-300.00,,2061505092,Loss
+2025-03-09,15:10,Unknown,Basketball,NCAA,Spread,Yes,Bradley vs Drake,Bradley +3.5,-147,450.00,Pinnacle,306.12,,,-450.00,,2061499119,Loss
+2025-03-09,14:10,Unknown,Basketball,NBA,Player Prop,No,Russell Westbrook (Pts+Rebs+Asts),Under 19.5 Points+Rebs+Assists,+111,300.00,Pinnacle,333.00,,,-300.00,,2061485610,Loss
+2025-03-09,20:10,Unknown,Basketball,NBA,Spread,No,Memphis Grizzlies vs New Orleans Pelicans,New Orleans Pelicans +9.5,+105,400.00,Pinnacle,420.00,,,420.00,,2061609622,Win
+2025-03-09,20:10,Unknown,Basketball,NBA,Spread,No,Memphis Grizzlies vs New Orleans Pelicans,New Orleans Pelicans +9.0,+115,800.00,Pinnacle,920.00,,,920.00,,2061608195,Win
+2025-03-09,23:00,Unknown,Basketball,NCAA,Spread,Yes,Northern Arizona vs Montana,Northern Arizona +2.5,+107,500.00,Pinnacle,535.00,,,535.00,,2061535035,Win
+2025-03-09,14:10,Unknown,Basketball,NBA,Total,Yes,Denver Nuggets vs Oklahoma City Thunder,Oklahoma City Thunder - Over 63.5,-111,400.00,Pinnacle,360.36,,,-400.00,,2061521440,Loss
+2025-03-10,00:00,Unknown,Basketball,NCAA,Spread,Yes,Washington State vs San Francisco,Washington State +4.5,-136,444.00,Pinnacle,326.47,,,326.47,,2061634590,Win
+2025-03-09,20:40,Unknown,Basketball,NBA,Player Prop,No,Keyonte George (Points),Under 20.5 Points,+110,598.00,Pinnacle,657.80,,,-598.00,,2061633888,Loss
+2025-03-09,14:10,Unknown,Basketball,NBA,Total,Yes,Denver Nuggets vs Oklahoma City Thunder,Over 63,+109,500.00,Pinnacle,545.00,,,-500.00,,2061643454,Loss
+2025-03-09,15:00,Unknown,Basketball,NCAA,Moneyline,No,Colgate vs American,Colgate,+127,718.00,Pinnacle,911.86,,,-718.00,,2061639440,Loss
+2025-03-09,14:10,Unknown,Basketball,NBA,Player Prop,No,Russell Westbrook (Pts+Rebs+Asts),Under 19.5 Points+Rebs+Assists,+106,598.00,Pinnacle,633.88,,,-598.00,,2061638296,Loss
+2025-03-09,20:40,Unknown,Basketball,NBA,Total,Yes,Utah Jazz vs Philadelphia 76ers,Utah Jazz - Under 54.5,-107,350.00,Pinnacle,327.10,,,-350.00,,2061760600,Loss
+2025-03-09,20:40,Unknown,Basketball,NBA,Total,Yes,Utah Jazz vs Philadelphia 76ers,Under 112.5,-104,300.00,Pinnacle,288.46,,,-300.00,,2061757249,Loss
+2025-03-09,22:10,Unknown,Basketball,NBA,Spread,Yes,Detroit Pistons vs Portland Trail Blazers,Detroit Pistons -1.0,+108,222.00,Pinnacle,239.76,,,239.76,,2061741527,Win
+2025-03-10,00:00,Unknown,Basketball,NCAA,Total,No,Washington State vs San Francisco,Over 152.5,-102,300.00,Pinnacle,294.12,,,294.12,,2061774547,Win
+2025-03-09,22:00,Unknown,Basketball,NCAA,Spread,No,LiveSt. Thomas vs Nebraska Omaha,Nebraska Omaha +2.5,-128,600.00,Pinnacle,468.75,,,468.75,,2061782994,Win
+2025-03-10,20:40,Unknown,Basketball,NBA,Player Prop,Yes,Philadelphia 76ers vs Atlanta Hawks,Atlanta Hawks - Over 31.5,+101,359.00,Pinnacle,362.59,,,,,2061856189,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Player Prop,Yes,Philadelphia 76ers vs Atlanta Hawks,Atlanta Hawks - Over 31.5,+103,40.00,Pinnacle,41.20,,,,,2061856165,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Player Prop,Yes,Utah Jazz vs Boston Celtics,Utah Jazz - Under 25.5,+103,359.00,Pinnacle,369.77,,,,,2061855639,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Total,Yes,Utah Jazz vs Boston Celtics,Under 56.5,+102,359.00,Pinnacle,366.18,,,,,2061855123,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Total,Yes,Utah Jazz vs Boston Celtics,Under 111.5,+113,400.00,Pinnacle,452.00,,,,,2061854999,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Total,Yes,Philadelphia 76ers vs Atlanta Hawks,Over 60.5,+115,359.00,Pinnacle,412.85,,,,,2061854833,Pending
+2025-03-10,20:00,Unknown,Basketball,NCAA,Total,No,Arkansas State vs Troy,Under 140.5,-121,435.00,Pinnacle,359.50,,,,,2061852532,Pending
+2025-03-10,21:40,Unknown,Basketball,NBA,Spread,No,Dallas Mavericks vs San Antonio Spurs,Dallas Mavericks +6.5,+102,400.00,Pinnacle,408.00,,,,,2061872822,Pending
+2025-03-10,21:40,Unknown,Basketball,NBA,Spread,No,Dallas Mavericks vs San Antonio Spurs,Dallas Mavericks +6.5,+102,400.00,Pinnacle,408.00,,,,,2061872675,Pending
+2025-03-10,21:10,Unknown,Basketball,NBA,Player Prop,No,Nikola Vucevic (Points),Under 18.5 Points,-123,696.00,Pinnacle,565.85,,,,,2061872126,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Player Prop,No,D'Angelo Russell (3 Point FG),Under 2.5 3-Point Field Goals,-116,500.00,Pinnacle,431.03,,,,,2061872091,Pending
+2025-03-10,21:10,Unknown,Basketball,NBA,Spread,No,Indiana Pacers vs Chicago Bulls,Chicago Bulls +6.5,-108,1000.00,Pinnacle,925.93,,,,,2061870922,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Spread,No,Los Angeles Lakers vs Brooklyn Nets,Brooklyn Nets +6.5,-102,400.00,Pinnacle,392.16,,,,,2061870670,Pending
+2025-03-10,21:10,Unknown,Basketball,NBA,Total,Yes,Orlando Magic vs Houston Rockets,Houston Rockets - Over 55.5,-100,350.00,Pinnacle,350.00,,,,,2061870516,Pending
+2025-03-10,20:40,Unknown,Basketball,NBA,Spread,No,Philadelphia 76ers vs Atlanta Hawks,Philadelphia 76ers +9.5,+119,1000.00,Pinnacle,1190.00,,,,,2061869857,Pending
+2025-03-10,20:00,Unknown,Basketball,NCAA,Spread,No,Arkansas State vs Troy,Arkansas State -2.0,-103,300.00,Pinnacle,291.26,,,,,2061866718,Pending
