@@ -8,8 +8,17 @@ A hybrid betting automation tool for scraping, grading, and syncing Pinnacle and
 - ✅ Syncs to Google Sheets dynamically
 - ✅ Structured for future Discord/Telegram alert integration
 
+### 📦 Setup
+
+Install the Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ### 🚀 To Run
 
 ```bash
-python cli/hybrid_script.py
+python hybrid_script.py
+```
 
