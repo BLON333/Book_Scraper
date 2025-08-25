@@ -3,6 +3,7 @@ import time
 import csv
 import random
 import re
+import tempfile
 import undetected_chromedriver as uc
 import config
 from datetime import datetime, timedelta
@@ -10,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import SessionNotCreatedException
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -50,7 +52,13 @@ def init_driver():
     if user_data_dir:
         options.add_argument(f"--user-data-dir={user_data_dir}")
     options.add_argument("--profile-directory=Default")
-    driver = uc.Chrome(options=options)
+    try:
+        driver = uc.Chrome(options=options)
+    except SessionNotCreatedException:
+        temp_dir = tempfile.mkdtemp()
+        options = uc.ChromeOptions()
+        options.add_argument(f"--user-data-dir={temp_dir}")
+        driver = uc.Chrome(options=options)
     print("Chrome opened successfully!")
     return driver
 
