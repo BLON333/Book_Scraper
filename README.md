@@ -10,9 +10,12 @@ A hybrid betting automation tool for scraping, grading, and syncing Pinnacle and
 
 ### 📦 Setup
 
-Install the Python dependencies:
+This project requires **Python 3.12** (3.11 is also supported). Create and activate a
+virtual environment, then install the dependencies:
 
 ```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
