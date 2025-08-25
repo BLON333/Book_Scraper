@@ -107,38 +107,76 @@ def init_driver():
 
 
 def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
-    target_host = urlparse(url).netloc
+    """
+    Navigate reliably to `url`. Tries:
+      1) driver.get(url)
+      2) JS: window.location.href = url
+      3) (optional) CDP: Page.navigate
+    Verifies readyState and host using a subdomain-tolerant check.
+    """
+    target_host = urlparse(url).netloc.lower()
 
-    def loaded():
+    def _loaded_on_target():
         try:
             WebDriverWait(driver, timeout).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
-            return urlparse(driver.current_url).netloc == target_host
+        except TimeoutException:
+            pass
+        try:
+            cur = driver.current_url or ""
+            cur_host = urlparse(cur).netloc.lower()
+            # tolerant both ways: foo.bar endswith bar OR bar endswith foo
+            return cur_host.endswith(target_host) or target_host.endswith(cur_host)
         except Exception:
             return False
 
-    for _ in range(max_attempts):
+    for attempt in range(1, max_attempts + 1):
+        # A) normal get()
         try:
             driver.set_page_load_timeout(timeout)
             driver.get(url)
         except Exception:
             pass
-        if loaded():
+        if _loaded_on_target():
             return True
+
+        # B) force via JS
         try:
-            driver.execute_script(f"window.location.href = '{url}'")
-        except Exception:
+            driver.execute_script("window.location.href = arguments[0];", url)
+        except WebDriverException:
             pass
-        if loaded():
+        if _loaded_on_target():
             return True
+
+        # C) (optional) CDP fallback — keep if you already have CDP elsewhere
         try:
             driver.execute_cdp_cmd("Page.enable", {})
             driver.execute_cdp_cmd("Page.navigate", {"url": url})
         except Exception:
             pass
-        if loaded():
+        if _loaded_on_target():
             return True
+
+    return False
+
+
+def dismiss_cookie_banner(driver, timeout=8):
+    try:
+        wait = WebDriverWait(driver, timeout)
+        for sel in [
+            (By.XPATH, "//button[contains(., 'Accept')]") ,
+            (By.XPATH, "//button[contains(., 'I agree')]") ,
+            (By.CSS_SELECTOR, "#onetrust-accept-btn-handler, button#onetrust-accept-btn-handler"),
+        ]:
+            try:
+                btn = wait.until(EC.element_to_be_clickable(sel))
+                driver.execute_script("arguments[0].click();", btn)
+                return True
+            except Exception:
+                continue
+    except Exception:
+        pass
     return False
 
 def is_logged_in(driver):
@@ -772,7 +810,11 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
 # -----------------------------------------------------------------------------
 def main():
     driver = init_driver()
-    navigate_with_retry(driver, "https://www.pinnacle.ca/en/")
+    if not navigate_with_retry(driver, "https://www.pinnacle.ca/en/"):
+        print("[FATAL] Could not reach Pinnacle after retries. Exiting.")
+        driver.quit()
+        return
+    dismiss_cookie_banner(driver)
     time.sleep(random_delay(5, 2))
 
     if not is_logged_in(driver):
