@@ -1,9 +1,8 @@
 import os
 import time
 import csv
-import random
+import random, tempfile
 import re
-import tempfile
 import undetected_chromedriver as uc
 import config
 from datetime import datetime, timedelta
@@ -12,7 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import SessionNotCreatedException, TimeoutException
+from selenium.common.exceptions import SessionNotCreatedException, WebDriverException, TimeoutException
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -47,33 +46,64 @@ def random_delay(base=1.0, variation=0.5):
     return random.uniform(base - variation, base + variation)
 
 def init_driver():
-    print("Opening Chrome...")
+    # Option 1: attach to a running Chrome with my profile (manual start)
+    # Manual start example (outside Python):
+    # "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" ^
+    #   --remote-debugging-port=9222 ^
+    #   --user-data-dir="C:\\Users\\jason\\AppData\\Local\\Google\\Chrome\\User Data" ^
+    #   --profile-directory="Default"
+    if getattr(config, "ATTACH_TO_RUNNING", False):
+        print("Attaching to an already running Chrome (127.0.0.1:9222)...")
+        opts = uc.ChromeOptions()
+        opts.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+        driver = uc.Chrome(options=opts)
+        print("✅ Attached to running Chrome with profile.")
+        return driver
+
+    print("Opening Chrome with your profile...")
     options = uc.ChromeOptions()
+
+    # Real profile (from config.py)
     user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", None)
+    profile_dir   = getattr(config, "CHROME_PROFILE_DIR", "Default")
     if user_data_dir:
         options.add_argument(f"--user-data-dir={user_data_dir}")
-    options.add_argument("--profile-directory=Default")
+    if profile_dir:
+        options.add_argument(f"--profile-directory={profile_dir}")
+
+    # Stability flags
     options.add_argument("--no-first-run")
     options.add_argument("--no-default-browser-check")
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-background-networking")
     options.add_argument("--start-maximized")
     options.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
+
     try:
         driver = uc.Chrome(options=options)
-    except SessionNotCreatedException:
-        temp_dir = tempfile.mkdtemp()
-        options = uc.ChromeOptions()
-        options.add_argument(f"--user-data-dir={temp_dir}")
-        options.add_argument("--no-first-run")
-        options.add_argument("--no-default-browser-check")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-background-networking")
-        options.add_argument("--start-maximized")
-        options.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
-        driver = uc.Chrome(options=options)
-    print("Chrome opened successfully!")
-    return driver
+        print(f"✅ Attached to profile: {profile_dir}")
+        return driver
+    except (SessionNotCreatedException, WebDriverException) as e:
+        print(f"❌ Couldn’t attach to Chrome profile ({profile_dir}): {e}")
+
+        # Enforce real profile if required
+        if getattr(config, "REQUIRE_PROFILE", True):
+            raise
+
+        # Optional fallback to temp profile
+        print("[WARN] Falling back to a temporary profile (login not persisted).")
+        temp_dir = tempfile.mkdtemp(prefix="pinn_uc_")
+        fresh = uc.ChromeOptions()
+        fresh.add_argument(f"--user-data-dir={temp_dir}")
+        fresh.add_argument("--no-first-run")
+        fresh.add_argument("--no-default-browser-check")
+        fresh.add_argument("--disable-extensions")
+        fresh.add_argument("--disable-background-networking")
+        fresh.add_argument("--start-maximized")
+        fresh.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
+        driver = uc.Chrome(options=fresh)
+        print("Opened Chrome with a temporary profile.")
+        return driver
 
 
 def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
