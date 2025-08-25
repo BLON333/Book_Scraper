@@ -5,6 +5,8 @@ import random, tempfile
 import re
 import undetected_chromedriver as uc
 import config
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
@@ -54,10 +56,11 @@ def init_driver():
     #   --profile-directory="Default"
     if getattr(config, "ATTACH_TO_RUNNING", False):
         print("Attaching to an already running Chrome (127.0.0.1:9222)...")
-        opts = uc.ChromeOptions()
-        opts.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-        driver = uc.Chrome(options=opts)
-        print("✅ Attached to running Chrome with profile.")
+        opts = Options()
+        opts.debugger_address = "127.0.0.1:9222"
+        opts.add_argument("--start-maximized")
+        driver = webdriver.Chrome(options=opts)
+        print("✅ Attached to running Chrome with your profile.")
         return driver
 
     print("Opening Chrome with your profile...")
