@@ -7,11 +7,12 @@ import tempfile
 import undetected_chromedriver as uc
 import config
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import SessionNotCreatedException
+from selenium.common.exceptions import SessionNotCreatedException, TimeoutException
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -52,15 +53,43 @@ def init_driver():
     if user_data_dir:
         options.add_argument(f"--user-data-dir={user_data_dir}")
     options.add_argument("--profile-directory=Default")
+    options.add_argument("--no-first-run")
+    options.add_argument("--no-default-browser-check")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-background-networking")
     try:
         driver = uc.Chrome(options=options)
     except SessionNotCreatedException:
         temp_dir = tempfile.mkdtemp()
         options = uc.ChromeOptions()
         options.add_argument(f"--user-data-dir={temp_dir}")
+        options.add_argument("--no-first-run")
+        options.add_argument("--no-default-browser-check")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-background-networking")
         driver = uc.Chrome(options=options)
     print("Chrome opened successfully!")
     return driver
+
+
+def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
+    target_host = urlparse(url).netloc
+    for _ in range(max_attempts):
+        try:
+            driver.set_page_load_timeout(timeout)
+            driver.get(url)
+        except Exception:
+            pass
+        try:
+            WebDriverWait(driver, timeout).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+        except TimeoutException:
+            pass
+        if urlparse(driver.current_url).netloc == target_host:
+            return
+        driver.execute_script(f"window.location.href = '{url}'")
+        time.sleep(2)
 
 def is_logged_in(driver):
     """
@@ -693,7 +722,7 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
 # -----------------------------------------------------------------------------
 def main():
     driver = init_driver()
-    driver.get("https://www.pinnacle.ca/en/")
+    navigate_with_retry(driver, "https://www.pinnacle.ca/en/")
     time.sleep(random_delay(5, 2))
 
     if not is_logged_in(driver):
