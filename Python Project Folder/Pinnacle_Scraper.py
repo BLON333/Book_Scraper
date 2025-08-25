@@ -57,6 +57,8 @@ def init_driver():
     options.add_argument("--no-default-browser-check")
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-background-networking")
+    options.add_argument("--start-maximized")
+    options.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
     try:
         driver = uc.Chrome(options=options)
     except SessionNotCreatedException:
@@ -67,6 +69,8 @@ def init_driver():
         options.add_argument("--no-default-browser-check")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-background-networking")
+        options.add_argument("--start-maximized")
+        options.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
         driver = uc.Chrome(options=options)
     print("Chrome opened successfully!")
     return driver
@@ -74,22 +78,38 @@ def init_driver():
 
 def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
     target_host = urlparse(url).netloc
+
+    def loaded():
+        try:
+            WebDriverWait(driver, timeout).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            return urlparse(driver.current_url).netloc == target_host
+        except Exception:
+            return False
+
     for _ in range(max_attempts):
         try:
             driver.set_page_load_timeout(timeout)
             driver.get(url)
         except Exception:
             pass
+        if loaded():
+            return True
         try:
-            WebDriverWait(driver, timeout).until(
-                lambda d: d.execute_script("return document.readyState") == "complete"
-            )
-        except TimeoutException:
+            driver.execute_script(f"window.location.href = '{url}'")
+        except Exception:
             pass
-        if urlparse(driver.current_url).netloc == target_host:
-            return
-        driver.execute_script(f"window.location.href = '{url}'")
-        time.sleep(2)
+        if loaded():
+            return True
+        try:
+            driver.execute_cdp_cmd("Page.enable", {})
+            driver.execute_cdp_cmd("Page.navigate", {"url": url})
+        except Exception:
+            pass
+        if loaded():
+            return True
+    return False
 
 def is_logged_in(driver):
     """
