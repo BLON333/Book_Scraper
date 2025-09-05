@@ -1,5 +1,12 @@
 from typing import List
-import gspread
+
+try:
+    import gspread  # type: ignore
+except Exception as e:
+    raise RuntimeError(
+        "Missing dependency 'gspread'. Install it in your runtime environment.\n"
+        "See docs/INSTALL.md for proxy/offline install steps."
+    ) from e
 from google.oauth2.service_account import Credentials
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
