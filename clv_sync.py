@@ -1,184 +1,149 @@
 import re
-import sys
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-
-import gspread
-from google.oauth2.service_account import Credentials
-
-ROOT = Path(__file__).resolve().parent
-sys.path.append(str(ROOT / "Python Project Folder"))
-
-from core.odds_labeling import base_market, build_label
+from typing import Dict, List, Optional, Tuple
+from core import sheets
+from core import odds_labeling
 import config
 
-# ---------- Helpers ----------
+
 def american_to_prob(odds: str) -> Optional[float]:
+    s = str(odds).strip()
+    if not s:
+        return None
     try:
-        s = str(odds).strip().replace(" ", "")
-        if not s:
-            return None
-        v = float(s.replace("+", ""))
-        if v > 0:
-            return 100.0 / (v + 100.0)
-        else:
-            return -v / (-v + 100.0)
+        n = int(s[1:]) if s.startswith("+") else int(s)
     except Exception:
         return None
+    if n == 0:
+        return None
+    if s.startswith("+"):
+        return 100.0 / (n + 100.0)
+    return float(abs(n)) / (abs(n) + 100.0)
 
-def clean_money(x: str) -> str:
-    return re.sub(r"[^\d\.-]", "", str(x or "")).strip()
 
 def norm(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "").strip().lower())
+    return re.sub(r"\s+", " ", (s or "").replace("Â½", "½").strip().lower())
 
-def open_sheet_by_id(sheet_id: str):
-    creds = Credentials.from_service_account_file(
-        "credentials.json",
-        scopes=["https://www.googleapis.com/auth/spreadsheets"],
-    )
-    gc = gspread.authorize(creds)
-    return gc.open_by_key(sheet_id)
 
-# ---------- Load Bet Tracking rows ----------
-def load_bets() -> Tuple[gspread.Worksheet, List[Dict[str, str]], List[str]]:
-    bet_book = open_sheet_by_id(config.GOOGLE_SHEET_ID)
-    ws = bet_book.worksheet(config.BET_SHEET_TAB)
+def load_bets() -> Tuple[List[str], List[List[str]]]:
+    ws = sheets.open_ws(config.GOOGLE_SHEET_ID, config.BET_SHEET_TAB)
     header = ws.row_values(config.BET_HEADER_ROW)
-    all_vals = ws.get_all_values()
-    rows = []
-    for r in all_vals[config.BET_FIRST_DATA_ROW - 1:]:
-        if not any(cell.strip() for cell in r):
-            continue
-        row = {header[i]: (r[i] if i < len(r) else "") for i in range(len(header))}
-        rows.append(row)
-    return ws, rows, header
+    data = ws.get_all_values()[config.BET_FIRST_DATA_ROW - 1 :]
+    return header, data
 
-# ---------- Load Detailed Odds into a lookup ----------
-def load_detailed_odds() -> Dict[str, List[Dict[str, str]]]:
-    odds_book = open_sheet_by_id(config.GOOGLE_SHEET_ID)
-    ws = odds_book.worksheet(config.DETAILED_ODDS_TAB)
+
+def load_detailed_odds() -> List[Dict[str, str]]:
+    ws = sheets.open_ws(config.GOOGLE_SHEET_ID, config.DETAILED_ODDS_TAB)
     vals = ws.get_all_values()
     if not vals:
-        return {}
+        return []
     header = vals[0]
-    idx = {h: i for i, h in enumerate(header)}
-    lookup: Dict[str, List[Dict[str, str]]] = {}
+    out = []
     for r in vals[1:]:
-        if not any(c.strip() for c in r):
+        if not any(r):
             continue
-        event_id = r[idx.get("Event ID", -1)].strip() if idx.get("Event ID", -1) >= 0 else ""
-        if not event_id:
-            continue
-        entry = {h: (r[i] if i < len(r) else "") for i, h in enumerate(header)}
-        lookup.setdefault(event_id, []).append(entry)
-    return lookup
+        out.append({header[i]: (r[i] if i < len(r) else "") for i in range(len(header))})
+    return out
 
-# ---------- Matching logic ----------
-def parse_bet_market(row: Dict[str, str]) -> Tuple[str, str]:
-    market = (row.get("Market", "") or "").lower().strip()
-    bet = (row.get("Bet", "") or "").strip().replace("Â½", "½")
-    bet = re.sub(r"\s+", " ", bet)
-    if re.match(r"^(over|under)\s+\d+(\.\d+)?(½)?$", bet, flags=re.I):
-        label = bet.title()
-    elif re.search(r"[+\-]\d+(\.\d+)?(½)?$", bet):
-        label = bet
-    else:
-        label = bet
-    return market, label
+
+def parse_bet_market(market: str, bet: str) -> Tuple[str, str]:
+    m = (market or "").lower().strip()
+    b = (bet or "").strip()
+    if re.match(r"^(?i)(over|under)\s+\d+(\.\d+)?(½)?$", b):
+        side, num = b.split()[0].title(), b.split()[1].replace("Â½", "½")
+        return "totals", f"{side} {num}"
+    m = (
+        "spreads"
+        if m.startswith("spread")
+        else ("totals" if m.startswith("total") else ("h2h" if m in ("h2h", "ml", "moneyline") else m))
+    )
+    m2 = re.search(r"([+-]?\d+(\.\d+)?(½)?)$", b)
+    if m == "spreads" and m2:
+        p = m2.group(1)
+        if not p.startswith(("+", "-")):
+            b = b.replace(p, f"+{p}")
+    return m, b.replace("Â½", "½")
+
 
 def _norm_book(s: str) -> str:
-    s = (s or "").strip().lower()
-    return {"betonlineag": "betonline"}.get(s, s)
+    x = (s or "").strip().lower()
+    return {"betonline.ag": "betonline", "betonlineag": "betonline"}.get(x, x)
 
-def _norm_market_from_api(api_market: str) -> str:
-    return base_market(api_market)
 
-def _build_label_from_detailed(row: Dict[str, str]) -> str:
-    api_raw = row.get("API Market") or row.get("Market") or ""
-    name = (
-        row.get("Outcome Name (Normalized)")
-        or row.get("Label")
-        or row.get("Outcome")
-        or row.get("Bet")
-        or ""
-    )
-    point = row.get("Outcome Point") or ""
-    return build_label(api_raw, name, point)
-
-def pick_closing_line(
-    event_rows: List[Dict[str, str]],
-    wanted_market: str,
-    wanted_label: str,
-    bookmaker: str,
-) -> Optional[str]:
-    """Match a bet row to closing odds from Detailed Odds."""
-    if not event_rows:
-        return None
-    base_mkt = _norm_market_from_api(wanted_market)
+def pick_closing_line(event_rows: List[Dict[str, str]], market: str, bet_label: str, bookmaker: str) -> Optional[str]:
+    base_mkt = odds_labeling.base_market(market)
     target_book = _norm_book(bookmaker)
+    # pass 1: same book
     for r in event_rows:
-        book = _norm_book(r.get("Bookmaker") or r.get("Book") or r.get("Sportsbook") or "")
-        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
-        label = _build_label_from_detailed(r)
-        if book == target_book and api_mkt == base_mkt and norm(label) == norm(wanted_label):
-            odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
-            if odds:
-                return odds
+        api_mkt = odds_labeling.base_market(r.get("API Market") or r.get("Market") or "")
+        if api_mkt != base_mkt:
+            continue
+        label = odds_labeling.build_label(
+            r.get("API Market", ""), r.get("Outcome Name (Normalized)", ""), r.get("Outcome Point", "")
+        )
+        if norm(_norm_book(r.get("Bookmaker") or r.get("Book", ""))) == target_book and norm(label) == norm(bet_label):
+            return (r.get("Odds") or "").strip()
+    # pass 2: any book
     for r in event_rows:
-        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
-        label = _build_label_from_detailed(r)
-        if api_mkt == base_mkt and norm(label) == norm(wanted_label):
-            odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
-            if odds:
-                return odds
+        api_mkt = odds_labeling.base_market(r.get("API Market") or r.get("Market") or "")
+        if api_mkt != base_mkt:
+            continue
+        label = odds_labeling.build_label(
+            r.get("API Market", ""), r.get("Outcome Name (Normalized)", ""), r.get("Outcome Point", "")
+        )
+        if norm(label) == norm(bet_label):
+            return (r.get("Odds") or "").strip()
     return None
 
-# ---------- Main sync ----------
-def sync_clv():
-    ws_bets, bets, header = load_bets()
-    detailed = load_detailed_odds()
 
-    def col_idx(name: str) -> int:
+def main():
+    header, bet_rows = load_bets()
+    det_rows = load_detailed_odds()
+    from collections import defaultdict
+
+    by_event = defaultdict(list)
+    for r in det_rows:
+        by_event[(r.get("Event ID") or "").strip()].append(r)
+
+    def col(name: str) -> int:
         return header.index(name) + 1 if name in header else -1
 
-    col_closing = col_idx("Closing Line")
-    col_clv = col_idx("CLV%")
-
-    if col_closing < 0 or col_clv < 0:
-        print("Missing 'Closing Line' or 'CLV%' columns in Bet sheet header.")
+    c_event = col("Event ID")
+    c_market = col("Market")
+    c_bet = col("Bet")
+    c_book = col("Bookmaker")
+    c_entry = col("Odds")
+    c_close = col("Closing Line")
+    c_clv = col("CLV%")
+    if min(c_event, c_market, c_bet, c_book, c_entry, c_close, c_clv) < 0:
+        print(
+            "Missing required columns in Bets (need: Event ID, Market, Bet, Bookmaker, Odds, Closing Line, CLV%)."
+        )
         return
-
-    updates = []
-    start_row = config.BET_FIRST_DATA_ROW
-    for i, row in enumerate(bets, start=start_row):
-        event_id = (row.get("Event ID", "") or "").strip()
-        bookmaker = (row.get("Bookmaker", "") or "").strip()
-        entry_odds = (row.get("Odds", "") or "").strip()
-        market, label = parse_bet_market(row)
-        if not event_id or not entry_odds:
+    ws = sheets.open_ws(config.GOOGLE_SHEET_ID, config.BET_SHEET_TAB)
+    updated = 0
+    for i, row in enumerate(bet_rows, start=config.BET_FIRST_DATA_ROW):
+        ev_id = (row[c_event - 1] if c_event - 1 < len(row) else "").strip()
+        market = (row[c_market - 1] if c_market - 1 < len(row) else "").strip()
+        bet = (row[c_bet - 1] if c_bet - 1 < len(row) else "").strip()
+        book = (row[c_book - 1] if c_book - 1 < len(row) else "").strip()
+        entry = (row[c_entry - 1] if c_entry - 1 < len(row) else "").strip()
+        if not (ev_id and market and bet and entry):
             continue
-        event_rows = detailed.get(event_id, [])
-        closing = pick_closing_line(event_rows, market, label, bookmaker)
+        mkt, label = parse_bet_market(market, bet)
+        rows = by_event.get(ev_id, [])
+        closing = pick_closing_line(rows, mkt, label, book)
         if not closing:
             continue
-        p_entry = american_to_prob(entry_odds)
-        p_closing = american_to_prob(closing)
-        if p_entry and p_entry > 0 and p_closing:
-            clv = ((p_closing / p_entry) - 1.0) * 100.0
-            updates.append((i, closing, f"{clv:.2f}"))
+        p_entry = american_to_prob(entry)
+        p_close = american_to_prob(closing)
+        if not (p_entry and p_close and p_entry > 0):
+            continue
+        clv_pct = (p_close / p_entry - 1.0) * 100.0
+        ws.update_cell(i, c_close, str(closing))
+        ws.update_cell(i, c_clv, f"{clv_pct:.2f}")
+        updated += 1
+    print(f"Updated {updated} rows with Closing Line & CLV%.")
 
-    if not updates:
-        print("No CLV updates found.")
-        return
-
-    cell_updates = []
-    for r, closing, clv in updates:
-        cell_updates.append({"range": gspread.utils.rowcol_to_a1(r, col_closing), "values": [[closing]]})
-        cell_updates.append({"range": gspread.utils.rowcol_to_a1(r, col_clv), "values": [[clv]]})
-
-    ws_bets.batch_update([{ "range": u["range"], "values": u["values"] } for u in cell_updates])
-    print(f"Updated {len(updates)} rows with Closing Line & CLV%.")
 
 if __name__ == "__main__":
-    sync_clv()
+    main()
