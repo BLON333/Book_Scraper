@@ -47,3 +47,14 @@ python clv_sync.py
 or run the full pipeline via `python hybrid_script.py`.
 This writes **Live/Detailed Odds** tabs and fills **Closing Line** / **CLV%** in the Bet sheet.
 
+# Bet Tracking Automation (Pipeline)
+- Python-only pipeline; single Google Sheet for Bets + Live Odds + Detailed Odds
+- Configure IDs in config.py; set ODDS_API_KEY via environment
+- Run: python hybrid_script.py
+
+Quick check
+
+```powershell
+python -m pytest -q tests 2>$null
+```
+
