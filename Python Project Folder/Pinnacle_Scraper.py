@@ -15,6 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import SessionNotCreatedException, WebDriverException, TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -375,24 +376,71 @@ def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
                     existing_ids.add(bet_id)
     return existing_ids
 
-def expand_unlogged_bets(driver, existing_ids):
+def expand_unlogged_bets(driver, existing_ids, max_passes=3):
     """
     Expand any bet cards that are not already logged in the CSV, to reveal details.
+    Robust against DOM reflows/virtualization that cause stale element refs.
     """
-    bet_cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-    for bet in bet_cards:
+    seen_ids = set()
+    passes = 0
+
+    while passes < max_passes:
         try:
-            bet_id_elem = bet.find_element(By.CSS_SELECTOR, ".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2")
-            bet_id = bet_id_elem.text.strip().replace("#", "").replace(" ", "")
+            cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
         except Exception:
-            bet_id = None
+            cards = []
 
-        if bet_id and bet_id in existing_ids:
-            continue
+        if not cards:
+            break
 
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", bet)
-        driver.execute_script("arguments[0].click();", bet)
-        time.sleep(random.uniform(2, 4))
+        for idx in range(len(cards)):
+            try:
+                # Re-locate the card fresh each time to avoid stale refs
+                card_list = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
+                if idx >= len(card_list):
+                    continue
+                card = card_list[idx]
+
+                # Extract Bet ID (fresh each iteration)
+                bet_id = None
+                try:
+                    bid_elem = card.find_element(By.CSS_SELECTOR, ".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2")
+                    bet_id = (bid_elem.text or "").strip().replace("#", "").replace(" ", "")
+                except Exception:
+                    pass
+
+                # Skip duplicates/already-logged
+                if bet_id and (bet_id in existing_ids or bet_id in seen_ids):
+                    continue
+
+                # Bring into view and expand
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", card)
+                except StaleElementReferenceException:
+                    # Reflow occurred; retry next loop
+                    continue
+
+                # Click with JS (less brittle than ActionChains)
+                try:
+                    driver.execute_script("arguments[0].click();", card)
+                except Exception:
+                    try:
+                        card.click()
+                    except Exception:
+                        pass
+
+                time.sleep(random.uniform(1.5, 3.0))
+                if bet_id:
+                    seen_ids.add(bet_id)
+
+            except StaleElementReferenceException:
+                # Card became stale after scroll/expand; move on
+                continue
+            except Exception:
+                # Non-fatal; continue expanding other cards
+                continue
+
+        passes += 1
 
 # -----------------------------------------------------------------------------
 # JAVASCRIPT EXTRACTION CODE
