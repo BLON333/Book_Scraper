@@ -1,0 +1,4 @@
+credentials.json
+oauth_credentials.json
+*.pyc
+__pycache__/

@@ -1,20 +1,9 @@
-# Odds API → Google Sheets
-This project reads **odds already exported to Google Sheets** by our Odds API service.
+# Odds API Sync
 
-- Spreadsheet: **Live Odds** (`LIVE_ODDS_SHEET_ID` in `config.py`)
-- Tabs:
-  - **Live Odds** — one row per event (high-level snapshot)
-  - **Detailed Odds** — multiple rows per event; one row per **book × market × label** (used for CLV)
+`odds_sync.py` pulls markets from [The Odds API](https://the-odds-api.com/) and writes them to the Google Sheet defined by `config.GOOGLE_SHEET_ID`.
 
-**Columns expected in `Detailed Odds`** (case-insensitive):
-- `Event ID` — canonical key we also store in Bet Tracking
-- `Book` (or `Bookmaker` / `Sportsbook`)
-- `Market` — e.g., `h2h`, `spreads`, `totals`, `team_totals` (+ optional `_q1`, `_h1`, etc.)
-- `Label` — outcome label; examples:
-  - Totals: `Over 9.5` / `Under 9.5`
-  - Spreads: `Team +3.5`
-  - H2H: `Team`
-- `Odds` (or `American` / `Price`) — American odds for that outcome
+- **Live Odds** tab: league, event id, matchup, start time, and bookmaker count (one row per event).
+- **Detailed Odds** tab: one row per bookmaker × market × outcome for bets listed in the Bet sheet.
 
-If names differ, update `clv_sync.py`’s `pick_closing_line()` aliases.
-
+Inputs: `ODDS_API_KEY`, `LEAGUES`, `ALLOWED_BOOKS`, and bet rows with Event ID / Market / Bet.
+Outputs: refreshed odds data used later by `clv_sync.py` to compute Closing Line and CLV%.

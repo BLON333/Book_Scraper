@@ -47,7 +47,7 @@ def load_bets() -> Tuple[gspread.Worksheet, List[Dict[str, str]], List[str]]:
 
 # ---------- Load Detailed Odds into a lookup ----------
 def load_detailed_odds() -> Dict[str, List[Dict[str, str]]]:
-    odds_book = open_sheet_by_id(config.LIVE_ODDS_SHEET_ID)
+    odds_book = open_sheet_by_id(config.GOOGLE_SHEET_ID)
     ws = odds_book.worksheet(config.DETAILED_ODDS_TAB)
     vals = ws.get_all_values()
     if not vals: return {}
