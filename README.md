@@ -34,14 +34,16 @@ GOOGLE_SHEET_ID = "<your-sheet-id>"
 python hybrid_script.py
 ```
 
-## CLV sync (Live Odds → Bet Tracking)
-1. Put your Odds API Google Sheet ID into `config.LIVE_ODDS_SHEET_ID`.
+## Odds & CLV sync
+1. Fill `ODDS_API_KEY` and `GOOGLE_SHEET_ID` in `config.py`.
 2. Ensure Bet Tracking has `Event ID`, `Odds`, `Bookmaker`, `Market`, `Bet` columns.
-3. Run:
+3. Update odds and CLV with:
 
 ```bash
+python odds_sync.py
 python clv_sync.py
 ```
 
-This writes **Closing Line** and **CLV%** back to the Bet Tracking tab.
+or run the full pipeline via `python hybrid_script.py`.
+This writes **Live/Detailed Odds** tabs and fills **Closing Line** / **CLV%** in the Bet sheet.
 

@@ -1,22 +1,10 @@
-# Closing Line Value (CLV) Sync
-**Goal:** Fill `Closing Line` and `CLV%` in Bet Tracking using odds from `Detailed Odds`.
+# CLV Sync
 
-**Linking key:** `Event ID`. Bets without `Event ID` are skipped.  
-Use your scrapers’ event-ID merge (Pinnacle_Scraper/BetOnline_Scraper) or set manually.
+`clv_sync.py` reads bets and odds from the same Google Sheet (`config.GOOGLE_SHEET_ID`).
 
-**Computation:**
-- Convert American odds → implied probability `p = 100/(v+100)` for positive, `p = -v/(-v+100)` for negative.
-- `CLV% = (p_closing / p_entry - 1) × 100`.
+- Uses the **Detailed Odds** tab to locate closing prices for each bet.
+- Updates the Bet sheet with **Closing Line** and **CLV%** columns.
 
-**Matching rules:**
-- First prefer the same **Bookmaker** as the bet; otherwise fall back to any book with matching `Market` + `Label`.
-- Totals labels normalize to `Over/Under X.Y`; spreads keep `Team ±X.Y`; H2H keeps team.
-
-**Runbook:**
-
-set LIVE_ODDS_SHEET_ID in config.py
-
-python clv_sync.py
-
-or as part of: python hybrid_script.py
-
+Inputs: Bet rows with Event ID, Market, Bet, Odds, and Bookmaker.
+Outputs: each matching bet is populated with its closing line and calculated CLV%.
+Run after `odds_sync.py` or as part of `hybrid_script.py`.
