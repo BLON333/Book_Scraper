@@ -3,6 +3,7 @@ import time
 import csv
 import random, tempfile
 import re
+import requests
 import undetected_chromedriver as uc
 import config
 from selenium import webdriver
@@ -54,7 +55,21 @@ def init_driver():
         opts = Options()
         opts.debugger_address = f"127.0.0.1:{debug_port}"
         opts.add_argument("--start-maximized")
-        driver = webdriver.Chrome(options=opts)
+        opts.add_argument("--remote-allow-origins=*")
+        url = f"http://127.0.0.1:{debug_port}/json/version"
+        try:
+            resp = requests.get(url, timeout=2.0)
+            if resp.status_code != 200:
+                print(f"[FATAL] DevTools not reachable at {url}")
+                raise RuntimeError("DevTools not reachable")
+        except Exception:
+            print(f"[FATAL] DevTools not reachable at {url}")
+            raise RuntimeError("DevTools not reachable")
+        try:
+            driver = webdriver.Chrome(options=opts)
+        except Exception as e:
+            print(f"[FATAL] Failed to attach to running Chrome: {e}")
+            raise
         print("✅ Attached to running Chrome with your profile.")
         return driver
 
@@ -80,8 +95,8 @@ def init_driver():
             },
         )
         return driver
-    except Exception:
-        print("[WARN] Falling back to undetected_chromedriver temp profile")
+    except (SessionNotCreatedException, WebDriverException):
+        print("[WARN] Selenium profile launch failed; trying UC temp profile…")
         fresh = uc.ChromeOptions()
         for arg in [
             "--no-first-run",
@@ -91,6 +106,8 @@ def init_driver():
             "--start-maximized",
         ]:
             fresh.add_argument(arg)
+        temp_profile = tempfile.mkdtemp()
+        fresh.add_argument(f"--user-data-dir={temp_profile}")
         driver = uc.Chrome(options=fresh)
         return driver
 
@@ -244,6 +261,56 @@ def perform_login(driver):
     if result != "clicked":
         print("Pop-up login button not found.")
     time.sleep(random_delay(7, 3))
+
+def login_handshake(driver, max_wait_secs=120):
+    """
+    Ensure we're logged in. If not, guide the user to log in manually and poll for success.
+    """
+    if is_logged_in(driver):
+        return True
+
+    print("[LOGIN] Not logged in. Opening login UI and waiting for you to sign in...")
+    try:
+        # Try explicit login route first (safer than a brittle popup)
+        driver.get("https://www.pinnacle.com/en/login")
+    except Exception:
+        pass
+
+    # Fallback: click a visible login button if present
+    try:
+        for sel in [
+            (By.XPATH, "//a[contains(., 'Log in') or contains(., 'Login')]") ,
+            (By.CSS_SELECTOR, "a[href*='login']"),
+            (By.CSS_SELECTOR, "button[data-test-id='Button']"),
+        ]:
+            elems = driver.find_elements(*sel)
+            if elems:
+                try:
+                    driver.execute_script("arguments[0].click();", elems[0])
+                    break
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+    # Poll for login success up to max_wait_secs
+    import sys, time
+    deadline = time.time() + max_wait_secs
+    last_print = 0
+    print("[LOGIN] Please complete login in the opened Chrome window. Waiting up to", max_wait_secs, "seconds...")
+    while time.time() < deadline:
+        if is_logged_in(driver):
+            print("[LOGIN] Detected logged-in state. Continuing.")
+            return True
+        now = int(deadline - time.time())
+        if now != last_print:
+            last_print = now
+            sys.stdout.write(f"\r[LOGIN] {now:3d}s remaining... ")
+            sys.stdout.flush()
+        time.sleep(1)
+
+    print("\n[LOGIN] Timed out waiting for login. Please try again.")
+    return False
 
 def open_account_and_history(driver):
     """
@@ -817,9 +884,10 @@ def main():
         return
     dismiss_cookie_banner(driver)
     time.sleep(random_delay(5, 2))
-
-    if not is_logged_in(driver):
-        perform_login(driver)
+    # Ensure login before navigating to account/history
+    if not login_handshake(driver, max_wait_secs=120):
+        driver.quit()
+        return
 
     open_account_and_history(driver)
     click_load_more(driver)
