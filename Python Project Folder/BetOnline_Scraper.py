@@ -97,11 +97,10 @@ def simulate_random_mouse_movement(driver, moves=3):
 
 def init_driver():
     """
-    Launch Chrome with your configured user profile (from config.py) and stealth flags.
-    Avoids default profile restrictions that cause DevToolsActivePort errors.
+    Launch Chrome with your configured user profile (from config.py).
     """
     from selenium.webdriver.chrome.options import Options
-    print("DEBUG: Starting Chrome with your user profile + stealth settings...")
+    print("DEBUG: Starting Chrome with your user profile...")
 
     user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", r"C:\Users\jason\ChromeProfiles\PinnacleBot")
     profile_dir   = getattr(config, "CHROME_PROFILE_DIR", "Default")
@@ -110,30 +109,7 @@ def init_driver():
     options.add_argument(f'--user-data-dir={user_data_dir}')
     options.add_argument(f'--profile-directory={profile_dir}')
 
-    # Hide Selenium automation flags
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
-
-    # Modern Chrome quirk
-    options.add_argument("--remote-allow-origins=*")
-
-    # Stability
-    options.add_argument("--no-first-run")
-    options.add_argument("--no-default-browser-check")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-background-networking")
-    options.add_argument("--start-maximized")
-
-    driver = webdriver.Chrome(options=options)
-    driver.maximize_window()
-
-    # Remove navigator.webdriver fingerprint
-    driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
-        'source': """
-            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        """
-    })
-    return driver
+    return webdriver.Chrome(options=options)
 
 def type_url_manually(url):
     """
