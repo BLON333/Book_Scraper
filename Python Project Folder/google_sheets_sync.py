@@ -1,7 +1,7 @@
 
 
 import csv
-import os
+import os, unicodedata, config
 import datetime
 from typing import List, Dict, Tuple, Optional
 
@@ -9,20 +9,49 @@ import gspread
 from gspread import Worksheet
 from gspread.utils import rowcol_to_a1
 from google.oauth2.service_account import Credentials
-import config
 
 # -----------------------------
 # CONFIGURATION
 # -----------------------------
 SERVICE_ACCOUNT_FILE = "credentials.json"  # For Google Sheets sync
 
-# Read the Google Sheet ID from the shared config module
+CSV_FILE_PATH = os.getenv("BET_CSV_PATH", "Bet_Tracking.csv")
 SHEET_ID = getattr(config, "GOOGLE_SHEET_ID", "")
-SHEET_NAME = "Sheet1"
-CSV_FILE_PATH = "bet_tracking.csv"
+SHEET_NAME = getattr(config, "BET_SHEET_TAB", "Sheet1")
+HEADER_ROW = getattr(config, "BET_HEADER_ROW", 7)
+FIRST_DATA_ROW = getattr(config, "BET_FIRST_DATA_ROW", 8)
 
 DATE_FORMAT = "%Y-%m-%d"
 TIME_FORMAT = "%H:%M"
+
+HEADER_ALIASES = {
+    "Bet ID#": ["bet id#", "bet id", "ticket #", "ticket number", "ticket", "wager #", "wager id"],
+    "Profit/Loss": ["profit/loss", "profit / loss", "p/l", "net", "net profit"],
+    "Date": ["date"],
+    "Start Time": ["start time", "time"],
+    "Event ID": ["event id", "game id", "match id"],
+    "Result": ["result", "status", "outcome"],
+}
+
+
+def _norm(s: str) -> str:
+    if s is None:
+        return ""
+    s = unicodedata.normalize("NFKC", str(s)).replace("\u200b", "").replace("\xa0", " ")
+    return s.strip()
+
+
+def canonicalize_header_list(header_row):
+    rev = {}
+    for canon, variants in HEADER_ALIASES.items():
+        rev[_norm(canon).lower()] = canon
+        for v in variants:
+            rev[_norm(v).lower()] = canon
+    out = []
+    for h in header_row:
+        key = _norm(h).lower()
+        out.append(rev.get(key, _norm(h)))
+    return out
 
 # -----------------------------
 # HELPER FUNCTIONS (existing)
@@ -148,14 +177,14 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
     print("Starting Google Sheets sync from CSV...")
     sheet = connect_google_sheets()
 
-    header_row_number = 7
-    first_data_row_number = 8
-    sheet_header, sheet_data_rows = get_sheet_headers_from_row(sheet, header_row_number)
+    sheet_header, sheet_data_rows = get_sheet_headers_from_row(sheet, HEADER_ROW)
+    sheet_header = canonicalize_header_list(sheet_header)
 
     required_cols = ["Bet ID#", "Result", "Profit/Loss", "Date", "Start Time", "Event ID"]
     for col in required_cols:
         if col not in sheet_header:
-            print(f"❌ Column '{col}' is missing in row {header_row_number} of the Google Sheet.")
+            print(f"❌ Column '{col}' is missing in row {HEADER_ROW} of the Google Sheet.")
+            print('Header row seen by script:', sheet_header)
             return
 
     bet_id_index = sheet_header.index("Bet ID#")
@@ -164,7 +193,7 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
     bet_id_to_row = build_bet_id_mapping(
         sheet_data_rows,
         bet_id_col_index=bet_id_index,
-        first_data_row=first_data_row_number
+        first_data_row=FIRST_DATA_ROW
     )
 
     csv_rows = read_csv_data(csv_file_path)
@@ -251,7 +280,7 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
     print(f"CSV sync complete: {updated_count} rows updated, {appended_count} rows appended.")
 
     try:
-        sort_sheet(sheet, header_row_number, first_data_row_number, sheet_header)
+        sort_sheet(sheet, HEADER_ROW, FIRST_DATA_ROW, sheet_header)
     except Exception as e:
         print(f"Error sorting the sheet: {e}")
 
@@ -261,8 +290,8 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
     try:
         all_values = sheet.get_all_values()
         last_row = len(all_values)
-        if last_row >= first_data_row_number:
-            # Copy formula from N1 down from row N8 to last row
+        if last_row >= FIRST_DATA_ROW:
+            # Copy formula from N1 down from row N{FIRST_DATA_ROW} to last row
             source_N = {
                 "sheetId": sheet.id,
                 "startRowIndex": 0,         # Row 1 (0-indexed)
@@ -272,8 +301,8 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
             }
             destination_N = {
                 "sheetId": sheet.id,
-                "startRowIndex": first_data_row_number - 1,  # from row 8 (0-indexed)
-                "endRowIndex": last_row,                      # to the last row
+                "startRowIndex": FIRST_DATA_ROW - 1,  # starting row
+                "endRowIndex": last_row,               # to the last row
                 "startColumnIndex": 13,
                 "endColumnIndex": 14,
             }
@@ -286,7 +315,7 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
                 }
             }
 
-            # Copy formula from O1 down from row O8 to last row
+            # Copy formula from O1 down from row O{FIRST_DATA_ROW} to last row
             source_O = {
                 "sheetId": sheet.id,
                 "startRowIndex": 0,         # Row 1 (0-indexed)
@@ -296,8 +325,8 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
             }
             destination_O = {
                 "sheetId": sheet.id,
-                "startRowIndex": first_data_row_number - 1,  # from row 8 (0-indexed)
-                "endRowIndex": last_row,                      # to the last row
+                "startRowIndex": FIRST_DATA_ROW - 1,  # starting row
+                "endRowIndex": last_row,               # to the last row
                 "startColumnIndex": 14,
                 "endColumnIndex": 15,
             }
@@ -315,8 +344,8 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
                 "requests": [request_N, request_O]
             }
             sheet.spreadsheet.batch_update(body)
-            print(f"Formula in N1 copied down dynamically from N{first_data_row_number} to N{last_row}.")
-            print(f"Formula in O1 copied down dynamically from O{first_data_row_number} to O{last_row}.")
+            print(f"Formula in N1 copied down dynamically from N{FIRST_DATA_ROW} to N{last_row}.")
+            print(f"Formula in O1 copied down dynamically from O{FIRST_DATA_ROW} to O{last_row}.")
         else:
             print("No data rows to copy formula into.")
     except Exception as e:
