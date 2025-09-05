@@ -1,23 +1,34 @@
-import re
+def base_market(api_market: str) -> str:
+    k = (api_market or "").lower().strip()
+    if k.startswith("alternate_"):
+        k = k.replace("alternate_", "", 1)
+    if k in ("ml", "moneyline"):
+        return "h2h"
+    if k in ("h2h", "spreads", "totals"):
+        return k
+    return k  # fallback
 
 
-def clean_half(s: str) -> str:
-    return (s or "").replace("Â½","½")
+def _norm_name(s: str) -> str:
+    return " ".join((s or "").replace("Â½", "½").split())
 
 
-def build_label(api_market: str, name_norm: str, point: str) -> str:
-    m = (api_market or "").lower().strip()
-    if m.startswith("alternate_"): m = m.replace("alternate_","",1)
-    nm = clean_half(name_norm or "").strip()
-    pt = clean_half(point or "").strip()
-    if m=="totals":
-        return f"{nm.title()} {pt}".strip()
-    elif m=="spreads":
-        if pt and not pt.startswith(("+","-")): pt = f"+{pt}"
-        return f"{nm} {pt}".strip()
-    else:
-        return nm  # h2h
+def _sign_point(point: str) -> str:
+    p = (point or "").strip()
+    if not p:
+        return ""
+    if p[0] in "+-":
+        return p.replace("Â½", "½")
+    return f"+{p.replace('Â½','½')}"
 
 
-def base_market(m: str) -> str:
-    return (m or "").lower().strip().split("_")[0]
+def build_label(api_market: str, outcome_name: str, outcome_point: str) -> str:
+    bm = base_market(api_market)
+    name = _norm_name(outcome_name)
+    if bm == "totals":
+        side = name.split()[0].title() if name else ""
+        return f"{side} {(outcome_point or '').replace('Â½','½')}".strip()
+    if bm == "spreads":
+        return f"{name} {_sign_point(outcome_point)}".strip()
+    return name  # h2h
+
