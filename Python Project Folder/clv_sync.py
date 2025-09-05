@@ -63,53 +63,120 @@ def load_detailed_odds() -> Dict[str, List[Dict[str, str]]]:
     return lookup
 
 # ---------- Matching logic ----------
-def parse_bet_market(row: Dict[str, str]) -> Tuple[str, str]:
+def _norm_book(s: str) -> str:
+    s = (s or "").strip().lower()
+    return {"betonlineag": "betonline"}.get(s, s)
+
+
+def _norm_market_from_api(api_market: str) -> str:
+    m = (api_market or "").strip().lower()
+    if m.startswith("alternate_"):
+        m = m.replace("alternate_", "", 1)
+    # only keep base key (h2h, spreads, totals, team_totals, etc.)
+    return m
+
+
+def _build_label_from_detailed(api_market: str, name_norm: str, point: str) -> str:
     """
-    Return (market_key, label_key) to match 'Detailed Odds' rows.
-    market_key is one of {'h2h','spreads','totals','team_totals', ...} including segment suffix (e.g., 'totals_q1').
-    label_key is the normalized selection like 'Over 9.5' or 'Team +3.5' or 'Team'.
+    Construct a canonical label string from Detailed Odds columns:
+    - totals:  'Over 9.5' / 'Under 9.5'
+    - spreads: 'Team +3.5'
+    - h2h:     'Team'
     """
-    market = (row.get("Market","") or "").lower().strip()
-    bet    = (row.get("Bet","") or "").strip()
-    # normalize weird half char
-    bet = bet.replace("Â½","½").replace("  ", " ")
-    # pull spread value if present
-    lab = bet
-    # simplify: treat anything starting with Over/Under as totals
-    if re.match(r"^(over|under)\b", bet, flags=re.I):
-        lab = re.sub(r"\s+", " ", bet.title())
-    elif re.search(r"[+\-]\d+(\.\d+)?", bet):
-        # keep team + number
-        lab = re.sub(r"\s+", " ", bet)
+    m = _norm_market_from_api(api_market)
+    nm = (name_norm or "").strip()
+    pt = (point or "").strip()
+
+    # normalize half display issues (Â½ → ½)
+    nm = nm.replace("Â½", "½")
+    pt = pt.replace("Â½", "½")
+
+    if m == "totals":
+        # name_norm is 'Over' or 'Under'
+        if nm:
+            return f"{nm.title()} {pt}"
+        return pt
+    elif m == "spreads":
+        # name_norm is Team; point is signed line (+/-)
+        if pt and not pt.startswith(("+", "-")):
+            # sign-less numbers should be treated as + if no sign is given
+            pt = f"+{pt}"
+        return f"{nm} {pt}".strip()
     else:
-        # h2h: keep team name only
-        lab = re.sub(r"\s+@\s+.*$", "", bet)
+        # h2h or anything else: just the team/outcome name
+        return nm
 
-    return market, lab
 
-def pick_closing_line(event_rows: List[Dict[str,str]], market_key: str, label_key: str, bookmaker: str) -> Optional[str]:
-    if not event_rows: return None
-    # Try exact book first
-    def norm_book(s): return norm(s).replace("betonlineag","betonline")
-    target_book = norm_book(bookmaker)
-    # heuristic: columns present in Detailed Odds: ['Event ID','Book','Market','Label','Odds', ...]
-    # we accept aliases: Book/Bookmaker/Sportsbook, Market, Label, Odds (American)
+def pick_closing_line(event_rows: List[Dict[str, str]], wanted_market: str, wanted_label: str, bookmaker: str) -> Optional[str]:
+    """
+    event_rows: rows from 'Detailed Odds' for this Event ID
+    wanted_market: your Bet sheet 'Market' value (may include suffix like _q1/_h1)
+    wanted_label:  canonical Bet label (e.g., 'Over 9.5', 'Team +3.5', 'Team')
+    """
+    if not event_rows:
+        return None
+
+    base_market = (wanted_market or "").strip().lower()
+    # strip suffix (_q1,_q2,_h1,_h2) to compare base keys; your Detailed tab is base market
+    base_market = base_market.split("_")[0]
+
+    target_book = _norm_book(bookmaker)
+
+    # 1) exact bookmaker first
     for r in event_rows:
-        book = r.get("Book") or r.get("Bookmaker") or r.get("Sportsbook") or ""
-        mkt  = (r.get("Market") or "").lower().strip()
-        lab  = r.get("Label") or r.get("Outcome") or r.get("Bet") or ""
-        if norm_book(book)==target_book and mkt==market_key and norm(lab)==norm(label_key):
+        book = _norm_book(r.get("Bookmaker") or r.get("Book") or r.get("Sportsbook") or "")
+        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
+        label = _build_label_from_detailed(
+            api_mkt,
+            r.get("Outcome Name (Normalized)")
+            or r.get("Label")
+            or r.get("Outcome")
+            or r.get("Bet")
+            or "",
+            r.get("Outcome Point") or "",
+        )
+        if book == target_book and api_mkt == base_market and norm(label) == norm(wanted_label):
             odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
-            if odds: return odds
+            if odds:
+                return odds
 
-    # fallback: try any book with same market/label (e.g., Pinnacle)
+    # 2) fallback: any book that matches market + label
     for r in event_rows:
-        mkt  = (r.get("Market") or "").lower().strip()
-        lab  = r.get("Label") or r.get("Outcome") or r.get("Bet") or ""
-        if mkt==market_key and norm(lab)==norm(label_key):
+        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
+        label = _build_label_from_detailed(
+            api_mkt,
+            r.get("Outcome Name (Normalized)")
+            or r.get("Label")
+            or r.get("Outcome")
+            or r.get("Bet")
+            or "",
+            r.get("Outcome Point") or "",
+        )
+        if api_mkt == base_market and norm(label) == norm(wanted_label):
             odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
-            if odds: return odds
+            if odds:
+                return odds
+
     return None
+
+
+# Update parse_bet_market() to normalize label like your Bets do
+def parse_bet_market(row: Dict[str, str]) -> Tuple[str, str]:
+    market = (row.get("Market", "") or "").lower().strip()
+    bet = (row.get("Bet", "") or "").strip().replace("Â½", "½")
+    # unify whitespace
+    bet = re.sub(r"\s+", " ", bet)
+
+    # totals: 'Over N' / 'Under N'
+    if re.match(r"^(over|under)\s+\d+(\.\d+)?(½)?$", bet, flags=re.I):
+        label = bet.title()
+    # spreads: capture trailing signed number and keep team + number
+    elif re.search(r"[+\-]\d+(\.\d+)?(½)?$", bet):
+        label = bet
+    else:
+        # h2h (team only)
+        label = bet
+    return market, label
 
 # ---------- Main sync ----------
 def sync_clv():
