@@ -25,3 +25,6 @@ LEAGUES             = ["basketball_nba", "basketball_ncaab", "baseball_mlb"]
 ALLOWED_BOOKS       = ["pinnacle", "fanduel", "betonlineag", "draftkings"]   # adjust as needed
 ODDS_REGIONS        = "us,eu"
 ODDS_FORMAT         = "american"
+
+# Feature toggles
+ENABLE_BETONLINE    = False
