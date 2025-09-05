@@ -49,9 +49,10 @@ def random_delay(base=1.0, variation=0.5):
 
 def init_driver():
     if getattr(config, "ATTACH_TO_RUNNING", False):
-        print("Attaching to an already running Chrome (127.0.0.1:9222)...")
+        debug_port = getattr(config, "DEBUG_PORT", 9222)
+        print(f"Attaching to an already running Chrome (127.0.0.1:{debug_port})...")
         opts = Options()
-        opts.debugger_address = "127.0.0.1:9222"
+        opts.debugger_address = f"127.0.0.1:{debug_port}"
         opts.add_argument("--start-maximized")
         driver = webdriver.Chrome(options=opts)
         print("✅ Attached to running Chrome with your profile.")
