@@ -74,6 +74,7 @@ TEAM_SCHEDULE = {
 }
 
 CAD_CONVERSION_RATE = 1.44  # Convert USD => CAD
+STATIC_WAIT_SECONDS = int(os.getenv("STATIC_WAIT_SECONDS", "20"))
 
 # ---------------------------------------------------------
 # UTILITY FUNCTIONS
@@ -897,17 +898,8 @@ def main():
         target_url = "https://www.betonline.ag/my-account/bet-history"
         type_url_manually(target_url)
         print("DEBUG: Waiting for the Bet History page to load...")
-        time.sleep(random_delay(5, 2))
-
-        try:
-            WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "[id^='row-']"))
-            )
-            print("DEBUG: Bet rows found! Page loaded.")
-        except TimeoutException:
-            print("DEBUG: Timed out waiting for bet rows to appear.")
-        # Ensure user is logged in (first run in this profile will require a manual login)
-        login_handshake_betonline(driver, max_wait_secs=120)
+        print(f"Static wait before proceeding: {STATIC_WAIT_SECONDS}s …")
+        time.sleep(STATIC_WAIT_SECONDS)
 
         # Scroll down to load all bet rows, then scroll up
         scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10)
