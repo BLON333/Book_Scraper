@@ -4,7 +4,6 @@ import random
 import csv
 import re
 import datetime
-import pyautogui
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -82,18 +81,6 @@ def random_delay(base=1.0, variation=0.5):
     """Return a random float between (base - variation) and (base + variation)."""
     return random.uniform(base - variation, base + variation)
 
-def simulate_random_mouse_movement(driver, moves=3):
-    """
-    Add small random mouse movements to appear more human-like.
-    """
-    try:
-        for _ in range(moves):
-            offset_x = random.randint(-20, 20)
-            offset_y = random.randint(-20, 20)
-            ActionChains(driver).move_by_offset(offset_x, offset_y).perform()
-            time.sleep(random_delay(0.3, 0.2))
-    except Exception as e:
-        print("DEBUG: Mouse movement error:", e)
 
 def init_driver():
     """
@@ -111,22 +98,6 @@ def init_driver():
 
     return webdriver.Chrome(options=options)
 
-def type_url_manually(url):
-    """
-    Simulate human-like typing into the browser's address bar,
-    using pyautogui to press Ctrl+L, type the URL, then press Enter.
-    """
-    time.sleep(random_delay(1.5, 1.0))
-    print("DEBUG: Pressing Ctrl+L to focus address bar...")
-    pyautogui.hotkey('ctrl', 'l')
-    time.sleep(random_delay(1.5, 1.0))
-    print(f"DEBUG: Typing URL: {url}")
-    for char in url:
-        pyautogui.typewrite(char)
-        time.sleep(random_delay(0.12, 0.1))
-    pyautogui.press('enter')
-    print("DEBUG: URL entered.")
-    time.sleep(random_delay(1.5, 1.0))
 
 def scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10):
     """
@@ -866,14 +837,10 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv", spreadsheet_name="Live
 def main():
     try:
         driver = init_driver()
-        driver.get("about:blank")
-        print("DEBUG: Opened about:blank. Waiting before typing the URL...")
-        time.sleep(random_delay(3, 1))
 
         target_url = "https://www.betonline.ag/my-account/bet-history"
-        type_url_manually(target_url)
-        print("DEBUG: Waiting for the Bet History page to load...")
-        time.sleep(random_delay(5, 2))
+        print("DEBUG: Navigating directly to Bet History page...")
+        driver.get(target_url)
 
         try:
             WebDriverWait(driver, 20).until(
@@ -881,14 +848,14 @@ def main():
             )
             print("DEBUG: Bet rows found! Page loaded.")
         except TimeoutException:
-            print("DEBUG: Timed out waiting for bet rows to appear.")
+            print("DEBUG: Bet rows not immediately found. Waiting for manual login if needed.")
+
         # Ensure user is logged in (first run in this profile will require a manual login)
         login_handshake_betonline(driver, max_wait_secs=120)
 
         # Scroll down to load all bet rows, then scroll up
         scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10)
         scroll_bets_up(driver, scroll_container_selector="#bets", pause_time=2)
-        simulate_random_mouse_movement(driver, moves=3)
 
         existing_ids = read_existing_bet_ids("Bet_Tracking.csv")
         print(f"DEBUG: Found {len(existing_ids)} existing Bet IDs in CSV.")
@@ -898,7 +865,6 @@ def main():
 
         new_bets_data = []
         for row in bet_rows:
-            simulate_random_mouse_movement(driver, moves=2)
             try:
                 bet_id_elem = row.find_element(By.CSS_SELECTOR, "div.bet-history__table__body__rows__columns--id")
                 short_bet_id = bet_id_elem.text.strip()

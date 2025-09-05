@@ -4,7 +4,6 @@ import random
 import csv
 import re
 import datetime
-import pyautogui
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -73,25 +72,6 @@ def init_driver():
     })
     return driver
 
-def type_url_manually(url):
-    """Simulate human-like typing for the URL in Chrome's address bar."""
-    pre_focus_delay = random_delay(1.5, 1.0)
-    time.sleep(pre_focus_delay)
-    print(f"DEBUG: Pressing Ctrl+L after {pre_focus_delay:.2f}s to focus address bar...")
-    pyautogui.hotkey('ctrl', 'l')
-
-    pre_type_delay = random_delay(1.5, 1.0)
-    time.sleep(pre_type_delay)
-    print(f"DEBUG: Typing URL after {pre_type_delay:.2f}s: {url}")
-
-    for char in url:
-        pyautogui.typewrite(char)
-        time.sleep(random_delay(0.12, 0.1))
-
-    pyautogui.press('enter')
-    print("DEBUG: Pressed Enter after typing the URL.")
-    post_type_delay = random_delay(1.5, 1.0)
-    time.sleep(post_type_delay)
 
 def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
     existing_ids = set()
@@ -469,15 +449,12 @@ def parse_bet_card_python(container_text, short_bet_id="Unknown"):
 def main():
     try:
         driver = init_driver()
-        driver.get("about:blank")
-        print("DEBUG: Opened about:blank. Waiting before typing the URL...")
-        time.sleep(random_delay(3,1))
 
         target_url = "https://www.betonline.ag/my-account/bet-history"
-        type_url_manually(target_url)
+        print("DEBUG: Navigating directly to Bet History page...")
+        driver.get(target_url)
 
         print("DEBUG: Waiting for the Bet History page to load...")
-        time.sleep(random_delay(5,2))
         try:
             WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "[id^='row-']"))
