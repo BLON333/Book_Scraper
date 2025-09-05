@@ -4,7 +4,6 @@ import random
 import csv
 import re
 import datetime
-import pyautogui
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -98,27 +97,30 @@ def simulate_random_mouse_movement(driver, moves=3):
 
 def init_driver():
     """
-    Launch Chrome with your configured user profile (from config.py) and stealth flags.
-    Avoids default profile restrictions that cause DevToolsActivePort errors.
+    Launch Chrome either by attaching to an existing instance (if
+    config.ATTACH_TO_RUNNING is True) or by starting a new session with the
+    configured user profile.
     """
     from selenium.webdriver.chrome.options import Options
-    print("DEBUG: Starting Chrome with your user profile + stealth settings...")
+    print("DEBUG: Starting Chrome...")
 
-    user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", r"C:\Users\jason\ChromeProfiles\PinnacleBot")
-    profile_dir   = getattr(config, "CHROME_PROFILE_DIR", "Default")
-
+    attach = getattr(config, "ATTACH_TO_RUNNING", False)
     options = Options()
-    options.add_argument(f'--user-data-dir={user_data_dir}')
-    options.add_argument(f'--profile-directory={profile_dir}')
 
-    # Hide Selenium automation flags
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
+    if attach:
+        print("DEBUG: Attaching to existing Chrome at 127.0.0.1:9222")
+        options.debugger_address = "127.0.0.1:9222"
+    else:
+        user_data_dir = getattr(
+            config,
+            "CHROME_USER_DATA_DIR",
+            r"C:\Users\jason\ChromeProfiles\PinnacleBot",
+        )
+        profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
+        options.add_argument(f"--user-data-dir={user_data_dir}")
+        options.add_argument(f"--profile-directory={profile_dir}")
 
-    # Modern Chrome quirk
     options.add_argument("--remote-allow-origins=*")
-
-    # Stability
     options.add_argument("--no-first-run")
     options.add_argument("--no-default-browser-check")
     options.add_argument("--disable-extensions")
@@ -127,31 +129,45 @@ def init_driver():
 
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
-
-    # Remove navigator.webdriver fingerprint
-    driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
-        'source': """
-            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        """
-    })
     return driver
 
-def type_url_manually(url):
-    """
-    Simulate human-like typing into the browser's address bar,
-    using pyautogui to press Ctrl+L, type the URL, then press Enter.
-    """
-    time.sleep(random_delay(1.5, 1.0))
-    print("DEBUG: Pressing Ctrl+L to focus address bar...")
-    pyautogui.hotkey('ctrl', 'l')
-    time.sleep(random_delay(1.5, 1.0))
-    print(f"DEBUG: Typing URL: {url}")
-    for char in url:
-        pyautogui.typewrite(char)
-        time.sleep(random_delay(0.12, 0.1))
-    pyautogui.press('enter')
-    print("DEBUG: URL entered.")
-    time.sleep(random_delay(1.5, 1.0))
+
+def check_interstitial(driver):
+    """Return True if the page shows a challenge/interstitial."""
+    try:
+        text = driver.find_element(By.TAG_NAME, "body").text.lower()
+    except Exception:
+        return False
+    markers = [
+        "just a moment",
+        "verify you are human",
+        "403",
+        "429",
+        "forbidden",
+        "too many requests",
+    ]
+    if any(m in text for m in markers):
+        print("DEBUG: Detected possible interstitial challenge.")
+        return True
+    return False
+
+
+def navigate_and_wait(driver, url, container_selector="#bets", timeout=60):
+    """Navigate to a URL and wait for the target container to render."""
+    driver.get(url)
+    wait = WebDriverWait(driver, timeout)
+    wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
+    if check_interstitial(driver):
+        return False
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, container_selector)))
+    wait.until(
+        lambda d: d.execute_script(
+            "return document.querySelector(arguments[0]).offsetHeight",
+            container_selector,
+        )
+        > 0
+    )
+    return True
 
 def scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10):
     """
@@ -891,15 +907,17 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv", spreadsheet_name="Live
 def main():
     try:
         driver = init_driver()
-        driver.get("about:blank")
-        print("DEBUG: Opened about:blank. Waiting before typing the URL...")
-        time.sleep(random_delay(3, 1))
-
         target_url = "https://www.betonline.ag/my-account/bet-history"
-        type_url_manually(target_url)
+        if not navigate_and_wait(driver, target_url):
+            driver.quit()
+            return
         print("DEBUG: Waiting for the Bet History page to load...")
         print(f"Static wait before proceeding: {STATIC_WAIT_SECONDS}s …")
         time.sleep(STATIC_WAIT_SECONDS)
+        if check_interstitial(driver):
+            print("DEBUG: Interstitial detected after initial load. Exiting.")
+            driver.quit()
+            return
 
         # Scroll down to load all bet rows, then scroll up
         scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10)
