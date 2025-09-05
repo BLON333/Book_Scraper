@@ -1,4 +1,7 @@
+\.env
 credentials.json
 oauth_credentials.json
-*.pyc
+*.csv
+*.py[cod]
 __pycache__/
+logs/

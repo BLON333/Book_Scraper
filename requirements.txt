@@ -1,6 +1,5 @@
-selenium
-undetected-chromedriver
-gspread
-oauth2client
-google-auth
-pyautogui
+gspread>=6.2.1
+google-auth>=2.40.0
+pandas>=2.3.2
+requests>=2.32.5
+python-dotenv>=1.1.1
