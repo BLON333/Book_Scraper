@@ -8,6 +8,7 @@ import pyautogui
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import config
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -96,31 +97,41 @@ def simulate_random_mouse_movement(driver, moves=3):
 
 def init_driver():
     """
-    Launch Chrome with your existing user profile and stealth settings.
-    Adjust the path as needed (check chrome://version for user-data-dir).
+    Launch Chrome with your configured user profile (from config.py) and stealth flags.
+    Avoids default profile restrictions that cause DevToolsActivePort errors.
     """
     from selenium.webdriver.chrome.options import Options
     print("DEBUG: Starting Chrome with your user profile + stealth settings...")
 
+    user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", r"C:\Users\jason\ChromeProfiles\PinnacleBot")
+    profile_dir   = getattr(config, "CHROME_PROFILE_DIR", "Default")
+
     options = Options()
-    # Your local Chrome user data directory + profile
-    options.add_argument(r'--user-data-dir=C:\Users\jason\AppData\Local\Google\Chrome\User Data')
-    options.add_argument('--profile-directory=Default')
+    options.add_argument(f'--user-data-dir={user_data_dir}')
+    options.add_argument(f'--profile-directory={profile_dir}')
 
     # Hide Selenium automation flags
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
+    # Modern Chrome quirk
+    options.add_argument("--remote-allow-origins=*")
+
+    # Stability
+    options.add_argument("--no-first-run")
+    options.add_argument("--no-default-browser-check")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-background-networking")
+    options.add_argument("--start-maximized")
+
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
 
-    # Remove navigator.webdriver property for additional stealth
+    # Remove navigator.webdriver fingerprint
     driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
-        'source': '''
-            Object.defineProperty(navigator, 'webdriver', {
-              get: () => undefined
-            })
-        '''
+        'source': """
+            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        """
     })
     return driver
 
@@ -174,6 +185,44 @@ def scroll_bets_up(driver, scroll_container_selector="#bets", pause_time=2):
             print(f"DEBUG: Scrolling up not complete, current scrollTop: {current_top}")
     except Exception as e:
         print(f"DEBUG: Could not scroll up container: {e}")
+
+def login_handshake_betonline(driver, max_wait_secs=120):
+    """
+    If bet history rows are not visible, prompt the user to log in manually.
+    We poll until rows appear or timeout.
+    """
+    import time, sys
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    wait = WebDriverWait(driver, 5)
+
+    def has_rows():
+        try:
+            driver.find_element(By.CSS_SELECTOR, "[id^='row-']")
+            return True
+        except Exception:
+            return False
+
+    if has_rows():
+        return True
+
+    print("[LOGIN] BetOnline: please log in in the opened window. Waiting up to", max_wait_secs, "seconds...")
+    deadline = time.time() + max_wait_secs
+    last = -1
+    while time.time() < deadline:
+        if has_rows():
+            print("\n[LOGIN] Detected bet history rows. Continuing.")
+            return True
+        remain = int(deadline - time.time())
+        if remain != last:
+            last = remain
+            sys.stdout.write(f"\r[LOGIN] {remain:3d}s remaining... ")
+            sys.stdout.flush()
+        time.sleep(1)
+
+    print("\n[LOGIN] Timed out waiting for BetOnline login.")
+    return False
 
 def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
     existing_ids = set()
@@ -857,6 +906,8 @@ def main():
             print("DEBUG: Bet rows found! Page loaded.")
         except TimeoutException:
             print("DEBUG: Timed out waiting for bet rows to appear.")
+        # Ensure user is logged in (first run in this profile will require a manual login)
+        login_handshake_betonline(driver, max_wait_secs=120)
 
         # Scroll down to load all bet rows, then scroll up
         scroll_bets(driver, scroll_container_selector="#bets", pause_time=2, max_scrolls=10)
