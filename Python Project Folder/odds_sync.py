@@ -1,29 +1,17 @@
 import re
+import sys
 import time
-from typing import Dict, List
+from pathlib import Path
+from typing import List
+
 import requests
-import gspread
-from google.oauth2.service_account import Credentials
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core import sheets
+
 import config
 
-def _gc():
-    creds = Credentials.from_service_account_file(
-        "credentials.json",
-        scopes=["https://www.googleapis.com/auth/spreadsheets"]
-    )
-    return gspread.authorize(creds)
-
-def _open_ws(sheet_id: str, tab: str):
-    gc = _gc()
-    sh = gc.open_by_key(sheet_id)
-    try:
-        return sh.worksheet(tab)
-    except gspread.WorksheetNotFound:
-        return sh.add_worksheet(title=tab, rows=1000, cols=30)
-
-def _clear_and_header(ws, header: List[str]):
-    ws.clear()
-    ws.update("A1", [header])
+"""Synchronize odds data from The Odds API to Google Sheets."""
 
 def _norm_team(s: str) -> str:
     s = (s or "").strip()
@@ -34,9 +22,9 @@ def _norm_team(s: str) -> str:
     return s
 
 def refresh_live_odds():
-    ws = _open_ws(config.GOOGLE_SHEET_ID, config.LIVE_ODDS_TAB)
+    ws = sheets.open_ws(config.GOOGLE_SHEET_ID, config.LIVE_ODDS_TAB)
     header = ["League", "Event ID", "Event/Match", "Commence Time", "Bookmaker Count"]
-    _clear_and_header(ws, header)
+    sheets.write_header(ws, header)
 
     rowbuf = []
     for league in config.LEAGUES:
@@ -151,12 +139,9 @@ def _rows_for_event(event_id: str, user_market: str, bet_select: str, league: st
     return rows
 
 def refresh_detailed_odds_from_bets():
-    gc = _gc()
-    sh_bet = gc.open_by_key(config.GOOGLE_SHEET_ID)
-    ws_bets = sh_bet.worksheet(config.BET_SHEET_TAB)
+    ws_bets = sheets.open_ws(config.GOOGLE_SHEET_ID, config.BET_SHEET_TAB)
 
     # read Event ID (col 3), Market (6), Bet (9) from bet rows
-    last_row = ws_bets.row_count
     event_ids = ws_bets.col_values(3)[config.BET_FIRST_DATA_ROW-1:]   # C
     markets   = ws_bets.col_values(6)[config.BET_FIRST_DATA_ROW-1:]   # F
     bets      = ws_bets.col_values(9)[config.BET_FIRST_DATA_ROW-1:]   # I
@@ -169,12 +154,12 @@ def refresh_detailed_odds_from_bets():
         if eid and mkt and sel:
             triplets.append((eid, mkt, sel))
 
-    ws_det = _open_ws(config.GOOGLE_SHEET_ID, config.DETAILED_ODDS_TAB)
+    ws_det = sheets.open_ws(config.GOOGLE_SHEET_ID, config.DETAILED_ODDS_TAB)
     header = [
         "Event ID","User Market","User Bet Selection","Bookmaker",
         "API Market","Outcome Name (Normalized)","Outcome Point","Odds"
     ]
-    _clear_and_header(ws_det, header)
+    sheets.write_header(ws_det, header)
 
     out_rows = []
     for i, (eid, mkt, sel) in enumerate(triplets, start=1):

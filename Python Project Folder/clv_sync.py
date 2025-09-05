@@ -1,7 +1,15 @@
-import re, math, time
+import re
+import sys
+import time
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+
 import gspread
 from google.oauth2.service_account import Credentials
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.odds_labeling import base_market, build_label
+
 import config
 
 # ---------- Helpers ----------
@@ -68,66 +76,21 @@ def _norm_book(s: str) -> str:
     return {"betonlineag": "betonline"}.get(s, s)
 
 
-def _norm_market_from_api(api_market: str) -> str:
-    m = (api_market or "").strip().lower()
-    if m.startswith("alternate_"):
-        m = m.replace("alternate_", "", 1)
-    # only keep base key (h2h, spreads, totals, team_totals, etc.)
-    return m
-
-
-def _build_label_from_detailed(api_market: str, name_norm: str, point: str) -> str:
-    """
-    Construct a canonical label string from Detailed Odds columns:
-    - totals:  'Over 9.5' / 'Under 9.5'
-    - spreads: 'Team +3.5'
-    - h2h:     'Team'
-    """
-    m = _norm_market_from_api(api_market)
-    nm = (name_norm or "").strip()
-    pt = (point or "").strip()
-
-    # normalize half display issues (Â½ → ½)
-    nm = nm.replace("Â½", "½")
-    pt = pt.replace("Â½", "½")
-
-    if m == "totals":
-        # name_norm is 'Over' or 'Under'
-        if nm:
-            return f"{nm.title()} {pt}"
-        return pt
-    elif m == "spreads":
-        # name_norm is Team; point is signed line (+/-)
-        if pt and not pt.startswith(("+", "-")):
-            # sign-less numbers should be treated as + if no sign is given
-            pt = f"+{pt}"
-        return f"{nm} {pt}".strip()
-    else:
-        # h2h or anything else: just the team/outcome name
-        return nm
-
-
 def pick_closing_line(event_rows: List[Dict[str, str]], wanted_market: str, wanted_label: str, bookmaker: str) -> Optional[str]:
-    """
-    event_rows: rows from 'Detailed Odds' for this Event ID
-    wanted_market: your Bet sheet 'Market' value (may include suffix like _q1/_h1)
-    wanted_label:  canonical Bet label (e.g., 'Over 9.5', 'Team +3.5', 'Team')
-    """
+    """Match a bet row to closing odds from Detailed Odds."""
     if not event_rows:
         return None
 
-    base_market = (wanted_market or "").strip().lower()
-    # strip suffix (_q1,_q2,_h1,_h2) to compare base keys; your Detailed tab is base market
-    base_market = base_market.split("_")[0]
-
+    base_mkt = base_market(wanted_market)
     target_book = _norm_book(bookmaker)
 
     # 1) exact bookmaker first
     for r in event_rows:
         book = _norm_book(r.get("Bookmaker") or r.get("Book") or r.get("Sportsbook") or "")
-        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
-        label = _build_label_from_detailed(
-            api_mkt,
+        api_raw = r.get("API Market") or r.get("Market") or ""
+        api_mkt = base_market(api_raw)
+        label = build_label(
+            api_raw,
             r.get("Outcome Name (Normalized)")
             or r.get("Label")
             or r.get("Outcome")
@@ -135,16 +98,17 @@ def pick_closing_line(event_rows: List[Dict[str, str]], wanted_market: str, want
             or "",
             r.get("Outcome Point") or "",
         )
-        if book == target_book and api_mkt == base_market and norm(label) == norm(wanted_label):
+        if book == target_book and api_mkt == base_mkt and norm(label) == norm(wanted_label):
             odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
             if odds:
                 return odds
 
     # 2) fallback: any book that matches market + label
     for r in event_rows:
-        api_mkt = _norm_market_from_api(r.get("API Market") or r.get("Market") or "")
-        label = _build_label_from_detailed(
-            api_mkt,
+        api_raw = r.get("API Market") or r.get("Market") or ""
+        api_mkt = base_market(api_raw)
+        label = build_label(
+            api_raw,
             r.get("Outcome Name (Normalized)")
             or r.get("Label")
             or r.get("Outcome")
@@ -152,7 +116,7 @@ def pick_closing_line(event_rows: List[Dict[str, str]], wanted_market: str, want
             or "",
             r.get("Outcome Point") or "",
         )
-        if api_mkt == base_market and norm(label) == norm(wanted_label):
+        if api_mkt == base_mkt and norm(label) == norm(wanted_label):
             odds = (r.get("Odds") or r.get("American") or r.get("Price") or "").strip()
             if odds:
                 return odds
