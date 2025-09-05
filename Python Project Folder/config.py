@@ -12,19 +12,22 @@ try:
 except NameError:
     GOOGLE_SHEET_ID = "PUT_YOUR_BET_TRACKING_SPREADSHEET_ID_HERE"
 
-# Tab settings for unified Bet Tracking / Odds spreadsheet
-BET_SHEET_TAB       = "Sheet1"   # or "Bets" if you rename later
+import os
+
+# --- Tabs & header rows (single spreadsheet architecture) ---
+BET_SHEET_TAB       = "Sheet1"     # rename later if desired (e.g., "Bets")
 BET_HEADER_ROW      = 7
 BET_FIRST_DATA_ROW  = 8
 LIVE_ODDS_TAB       = "Live Odds"
 DETAILED_ODDS_TAB   = "Detailed Odds"
 
-# --- Odds API ---
-ODDS_API_KEY        = "PUT_YOUR_THE_ODDS_API_KEY_HERE"
-LEAGUES             = ["basketball_nba", "basketball_ncaab", "baseball_mlb"]
-ALLOWED_BOOKS       = ["pinnacle", "fanduel", "betonlineag", "draftkings"]   # adjust as needed
-ODDS_REGIONS        = "us,eu"
-ODDS_FORMAT         = "american"
+# --- Odds API (env-driven secret) ---
+ODDS_API_KEY  = os.getenv("ODDS_API_KEY", "")   # set at runtime; avoid hardcoding in git
+LEAGUES       = ["basketball_nba", "basketball_ncaab", "baseball_mlb"]
+ALLOWED_BOOKS = ["pinnacle", "fanduel", "betonlineag", "draftkings"]
+ODDS_REGIONS  = "us,eu"
+ODDS_FORMAT   = "american"
 
-# Feature toggles
-ENABLE_BETONLINE    = False
+# --- BetOnline scraper gate ---
+ENABLE_BETONLINE = False
+
