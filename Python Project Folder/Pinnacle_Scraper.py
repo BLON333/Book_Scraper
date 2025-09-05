@@ -48,12 +48,6 @@ def random_delay(base=1.0, variation=0.5):
     return random.uniform(base - variation, base + variation)
 
 def init_driver():
-    # Option 1: attach to a running Chrome with my profile (manual start)
-    # Manual start example (outside Python):
-    # "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" ^
-    #   --remote-debugging-port=9222 ^
-    #   --user-data-dir="C:\\Users\\jason\\AppData\\Local\\Google\\Chrome\\User Data" ^
-    #   --profile-directory="Default"
     if getattr(config, "ATTACH_TO_RUNNING", False):
         print("Attaching to an already running Chrome (127.0.0.1:9222)...")
         opts = Options()
@@ -63,49 +57,40 @@ def init_driver():
         print("✅ Attached to running Chrome with your profile.")
         return driver
 
-    print("Opening Chrome with your profile...")
-    options = uc.ChromeOptions()
-
-    # Real profile (from config.py)
-    user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", None)
-    profile_dir   = getattr(config, "CHROME_PROFILE_DIR", "Default")
-    if user_data_dir:
-        options.add_argument(f"--user-data-dir={user_data_dir}")
-    if profile_dir:
-        options.add_argument(f"--profile-directory={profile_dir}")
-
-    # Stability flags
-    options.add_argument("--no-first-run")
-    options.add_argument("--no-default-browser-check")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-background-networking")
-    options.add_argument("--start-maximized")
-    options.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
-
     try:
-        driver = uc.Chrome(options=options)
-        print(f"✅ Attached to profile: {profile_dir}")
+        opts = Options()
+        opts.add_argument(f"--user-data-dir={config.CHROME_USER_DATA_DIR}")
+        opts.add_argument(f"--profile-directory={config.CHROME_PROFILE_DIR}")
+        opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+        opts.add_experimental_option("useAutomationExtension", False)
+        for arg in [
+            "--no-first-run",
+            "--no-default-browser-check",
+            "--disable-extensions",
+            "--disable-background-networking",
+            "--start-maximized",
+        ]:
+            opts.add_argument(arg)
+        driver = webdriver.Chrome(options=opts)
+        driver.execute_cdp_cmd(
+            "Page.addScriptToEvaluateOnNewDocument",
+            {
+                "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})",
+            },
+        )
         return driver
-    except (SessionNotCreatedException, WebDriverException) as e:
-        print(f"❌ Couldn’t attach to Chrome profile ({profile_dir}): {e}")
-
-        # Enforce real profile if required
-        if getattr(config, "REQUIRE_PROFILE", True):
-            raise
-
-        # Optional fallback to temp profile
-        print("[WARN] Falling back to a temporary profile (login not persisted).")
-        temp_dir = tempfile.mkdtemp(prefix="pinn_uc_")
+    except Exception:
+        print("[WARN] Falling back to undetected_chromedriver temp profile")
         fresh = uc.ChromeOptions()
-        fresh.add_argument(f"--user-data-dir={temp_dir}")
-        fresh.add_argument("--no-first-run")
-        fresh.add_argument("--no-default-browser-check")
-        fresh.add_argument("--disable-extensions")
-        fresh.add_argument("--disable-background-networking")
-        fresh.add_argument("--start-maximized")
-        fresh.add_argument(f"--remote-debugging-port={random.randint(40000, 49000)}")
+        for arg in [
+            "--no-first-run",
+            "--no-default-browser-check",
+            "--disable-extensions",
+            "--disable-background-networking",
+            "--start-maximized",
+        ]:
+            fresh.add_argument(arg)
         driver = uc.Chrome(options=fresh)
-        print("Opened Chrome with a temporary profile.")
         return driver
 
 
@@ -813,7 +798,19 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
 # -----------------------------------------------------------------------------
 def main():
     driver = init_driver()
-    if not navigate_with_retry(driver, "https://www.pinnacle.ca/en/"):
+    driver.get("about:blank")
+    navigate_with_retry(
+        driver,
+        "https://www.pinnacle.ca/en/",
+        max_attempts=3,
+        timeout=20,
+    )
+    if not driver.current_url.startswith("https://www.pinnacle"):
+        driver.execute_script(
+            "window.location.href = arguments[0];",
+            "https://www.pinnacle.ca/en/",
+        )
+    if not driver.current_url.startswith("https://www.pinnacle"):
         print("[FATAL] Could not reach Pinnacle after retries. Exiting.")
         driver.quit()
         return
