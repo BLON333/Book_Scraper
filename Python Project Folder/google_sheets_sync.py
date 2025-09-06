@@ -3,6 +3,8 @@
 import csv
 import os, sys, unicodedata
 import datetime
+import json
+import traceback
 from typing import List, Dict, Tuple, Optional
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -14,6 +16,22 @@ import gspread
 from gspread import Worksheet
 from gspread.utils import rowcol_to_a1
 from google.oauth2.service_account import Credentials
+
+SHEETS_SCOPES = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
+]
+
+
+def gs_client_debug(keyfile: str):
+    with open(keyfile, "r", encoding="utf-8") as fh:
+        info = json.load(fh)
+    sa_email = info.get("client_email", "<unknown>")
+    dlog(f"Service account: {sa_email}")
+    creds = Credentials.from_service_account_info(info, scopes=SHEETS_SCOPES)
+    return gspread.authorize(creds)
 
 # -----------------------------
 # CONFIGURATION
@@ -121,14 +139,15 @@ def read_csv_data(csv_file_path: str) -> List[Dict[str, str]]:
 # -----------------------------
 def connect_google_sheets() -> Worksheet:
     print(f"[Sheets] Using credentials at: {SERVICE_ACCOUNT_FILE}")
-    creds = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=["https://www.googleapis.com/auth/spreadsheets"]
-    )
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
-    dlog("Connected to Google Sheets.")
-    return sheet
+    try:
+        client = gs_client_debug(SERVICE_ACCOUNT_FILE)
+        sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
+        dlog("Connected to Google Sheets.")
+        return sheet
+    except Exception as e:
+        tb = traceback.format_exc()
+        dlog(f"connect_google_sheets error ({type(e).__name__}: {e})\n{tb}")
+        raise
 
 # -----------------------------
 # SHEET HELPER FUNCTIONS (existing)
