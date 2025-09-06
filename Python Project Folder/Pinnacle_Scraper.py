@@ -84,7 +84,7 @@ from selenium.common.exceptions import (
 )
 from google.oauth2.service_account import Credentials as SA_Credentials
 import gspread, json, traceback
-from gspread.exceptions import WorksheetNotFound
+from gspread.exceptions import WorksheetNotFound, SpreadsheetNotFound
 
 
 def repo_path(*parts):
@@ -1057,40 +1057,43 @@ def build_matchup_dict_from_live_odds(spreadsheet_id=None, sheet_name=None):
     try:
         log(f"[Sheets] Opening spreadsheet '{sid}'")
         sh = client.open_by_key(sid)
-        try:
-            sheet = sh.worksheet(tab)
-        except WorksheetNotFound:
-            log(f"[Sheets][ERR] Worksheet '{tab}' not found")
-            return {}
+        sheet = sh.worksheet(tab)
         data = sheet.get_all_values()
-    except Exception as e:
-        log(f"[Sheets][ERR] {type(e).__name__}: {e}")
-        log(traceback.format_exc())
-        return {}
 
-    if len(data) < 2:
-        log("[Sheets][WARN] No data found in sheet")
-        return {}
+        if len(data) < 2:
+            log(f"[Merge][WARN] Worksheet '{tab}' is empty or has no data to merge")
+            return {}
 
-    header = data[0]
-    try:
+        header = data[0]
+        if "Event ID" not in header or "Event/Match" not in header:
+            log("[Merge][ERR] Missing 'Event ID' or 'Event/Match' columns")
+            return {}
         event_id_idx = header.index("Event ID")
         matchup_idx = header.index("Event/Match")
-    except ValueError:
-        log("[Sheets][ERR] Required columns 'Event ID' and 'Event/Match' not found")
-        return {}
 
-    matchup_dict = {}
-    for row in data[1:]:
-        if len(row) <= max(event_id_idx, matchup_idx):
-            continue
-        event_id = row[event_id_idx].strip()
-        matchup_raw = row[matchup_idx].strip()
-        # Canonicalize the matchup so the sheet & CSV align
-        canonical = canonicalize_matchup(matchup_raw)
-        matchup_dict[canonical] = event_id
+        matchup_dict = {}
+        for row in data[1:]:
+            if len(row) <= max(event_id_idx, matchup_idx):
+                continue
+            event_id = row[event_id_idx].strip()
+            matchup_raw = row[matchup_idx].strip()
+            # Canonicalize the matchup so the sheet & CSV align
+            canonical = canonicalize_matchup(matchup_raw)
+            matchup_dict[canonical] = event_id
 
-    return matchup_dict
+        log(f"[Merge] Built matchup dict for {len(matchup_dict)} events")
+        return matchup_dict
+
+    except WorksheetNotFound:
+        log(f"[Sheets][WARN] Worksheet '{tab}' not found")
+        log(traceback.format_exc())
+    except SpreadsheetNotFound:
+        log(f"[Sheets][WARN] Spreadsheet '{sid}' not found")
+        log(traceback.format_exc())
+    except Exception as e:
+        log(f"[Sheets][ERR] Unexpected error building matchup dict: {e}")
+        log(traceback.format_exc())
+    return {}
 
 def merge_event_ids_into_csv(csv_file=None,
                              spreadsheet_id="Live Odds",
