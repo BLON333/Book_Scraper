@@ -41,6 +41,8 @@ ENABLE_BETONLINE = False
 DEBUG_LOG = True
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")  # INFO|DEBUG
 # Non-default Chrome profile (prevents 'DevTools ... requires non-default data dir' + UC fallback)
-CHROME_USER_DATA_DIR = r"C:\\Users\\jason\\ChromeProfiles\\PinnacleBot"
+CHROME_USER_DATA_DIR = os.getenv(
+    "CHROME_USER_DATA_DIR", r"C:\\Users\\jason\\ChromeProfiles\\PinnacleBot"
+)
 ATTACH_TO_RUNNING = False
 DEBUG_PORT = 9222
