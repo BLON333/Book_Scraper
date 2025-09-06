@@ -27,6 +27,28 @@ def log(msg):
             print(repr(msg))
 
 
+def _looks_like_sheet_id(value: str) -> bool:
+    """Return True if ``value`` resembles a Google Sheet ID."""
+    if not isinstance(value, str):
+        return False
+    v = value.strip()
+    if len(v) < 25:
+        return False
+    return all(c.isalnum() or c in "-_" for c in v)
+
+
+def _resolve_sheet_id_and_tab(spreadsheet_id=None, sheet_name=None):
+    """Resolve spreadsheet ID and tab name using args or config defaults."""
+    if spreadsheet_id and _looks_like_sheet_id(spreadsheet_id):
+        sid = spreadsheet_id.strip()
+        tab = sheet_name or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    else:
+        sid = getattr(config, "GOOGLE_SHEET_ID", "").strip()
+        tab = sheet_name or spreadsheet_id or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    log(f"[Sheets] Using spreadsheet_id='{sid}', sheet_name='{tab}'")
+    return sid, tab
+
+
 log(f"REPO_ROOT={REPO_ROOT}")
 log(f"sys.path[0..3]={sys.path[:4]}")
 log(f"Config module: {getattr(config,'__file__','<unknown>')}")
@@ -62,6 +84,7 @@ from selenium.common.exceptions import (
 )
 from google.oauth2.service_account import Credentials as SA_Credentials
 import gspread, json, traceback
+from gspread.exceptions import WorksheetNotFound
 
 
 def repo_path(*parts):
@@ -83,13 +106,23 @@ SHEETS_SCOPES = [
 ]
 
 
-def gs_client_debug(keyfile: str):
-    with open(keyfile, "r", encoding="utf-8") as fh:
-        info = json.load(fh)
-    sa_email = info.get("client_email", "<unknown>")
-    log(f"[Sheets] Service account: {sa_email}")
-    creds = SA_Credentials.from_service_account_info(info, scopes=SHEETS_SCOPES)
-    return gspread.authorize(creds)
+def _gs_client():
+    keyfile = creds_path()
+    log(f"[Sheets] Using credentials at: {keyfile}")
+    if not os.path.isfile(keyfile):
+        log(f"[Sheets][ERR] credentials.json not found at {keyfile}")
+        return None
+    try:
+        with open(keyfile, "r", encoding="utf-8") as fh:
+            info = json.load(fh)
+        sa_email = info.get("client_email", "<unknown>")
+        log(f"[Sheets] Service account: {sa_email}")
+        creds = SA_Credentials.from_service_account_info(info, scopes=SHEETS_SCOPES)
+        return gspread.authorize(creds)
+    except Exception as e:
+        log(f"[Sheets][ERR] {type(e).__name__}: {e}")
+        log(traceback.format_exc())
+        return None
 
 # -----------------------------------------------------------------------------
 # OFFICIAL TEAM MAPPING & CANONICALIZATION
@@ -992,22 +1025,27 @@ def grade_settled_bets(driver, csv_file_path=None):
 # -----------------------------------------------------------------------------
 # GOOGLE SHEETS: BUILD MATCHUP DICTIONARY & MERGE EVENT IDS
 # -----------------------------------------------------------------------------
-def build_matchup_dict_from_live_odds(spreadsheet_id="Live Odds", sheet_name="Live Odds"):
-    keyfile = creds_path()
-    log(f"[Sheets] Using credentials at: {keyfile}")
-    if not os.path.isfile(keyfile):
-        log(f"[Sheets][ERR] credentials.json not found at {keyfile}")
+def build_matchup_dict_from_live_odds(spreadsheet_id=None, sheet_name=None):
+    sid, tab = _resolve_sheet_id_and_tab(spreadsheet_id, sheet_name)
+    client = _gs_client()
+    if not client or not sid:
         return {}
     try:
-        client = gs_client_debug(keyfile)
-        sheet = client.open_by_key(spreadsheet_id).worksheet(sheet_name)
+        log(f"[Sheets] Opening spreadsheet '{sid}'")
+        sh = client.open_by_key(sid)
+        try:
+            sheet = sh.worksheet(tab)
+        except WorksheetNotFound:
+            log(f"[Sheets][ERR] Worksheet '{tab}' not found")
+            return {}
+        data = sheet.get_all_values()
     except Exception as e:
         log(f"[Sheets][ERR] {type(e).__name__}: {e}")
         log(traceback.format_exc())
-        raise
+        return {}
 
-    data = sheet.get_all_values()
     if len(data) < 2:
+        log("[Sheets][WARN] No data found in sheet")
         return {}
 
     header = data[0]
@@ -1015,6 +1053,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_id="Live Odds", sheet_name="Li
         event_id_idx = header.index("Event ID")
         matchup_idx = header.index("Event/Match")
     except ValueError:
+        log("[Sheets][ERR] Required columns 'Event ID' and 'Event/Match' not found")
         return {}
 
     matchup_dict = {}
