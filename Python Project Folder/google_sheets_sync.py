@@ -222,40 +222,59 @@ def backfill_event_ids_from_live_odds(sh):
         print("[Sheets Sync] Skipped Event ID backfill: required headers not found.")
         return
 
-    # Build lookup: Event/Match -> Event ID (trim)
+    import re
+
+    def _canon_match(s: str) -> str:
+        s = (s or "").lower().strip()
+        s = re.sub(r"\s+@\s+|\s+at\s+", " vs ", s)
+        s = re.sub(r"\s+vs\.?\s+", " vs ", s)
+        s = re.sub(r"\s+", " ", s)
+        return s
+
+    def _canon_pair(s: str) -> tuple:
+        c = _canon_match(s)
+        if " vs " in c:
+            a, b = [p.strip() for p in c.split(" vs ", 1)]
+            return tuple(sorted([a, b]))
+        return (c, "")
+
     lookup = {}
+    pair_lookup = {}
     for row in live_values[1:]:
-        # Ensure row has both columns
         if len(row) <= max(li_event_id, li_event_match):
             continue
-        em = (row[li_event_match] or "").strip()
+        em_raw = (row[li_event_match] or "").strip()
         eid = (row[li_event_id] or "").strip()
-        if em and eid:
-            lookup[em] = eid
+        if not em_raw or not eid:
+            continue
+        c = _canon_match(em_raw)
+        lookup[c] = eid
+        pair_lookup[_canon_pair(em_raw)] = eid
 
-    # Stage updates for Bets body rows (start from FIRST_DATA_ROW)
     updates = []
     start = config.BET_FIRST_DATA_ROW
     for r, row in enumerate(bets_values[start - 1:], start=start):
-        # Ensure the row has enough columns
         if len(row) <= max(bi_event_id, bi_event_match):
             continue
         current_id = (row[bi_event_id] or "").strip()
         if current_id:
-            continue  # don't overwrite existing IDs
-        em = (row[bi_event_match] or "").strip()
-        if not em:
             continue
-        new_id = lookup.get(em)
-        if new_id:
-            # gspread is 1-based column addressing
-            updates.append((r, bi_event_id + 1, new_id))
+        em_bets_raw = (row[bi_event_match] or "").strip()
+        if not em_bets_raw:
+            continue
+
+        cb = _canon_match(em_bets_raw)
+        if " total " in cb and " vs " not in cb:
+            continue
+
+        eid = lookup.get(cb) or pair_lookup.get(_canon_pair(em_bets_raw))
+        if eid:
+            updates.append((r, bi_event_id + 1, eid))
 
     if not updates:
         print("[Sheets Sync] Backfilled 0 Event IDs from Live Odds (Sheet1).")
         return
 
-    # Apply with minimal API calls; sparse => update_cell loop is acceptable
     for r, c, val in updates:
         ws_bets.update_cell(r, c, val)
 
