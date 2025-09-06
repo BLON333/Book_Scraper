@@ -52,6 +52,26 @@ def canonicalize_matchup(match_str, team_mapping=OFFICIAL_TEAM_MAPPING):
     canonical_teams.sort()
     return " vs ".join(canonical_teams)
 
+
+def _looks_like_sheet_id(value: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    v = value.strip()
+    if len(v) < 25:
+        return False
+    return all(c.isalnum() or c in "-_" for c in v)
+
+
+def _resolve_sheet_id_and_tab(spreadsheet_id=None, sheet_name=None):
+    if spreadsheet_id and _looks_like_sheet_id(spreadsheet_id):
+        sid = spreadsheet_id.strip()
+        tab = sheet_name or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    else:
+        sid = getattr(config, "GOOGLE_SHEET_ID", "").strip()
+        tab = sheet_name or spreadsheet_id or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    print(f"DEBUG: Using spreadsheet_id='{sid}', sheet_name='{tab}'")
+    return sid, tab
+
 # ---------------------------------------------------------
 # CONFIGURATION & CONSTANTS
 # ---------------------------------------------------------
@@ -816,11 +836,12 @@ def parse_bet_card_python(container_text, short_bet_id="Unknown"):
 # ---------------------------------------------------------
 # GOOGLE SHEETS FUNCTIONS FOR MERGING EVENT IDS
 # ---------------------------------------------------------
-def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="Live Odds"):
+def build_matchup_dict_from_live_odds(spreadsheet_id=None, sheet_name=None):
     """
     Connect to a Google Sheet containing [League, Event ID, Event/Match, ...],
     build a dictionary {canonical_matchup: event_id}.
     """
+    sid, tab = _resolve_sheet_id_and_tab(spreadsheet_id, sheet_name)
     scope = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive.file",
@@ -829,7 +850,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
     try:
         creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
         client = gspread.authorize(creds)
-        sheet = client.open(spreadsheet_name).worksheet(sheet_name)
+        sheet = client.open_by_key(sid).worksheet(tab)
         data = sheet.get_all_values()
         print("Sheet data:", data)
     except Exception as e:
@@ -857,7 +878,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
 
     return matchup_dict
 
-def merge_event_ids_into_csv(csv_file=None, spreadsheet_name="Live Odds", sheet_name="Live Odds"):
+def merge_event_ids_into_csv(csv_file=None, spreadsheet_id=None, sheet_name=None):
     """
     For any row in CSV that has an empty or 'unknown' Event ID,
     attempt to match the Event/Match with the Google Sheet's canonical dictionary
@@ -868,7 +889,7 @@ def merge_event_ids_into_csv(csv_file=None, spreadsheet_name="Live Odds", sheet_
         print(f"DEBUG: CSV file '{csv_file}' not found. Skipping event ID merge.")
         return
 
-    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_name, sheet_name)
+    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_id, sheet_name)
     if not matchup_dict:
         print("DEBUG: No matchup_dict built from Google Sheets. Possibly empty sheet or error.")
         return
@@ -994,7 +1015,11 @@ def main():
         grade_settled_bets(driver, csv_path())
 
         # Merge event IDs from Google Sheets
-        merge_event_ids_into_csv(csv_path(), spreadsheet_name="Live Odds", sheet_name="Live Odds")
+        merge_event_ids_into_csv(
+            csv_file=csv_path(),
+            spreadsheet_id=None,  # use config.GOOGLE_SHEET_ID via resolver
+            sheet_name=getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+        )
 
         input("DEBUG: Press ENTER to close the browser...")
         driver.quit()

@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import config
 
 # -----------------------------------------------------------------------------
 # OFFICIAL TEAM MAPPING & CANONICALIZATION
@@ -35,6 +36,26 @@ def canonicalize_matchup(match_str, team_mapping=OFFICIAL_TEAM_MAPPING):
     canonical_teams = [team_mapping.get(team.strip(), team.strip()) for team in teams]
     canonical_teams.sort()
     return " vs ".join(canonical_teams)
+
+
+def _looks_like_sheet_id(value: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    v = value.strip()
+    if len(v) < 25:
+        return False
+    return all(c.isalnum() or c in "-_" for c in v)
+
+
+def _resolve_sheet_id_and_tab(spreadsheet_id=None, sheet_name=None):
+    if spreadsheet_id and _looks_like_sheet_id(spreadsheet_id):
+        sid = spreadsheet_id.strip()
+        tab = sheet_name or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    else:
+        sid = getattr(config, "GOOGLE_SHEET_ID", "").strip()
+        tab = sheet_name or spreadsheet_id or getattr(config, "LIVE_ODDS_TAB", "Live Odds")
+    print(f"Using spreadsheet_id='{sid}', sheet_name='{tab}'")
+    return sid, tab
 
 # -----------------------------------------------------------------------------
 # UTILITY FUNCTIONS
@@ -590,7 +611,8 @@ def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
 # -----------------------------------------------------------------------------
 # GOOGLE SHEETS: BUILD MATCHUP DICTIONARY & MERGE EVENT IDS
 # -----------------------------------------------------------------------------
-def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="Live Odds"):
+def build_matchup_dict_from_live_odds(spreadsheet_id=None, sheet_name=None):
+    sid, tab = _resolve_sheet_id_and_tab(spreadsheet_id, sheet_name)
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/spreadsheets",
@@ -600,7 +622,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
     try:
         creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
         client = gspread.authorize(creds)
-        sheet = client.open(spreadsheet_name).worksheet(sheet_name)
+        sheet = client.open_by_key(sid).worksheet(tab)
     except Exception as e:
         print(f"Google Sheets error: {e}")
         return {}
@@ -629,8 +651,8 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
     return matchup_dict
 
 def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
-                             spreadsheet_name="Live Odds",
-                             sheet_name="Live Odds"):
+                             spreadsheet_id=None,
+                             sheet_name=None):
     """
     Match unknown (pending) Event IDs in CSV with those from the Google Sheet
     using the canonicalized matchup strings.
@@ -638,7 +660,7 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
     if not os.path.isfile(csv_file):
         return
 
-    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_name, sheet_name)
+    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_id, sheet_name)
     if not matchup_dict:
         return
 
@@ -698,8 +720,8 @@ def main():
     grade_settled_bets(driver, "Bet_Tracking.csv")
     merge_event_ids_into_csv(
         csv_file="Bet_Tracking.csv",
-        spreadsheet_name="Live Odds",
-        sheet_name="Live Odds"
+        spreadsheet_id=None,  # use config.GOOGLE_SHEET_ID via resolver
+        sheet_name=getattr(config, "LIVE_ODDS_TAB", "Live Odds")
     )
 
     driver.quit()
