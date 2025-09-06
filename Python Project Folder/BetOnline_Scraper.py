@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import random
 import csv
@@ -7,7 +8,13 @@ import datetime
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 import config
+
+SERVICE_ACCOUNT_FILE = os.path.join(REPO_ROOT, "credentials.json")
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -805,7 +812,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
         "https://www.googleapis.com/auth/drive",
     ]
     try:
-        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
         client = gspread.authorize(creds)
         sheet = client.open(spreadsheet_name).worksheet(sheet_name)
         data = sheet.get_all_values()

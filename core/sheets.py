@@ -1,4 +1,5 @@
 from typing import List
+import os
 
 try:
     import gspread  # type: ignore
@@ -11,9 +12,13 @@ from google.oauth2.service_account import Credentials
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SERVICE_ACCOUNT_FILE = os.path.join(REPO_ROOT, "credentials.json")
+
 
 def _client():
-    creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+    print(f"[Sheets] Using credentials at: {SERVICE_ACCOUNT_FILE}")
+    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     return gspread.authorize(creds)
 
 
