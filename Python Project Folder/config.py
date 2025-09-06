@@ -1,6 +1,12 @@
 """Configuration values for the scraper tools."""
 
 import os
+from dotenv import load_dotenv
+
+# Force load from repo root .env
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 # Path to your Chrome user data directory used by undetected_chromedriver
 CHROME_USER_DATA_DIR = r"C:\\Users\\<you>\\AppData\\Local\\Google\\Chrome\\User Data"
