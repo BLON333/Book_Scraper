@@ -1,10 +1,14 @@
-import os, sys
+import os, sys, importlib.util
+from datetime import datetime
+
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-import config
-from datetime import datetime
+_cfg_path = os.path.join(REPO_ROOT, "config.py")
+_spec = importlib.util.spec_from_file_location("config", _cfg_path)
+config = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(config)
 
 RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
 
@@ -23,12 +27,17 @@ def log(msg):
             print(repr(msg))
 
 
+log(f"REPO_ROOT={REPO_ROOT}")
+log(f"sys.path[0..3]={sys.path[:4]}")
 log(f"Config module: {getattr(config,'__file__','<unknown>')}")
 log(
-    f"Config: ATTACH_TO_RUNNING={getattr(config,'ATTACH_TO_RUNNING',None)}, "
-    f"CHROME_USER_DATA_DIR='{getattr(config,'CHROME_USER_DATA_DIR',None)}', "
-    f"CHROME_PROFILE_DIR='{getattr(config,'CHROME_PROFILE_DIR','Default')}', "
-    f"DEBUG_PORT={getattr(config,'DEBUG_PORT',None)}"
+    "Config: ATTACH_TO_RUNNING=%s, CHROME_USER_DATA_DIR='%s', CHROME_PROFILE_DIR='%s', DEBUG_PORT=%s"
+    % (
+        getattr(config, 'ATTACH_TO_RUNNING', None),
+        getattr(config, 'CHROME_USER_DATA_DIR', None),
+        getattr(config, 'CHROME_PROFILE_DIR', 'Default'),
+        getattr(config, 'DEBUG_PORT', None),
+    )
 )
 
 import time
@@ -125,10 +134,28 @@ def init_driver():
 
     try:
         opts = Options()
-        opts.add_argument(f"--user-data-dir={config.CHROME_USER_DATA_DIR}")
-        opts.add_argument(
-            f"--profile-directory={getattr(config, 'CHROME_PROFILE_DIR', 'Default')}"
-        )
+        user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", "").strip()
+        profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
+        if not user_data_dir:
+            msg = "[FATAL] CHROME_USER_DATA_DIR is empty"
+            log(msg)
+            raise RuntimeError(msg)
+        abs_user_data_dir = os.path.abspath(user_data_dir)
+        default_dirs = [
+            os.path.join(os.path.expanduser("~"), "AppData", "Local", "Google", "Chrome", "User Data"),
+            os.path.join(os.path.expanduser("~"), "Library", "Application Support", "Google", "Chrome"),
+            os.path.join(os.path.expanduser("~"), ".config", "google-chrome"),
+        ]
+        for d in default_dirs:
+            if abs_user_data_dir == os.path.abspath(d):
+                msg = f"[FATAL] CHROME_USER_DATA_DIR points to default Chrome directory: {abs_user_data_dir}"
+                log(msg)
+                raise RuntimeError(msg)
+        if not os.path.isdir(abs_user_data_dir):
+            os.makedirs(abs_user_data_dir, exist_ok=True)
+
+        opts.add_argument(f"--user-data-dir={abs_user_data_dir}")
+        opts.add_argument(f"--profile-directory={profile_dir}")
         opts.add_experimental_option("excludeSwitches", ["enable-automation"])
         opts.add_experimental_option("useAutomationExtension", False)
         for arg in [
@@ -141,7 +168,7 @@ def init_driver():
             opts.add_argument(arg)
         opts.add_argument("--remote-allow-origins=*")
         log(
-            f"[Driver] Selenium launch with profile -> user_data_dir='{config.CHROME_USER_DATA_DIR}', profile_dir='{getattr(config, 'CHROME_PROFILE_DIR', 'Default')}'"
+            f"[Driver] Selenium launch with profile -> user_data_dir='{abs_user_data_dir}', profile_dir='{profile_dir}'"
         )
         driver = webdriver.Chrome(options=opts)
         driver.execute_cdp_cmd(
