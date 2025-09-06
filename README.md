@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 ### ⚙️ Configuration
 
-Update `Python Project Folder/config.py` with your local paths and Google Sheet ID:
+Update `config.py` in the repository root with your local paths and Google Sheet ID:
 
 ```python
 CHROME_USER_DATA_DIR = r"C:\\Users\\<you>\\AppData\\Local\\Google\\Chrome\\User Data"
