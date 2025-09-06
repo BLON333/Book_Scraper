@@ -26,7 +26,11 @@ DETAILED_ODDS_TAB = os.environ.get("DETAILED_ODDS_TAB", "Detailed Odds")
 
 # --- Odds API (env-driven secret) ---
 ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
-LEAGUES = ["baseball_mlb", "americanfootball_nfl"]
+LEAGUES = os.environ.get(
+    "LEAGUES",
+    "baseball_mlb,americanfootball_nfl,americanfootball_ncaaf",
+).split(",")
+LEAGUES = [x.strip() for x in LEAGUES if x.strip()]
 ALLOWED_BOOKS = ["pinnacle", "fanduel", "betonlineag", "draftkings"]
 ODDS_REGIONS = "us"
 ODDS_FORMAT = "american"
