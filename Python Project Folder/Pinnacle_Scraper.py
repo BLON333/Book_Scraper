@@ -412,6 +412,7 @@ def open_account_and_history(driver, timeout=15):
             except Exception:
                 driver.execute_script("arguments[0].click();", elem)
             log(f"[Nav] Clicked account trigger: {sel}")
+            log(f"[Nav] Post-account-click URL: {driver.current_url}")
             opened_menu = True
             break
         except Exception as e:
@@ -420,38 +421,84 @@ def open_account_and_history(driver, timeout=15):
     if not opened_menu:
         log("[Nav][ERR] Could not open Account menu (no trigger clickable).")
         return
-
-    history_selectors = [
-        (By.XPATH, "//label[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
-        (By.XPATH, "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
-        (By.XPATH, "//span[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
-    ]
-    clicked_history = False
-    for by, sel in history_selectors:
+    # Locate account-menu container
+    container = None
+    try:
+        container = driver.find_element(By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']")
         try:
-            item = wait.until(EC.element_to_be_clickable((by, sel)))
-            try:
-                item.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", item)
-            log(f"[Nav] Clicked Betting history item: {sel}")
-            clicked_history = True
-            break
-        except Exception as e:
-            log(f"[Nav] Betting history selector not clickable: {sel} | {e}")
+            container = container.find_element(By.XPATH, "..")
+        except Exception:
+            pass
+    except Exception:
+        pass
+    if not container:
+        try:
+            container = driver.find_element(By.TAG_NAME, "body")
+        except Exception:
+            log("[Nav][ERR] Could not locate account menu container.")
+            return
+
+    # Scan for history link within the account menu
+    keywords = [
+        "betting history",
+        "history",
+        "transactions",
+        "bets",
+        "account history",
+        "settled",
+        "wagers",
+    ]
+    candidates = []
+    try:
+        candidates = container.find_elements(By.CSS_SELECTOR, "a, button, label, span, div[role='button']")
+    except Exception:
+        pass
+    clicked_history = False
+    for item in candidates:
+        try:
+            text = item.text or ""
+            norm = (
+                text.replace("\u00a0", " ")
+                .replace("\u200b", "")
+                .strip()
+                .lower()
+            )
+            if any(k in norm for k in keywords):
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", item)
+                except Exception:
+                    pass
+                try:
+                    item.click()
+                except Exception:
+                    driver.execute_script("arguments[0].click();", item)
+                log(f"[Nav] Matched history item text='{norm}' tag={item.tag_name}")
+                log(f"[Nav] Post-history-click URL: {driver.current_url}")
+                clicked_history = True
+                break
+        except StaleElementReferenceException:
             continue
     if not clicked_history:
-        log("[Nav][ERR] Could not click 'Betting history'.")
+        try:
+            menu_text = container.text or ""
+            menu_text = menu_text.replace("\u00a0", " ").replace("\u200b", "")
+            log(f"[Nav][DBG] Account menu text (first 400 chars): {menu_text[:400]}")
+        except Exception:
+            log("[Nav][DBG] Account menu text unavailable.")
         return
 
     try:
-        wait.until(EC.any_of(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-test-id='betCard']")),
-            EC.presence_of_element_located((By.XPATH, "//*[contains(., 'Bet ID') or contains(., 'Wager')]") )
-        ))
-        log("[Nav] Betting history table detected.")
+        wait.until(
+            lambda d: (
+                "account" in (d.current_url or "").lower()
+                or "history" in (d.current_url or "").lower()
+                or d.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
+                or d.find_elements(By.XPATH, "//*[contains(., 'Bet ID') or contains(., 'Wager')]")
+            )
+        )
+        log("[Nav] Betting history detected.")
     except TimeoutException:
-        log("[Nav][ERR] Betting history table did not appear within timeout.")
+        log("[Nav][ERR] Betting history page did not load within timeout.")
 
 def click_load_more(driver, max_attempts=3):
     """
