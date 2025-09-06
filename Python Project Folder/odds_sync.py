@@ -33,24 +33,37 @@ def refresh_live_odds():
             "apiKey": config.ODDS_API_KEY,
             "regions": config.ODDS_REGIONS,
             "oddsFormat": config.ODDS_FORMAT,
-            "markets": "h2h,spreads,totals"
+            "markets": "h2h,spreads,totals",
         }
-        r = requests.get(url, params=params, timeout=20)
-        if r.status_code != 200:
-            print(f"[WARN] Live odds {league} HTTP {r.status_code}: {r.text[:200]}")
+        resp = requests.get(url, params=params, timeout=20)
+        if resp.status_code != 200:
+            try:
+                body = resp.json()
+            except Exception:
+                body = resp.text[:200]
+            print(
+                f"[Live Odds] {league} HTTP {resp.status_code}  Wrote 0 rows  (books={len(config.ALLOWED_BOOKS)})"
+            )
+            print(f"           Body: {body}")
             continue
-        data = r.json()
+
+        data = resp.json()
+        before = len(rowbuf)
         for evt in data:
-            home = _norm_team(evt.get("home_team",""))
-            away = _norm_team(evt.get("away_team",""))
+            home = _norm_team(evt.get("home_team", ""))
+            away = _norm_team(evt.get("away_team", ""))
             matchup = f"{home} vs {away}".strip()
-            event_id = evt.get("id","")
-            commence = evt.get("commence_time","")
-            bk_count = len(evt.get("bookmakers",[]))
+            event_id = evt.get("id", "")
+            commence = evt.get("commence_time", "")
+            bk_count = len(evt.get("bookmakers", []))
             rowbuf.append([league, event_id, matchup, commence, bk_count])
+        wrote = len(rowbuf) - before
+        print(
+            f"[Live Odds] {league} HTTP {resp.status_code}  Wrote {wrote} rows  (books={len(config.ALLOWED_BOOKS)})"
+        )
 
     if rowbuf:
-        ws.update(f"A2", rowbuf, value_input_option="USER_ENTERED")
+        ws.update("A2", rowbuf, value_input_option="USER_ENTERED")
     print(f"[Live Odds] Wrote {len(rowbuf)} rows.")
 
 def _build_user_market_and_label(mkt_key: str, outcome: dict, league: str, bet_select_hint: str = "") -> (str, str, str):
@@ -110,7 +123,11 @@ def _rows_for_event(event_id: str, user_market: str, bet_select: str, league: st
     }
     r = requests.get(url, params=params, timeout=25)
     if r.status_code != 200:
-        print(f"[WARN] Event {event_id} {league} HTTP {r.status_code}: {r.text[:200]}")
+        try:
+            body = r.json()
+        except Exception:
+            body = r.text[:200]
+        print(f"[WARN] Event {event_id} {league} HTTP {r.status_code}: {body}")
         return rows
 
     data = r.json()
