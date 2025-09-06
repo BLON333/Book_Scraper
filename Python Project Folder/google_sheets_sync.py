@@ -5,9 +5,9 @@ import os, sys, unicodedata
 import datetime
 from typing import List, Dict, Tuple, Optional
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 import config
 
 import gspread
@@ -18,7 +18,7 @@ from google.oauth2.service_account import Credentials
 # -----------------------------
 # CONFIGURATION
 # -----------------------------
-SERVICE_ACCOUNT_FILE = "credentials.json"  # For Google Sheets sync
+SERVICE_ACCOUNT_FILE = os.path.join(REPO_ROOT, "credentials.json")  # For Google Sheets sync
 
 CSV_FILE_PATH = os.getenv("BET_CSV_PATH", "Bet_Tracking.csv")
 SHEET_ID = getattr(config, "GOOGLE_SHEET_ID", "")
@@ -120,8 +120,9 @@ def read_csv_data(csv_file_path: str) -> List[Dict[str, str]]:
 # GOOGLE SHEETS CONNECTION (existing)
 # -----------------------------
 def connect_google_sheets() -> Worksheet:
+    print(f"[Sheets] Using credentials at: {SERVICE_ACCOUNT_FILE}")
     creds = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, 
+        SERVICE_ACCOUNT_FILE,
         scopes=["https://www.googleapis.com/auth/spreadsheets"]
     )
     client = gspread.authorize(creds)

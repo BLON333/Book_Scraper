@@ -1,14 +1,14 @@
-import os, sys, time
+import os, sys
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+import time
 from datetime import datetime
 import csv
 import random
 import re
 import requests
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, ".."))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
 import config
 
 from selenium import webdriver
@@ -29,29 +29,33 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 
+RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
 def _ts():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-
 def log(msg):
     try:
-        s = f"[{_ts()}][RUN {RUN_ID}] {msg}"
-        print(s)
+        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
     except Exception:
         try:
-            s = f"[{_ts()}][RUN {RUN_ID}] {str(msg)}"
-            print(s.encode('ascii', 'replace').decode())
+            print((f"[{_ts()}][RUN {RUN_ID}] {str(msg)}").encode("ascii","replace").decode())
         except Exception:
             print(repr(msg))
 
 
-def _csv_path(name="Bet_Tracking.csv"):
-    here = os.path.dirname(os.path.abspath(__file__))
-    root = os.path.abspath(os.path.join(here, ".."))
-    return os.path.join(root, name)
+def repo_path(*parts):
+    return os.path.join(REPO_ROOT, *parts)
+
+
+def csv_path(name="Bet_Tracking.csv"):
+    return repo_path(name)
+
+
+def creds_path():
+    return repo_path("credentials.json")
 
 # -----------------------------------------------------------------------------
 # OFFICIAL TEAM MAPPING & CANONICALIZATION
@@ -437,7 +441,7 @@ def click_load_more(driver, max_attempts=3):
 # -----------------------------------------------------------------------------
 def read_existing_bet_ids(csv_file_path=None):
     """Return a set of Bet ID#s that already exist in the CSV, to avoid duplicates."""
-    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
+    csv_file_path = csv_file_path or csv_path("Bet_Tracking.csv")
     existing_ids = set()
     if os.path.isfile(csv_file_path):
         with open(csv_file_path, newline="") as file:
@@ -749,7 +753,7 @@ def extract_bet_data(driver):
 
 def update_csv(extracted_bets, csv_file_path=None):
     """Append new bets to the CSV, avoiding duplicates by Bet ID#."""
-    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
+    csv_file_path = csv_file_path or csv_path("Bet_Tracking.csv")
     file_exists = os.path.isfile(csv_file_path)
     existing_ids = set()
     if file_exists:
@@ -806,7 +810,7 @@ def grade_settled_bets(driver, csv_file_path=None):
         except:
             return None
 
-    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
+    csv_file_path = csv_file_path or csv_path("Bet_Tracking.csv")
     if not os.path.isfile(csv_file_path):
         return
 
@@ -897,11 +901,16 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
         "https://www.googleapis.com/auth/drive",
     ]
     try:
-        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        keyfile = creds_path()
+        if not os.path.isfile(keyfile):
+            log(f"[Sheets][ERR] credentials.json not found at {keyfile}")
+            return {}
+        log(f"[Sheets] Using credentials at: {keyfile}")
+        creds = ServiceAccountCredentials.from_json_keyfile_name(keyfile, scope)
         client = gspread.authorize(creds)
         sheet = client.open(spreadsheet_name).worksheet(sheet_name)
     except Exception as e:
-        print(f"Google Sheets error: {e}")
+        log(f"[Sheets][ERR] Google Sheets auth failed: {e}")
         return {}
 
     data = sheet.get_all_values()
@@ -934,7 +943,7 @@ def merge_event_ids_into_csv(csv_file=None,
     Match unknown (pending) Event IDs in CSV with those from the Google Sheet
     using the canonicalized matchup strings.
     """
-    csv_file = csv_file or _csv_path("Bet_Tracking.csv")
+    csv_file = csv_file or csv_path("Bet_Tracking.csv")
     if not os.path.isfile(csv_file):
         return
 
@@ -981,8 +990,10 @@ def merge_event_ids_into_csv(csv_file=None,
 def main():
     log("==== Pinnacle_Scraper starting ====")
     try:
+        import config
+        log(f"Config module: {getattr(config,'__file__','<unknown>')}")
         log(
-            f"Config: ATTACH_TO_RUNNING={getattr(config,'ATTACH_TO_RUNNING',None)}, "
+            f"Config values: ATTACH_TO_RUNNING={getattr(config,'ATTACH_TO_RUNNING',None)}, "
             f"CHROME_USER_DATA_DIR='{getattr(config,'CHROME_USER_DATA_DIR',None)}', "
             f"CHROME_PROFILE_DIR='{getattr(config,'CHROME_PROFILE_DIR','Default')}', "
             f"DEBUG_PORT={getattr(config,'DEBUG_PORT',None)}"
@@ -1019,15 +1030,15 @@ def main():
     open_account_and_history(driver)
     click_load_more(driver)
 
-    existing_ids = read_existing_bet_ids(_csv_path("Bet_Tracking.csv"))
+    existing_ids = read_existing_bet_ids(csv_path("Bet_Tracking.csv"))
     expand_unlogged_bets(driver, existing_ids)
 
     new_bets = extract_bet_data(driver)
-    update_csv(new_bets, _csv_path("Bet_Tracking.csv"))
+    update_csv(new_bets, csv_path("Bet_Tracking.csv"))
 
-    grade_settled_bets(driver, _csv_path("Bet_Tracking.csv"))
+    grade_settled_bets(driver, csv_path("Bet_Tracking.csv"))
     merge_event_ids_into_csv(
-        csv_file=_csv_path("Bet_Tracking.csv"),
+        csv_file=csv_path("Bet_Tracking.csv"),
         spreadsheet_name="Live Odds",
         sheet_name="Live Odds"
     )
