@@ -1171,8 +1171,8 @@ def main():
     grade_settled_bets(driver, csv_path("Bet_Tracking.csv"))
     merge_event_ids_into_csv(
         csv_file=csv_path("Bet_Tracking.csv"),
-        spreadsheet_id="Live Odds",
-        sheet_name="Live Odds"
+        spreadsheet_id=None,  # use config.GOOGLE_SHEET_ID via resolver
+        sheet_name=getattr(config, "LIVE_ODDS_TAB", "Live Odds")
     )
 
     driver.quit()
