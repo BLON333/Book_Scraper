@@ -1,7 +1,13 @@
+import sys
+from pathlib import Path
+
 import config
 import Pinnacle_Scraper
 import google_sheets_sync
 import odds_sync
+
+# Allow importing sync scripts from repository root
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 import clv_sync
 
 def hybrid_main():
@@ -25,7 +31,7 @@ def hybrid_main():
     odds_sync.main()
 
     print("Updating Closing Line & CLV%...")
-    clv_sync.sync_clv()
+    clv_sync.main()
 
 if __name__ == "__main__":
     hybrid_main()
