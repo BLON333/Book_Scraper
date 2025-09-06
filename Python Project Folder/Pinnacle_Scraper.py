@@ -583,6 +583,27 @@ def read_existing_bet_ids(csv_file_path=None):
                     existing_ids.add(bet_id)
     return existing_ids
 
+
+def _read_existing_ids_debug(csv_file_path=None):
+    """Read Bet ID# values from a CSV with logging for debugging."""
+    csv_file_path = csv_file_path or csv_path("Bet_Tracking.csv")
+    ids = set()
+    if not os.path.isfile(csv_file_path):
+        log(f"[CSV] File not found at {csv_file_path}; returning empty set.")
+        return ids
+    try:
+        with open(csv_file_path, newline="") as file:
+            for row in csv.DictReader(file):
+                bet_id = row.get("Bet ID#", "").strip()
+                if bet_id:
+                    ids.add(bet_id)
+    except Exception as e:
+        log(f"[CSV] Failed to read existing Bet IDs: {e}")
+        return set()
+    sample = list(ids)[:5]
+    log(f"[CSV] Loaded {len(ids)} existing Bet IDs. Sample: {sample}")
+    return ids
+
 def expand_unlogged_bets(driver, existing_ids, max_passes=3):
     wait = WebDriverWait(driver, 10)
     try:
@@ -590,6 +611,7 @@ def expand_unlogged_bets(driver, existing_ids, max_passes=3):
     except TimeoutException:
         log("[Expand] No bet cards detected; nothing to expand.")
         return
+    log(f"[Expand] existing_ids count: {len(existing_ids)}")
     seen_ids, passes, expanded = set(), 0, 0
     while passes < max_passes:
         try:
@@ -635,6 +657,8 @@ def expand_unlogged_bets(driver, existing_ids, max_passes=3):
                 continue
         passes += 1
     log(f"[Expand] Expanded ~{expanded} cards across {passes} pass(es).")
+    if expanded == 0:
+        log("[Expand] No new bet cards expanded; all bets may already be logged or no unexpanded cards were found.")
 
 # -----------------------------------------------------------------------------
 # JAVASCRIPT EXTRACTION CODE
@@ -1162,7 +1186,7 @@ def main():
     open_account_and_history(driver)
     click_load_more(driver)
 
-    existing_ids = read_existing_bet_ids(csv_path("Bet_Tracking.csv"))
+    existing_ids = _read_existing_ids_debug(csv_path("Bet_Tracking.csv"))
     expand_unlogged_bets(driver, existing_ids)
 
     new_bets = extract_bet_data(driver)

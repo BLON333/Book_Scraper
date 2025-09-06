@@ -287,6 +287,27 @@ def read_existing_bet_ids(csv_file_path=None):
             existing_ids.add(bet_id)
     return existing_ids
 
+
+def _read_existing_ids_debug(csv_file_path=None):
+    """Read Bet ID# values from a CSV with simple debug logging."""
+    csv_file_path = csv_file_path or csv_path()
+    ids = set()
+    if not os.path.isfile(csv_file_path):
+        print(f"DEBUG: File not found at {csv_file_path}; returning empty ID set.")
+        return ids
+    try:
+        with open(csv_file_path, newline="") as file:
+            for row in csv.DictReader(file):
+                bet_id = row.get("Bet ID#", "").strip()
+                if bet_id:
+                    ids.add(bet_id)
+    except Exception as e:
+        print(f"DEBUG: Failed to read existing Bet IDs: {e}")
+        return set()
+    sample = list(ids)[:5]
+    print(f"DEBUG: Loaded {len(ids)} existing Bet IDs. Sample: {sample}")
+    return ids
+
 def parse_float_safe(s):
     try:
         return float(s)
@@ -334,7 +355,7 @@ def update_csv_betonline(bets, csv_file_path=None):
     """
     csv_file_path = csv_file_path or csv_path()
     file_exists = os.path.isfile(csv_file_path)
-    existing_ids = read_existing_bet_ids(csv_file_path)
+    existing_ids = _read_existing_ids_debug(csv_file_path)
     fieldnames = [
         "Date", "Start Time", "Event ID", "Sport", "League", "Market", "Derivative",
         "Event/Match", "Bet", "Odds", "Stake", "Bookmaker", "Payout",
@@ -968,8 +989,7 @@ def main():
         scroll_bets_up(driver, scroll_container_selector="#bets", pause_time=2)
         simulate_random_mouse_movement(driver, moves=3)
 
-        existing_ids = read_existing_bet_ids(csv_path())
-        print(f"DEBUG: Found {len(existing_ids)} existing Bet IDs in CSV.")
+        existing_ids = _read_existing_ids_debug(csv_path())
 
         bet_rows = driver.find_elements(By.CSS_SELECTOR, "[id^='row-']")
         print(f"DEBUG: Found {len(bet_rows)} bet rows on the page.")
