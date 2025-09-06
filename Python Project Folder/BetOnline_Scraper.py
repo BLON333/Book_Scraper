@@ -12,6 +12,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
+def csv_path(name="Bet_Tracking.csv"):
+    return os.path.join(REPO_ROOT, name)
+
 import config
 
 SERVICE_ACCOUNT_FILE = os.path.join(REPO_ROOT, "credentials.json")
@@ -248,14 +251,20 @@ def login_handshake_betonline(driver, max_wait_secs=120):
     print("\n[LOGIN] Timed out waiting for BetOnline login.")
     return False
 
-def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
+def read_existing_bet_ids(csv_file_path=None):
+    csv_file_path = csv_file_path or csv_path()
     existing_ids = set()
-    if os.path.isfile(csv_file_path):
-        with open(csv_file_path, newline="") as file:
-            for row in csv.DictReader(file):
-                bet_id = row.get("Bet ID#", "").strip()
-                if bet_id:
-                    existing_ids.add(bet_id)
+    if not os.path.isfile(csv_file_path):
+        return existing_ids
+    with open(csv_file_path, newline="") as file:
+        rows = list(csv.DictReader(file))
+    if not rows:
+        print(f"DEBUG: '{csv_file_path}' has 0 data rows; returning empty ID set.")
+        return existing_ids
+    for row in rows:
+        bet_id = row.get("Bet ID#", "").strip()
+        if bet_id:
+            existing_ids.add(bet_id)
     return existing_ids
 
 def parse_float_safe(s):
@@ -295,7 +304,7 @@ def decimal_to_american_str(dec_odds):
 # ---------------------------------------------------------
 # CSV UPDATE FUNCTIONS (New Bets, Grade Settled, Merge Event IDs)
 # ---------------------------------------------------------
-def update_csv_betonline(bets, csv_file_path="Bet_Tracking.csv"):
+def update_csv_betonline(bets, csv_file_path=None):
     """
     Append new bets to CSV. For each bet:
       - Format date => YYYY-MM-DD
@@ -303,6 +312,7 @@ def update_csv_betonline(bets, csv_file_path="Bet_Tracking.csv"):
       - If no odds but stake & toWin are present, compute them
       - Compute profit/loss in CAD if result is Win or Loss
     """
+    csv_file_path = csv_file_path or csv_path()
     file_exists = os.path.isfile(csv_file_path)
     existing_ids = read_existing_bet_ids(csv_file_path)
     fieldnames = [
@@ -446,17 +456,22 @@ def recalc_profit_loss(row):
     row["Profit/Loss"] = profit_loss
     return row
 
-def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
+def grade_settled_bets(driver, csv_file_path=None):
     """
     For any bet in CSV that is 'Pending', see if it's now 'Won'/'Lost'/'Refund'
     in the main table, then update CSV accordingly.
     """
+    csv_file_path = csv_file_path or csv_path()
     if not os.path.isfile(csv_file_path):
         print(f"DEBUG: CSV '{csv_file_path}' not found. Skipping grade_settled_bets.")
         return
 
     with open(csv_file_path, newline="") as f:
         rows = list(csv.DictReader(f))
+
+    if not rows:
+        print(f"DEBUG: '{csv_file_path}' has 0 data rows; skipping grade_settled_bets.")
+        return
 
     updated_count = 0
     for row in rows:
@@ -842,12 +857,13 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
 
     return matchup_dict
 
-def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv", spreadsheet_name="Live Odds", sheet_name="Live Odds"):
+def merge_event_ids_into_csv(csv_file=None, spreadsheet_name="Live Odds", sheet_name="Live Odds"):
     """
     For any row in CSV that has an empty or 'unknown' Event ID,
     attempt to match the Event/Match with the Google Sheet's canonical dictionary
     if the date/time is in the future.
     """
+    csv_file = csv_file or csv_path()
     if not os.path.isfile(csv_file):
         print(f"DEBUG: CSV file '{csv_file}' not found. Skipping event ID merge.")
         return
@@ -931,7 +947,7 @@ def main():
         scroll_bets_up(driver, scroll_container_selector="#bets", pause_time=2)
         simulate_random_mouse_movement(driver, moves=3)
 
-        existing_ids = read_existing_bet_ids("Bet_Tracking.csv")
+        existing_ids = read_existing_bet_ids(csv_path())
         print(f"DEBUG: Found {len(existing_ids)} existing Bet IDs in CSV.")
 
         bet_rows = driver.find_elements(By.CSS_SELECTOR, "[id^='row-']")
@@ -972,13 +988,13 @@ def main():
                 time.sleep(random_delay(1, 0.5))
 
         # Write new bets
-        update_csv_betonline(new_bets_data, "Bet_Tracking.csv")
+        update_csv_betonline(new_bets_data, csv_path())
 
         # Attempt to grade settled bets
-        grade_settled_bets(driver, "Bet_Tracking.csv")
+        grade_settled_bets(driver, csv_path())
 
         # Merge event IDs from Google Sheets
-        merge_event_ids_into_csv("Bet_Tracking.csv", spreadsheet_name="Live Odds", sheet_name="Live Odds")
+        merge_event_ids_into_csv(csv_path(), spreadsheet_name="Live Odds", sheet_name="Live Odds")
 
         input("DEBUG: Press ENTER to close the browser...")
         driver.quit()
