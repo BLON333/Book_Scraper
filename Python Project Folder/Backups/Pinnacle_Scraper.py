@@ -212,11 +212,31 @@ def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
                     existing_ids.add(bet_id)
     return existing_ids
 
+
+def _read_existing_ids_debug(csv_file_path="Bet_Tracking.csv"):
+    """Read Bet ID# values from a CSV with debug logging."""
+    ids = set()
+    if not os.path.isfile(csv_file_path):
+        print(f"DEBUG: File not found at {csv_file_path}; returning empty set.")
+        return ids
+    try:
+        with open(csv_file_path, newline="") as file:
+            for row in csv.DictReader(file):
+                bet_id = row.get("Bet ID#", "").strip()
+                if bet_id:
+                    ids.add(bet_id)
+    except Exception as e:
+        print(f"DEBUG: Failed to read Bet IDs: {e}")
+        return set()
+    sample = list(ids)[:5]
+    print(f"DEBUG: Loaded {len(ids)} Bet IDs. Sample: {sample}")
+    return ids
+
 def expand_unlogged_bets(driver, existing_ids):
-    """
-    Expand any bet cards that are not already logged in the CSV, to reveal details.
-    """
+    """Expand any bet cards that are not already logged in the CSV, to reveal details."""
+    print(f"DEBUG: existing_ids count: {len(existing_ids)}")
     bet_cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
+    expanded = 0
     for bet in bet_cards:
         try:
             bet_id_elem = bet.find_element(By.CSS_SELECTOR, ".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2")
@@ -230,6 +250,9 @@ def expand_unlogged_bets(driver, existing_ids):
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", bet)
         driver.execute_script("arguments[0].click();", bet)
         time.sleep(random.uniform(2, 4))
+        expanded += 1
+    if expanded == 0:
+        print("DEBUG: No new bet cards expanded; all bets may already be logged or no unexpanded cards were found.")
 
 # -----------------------------------------------------------------------------
 # JAVASCRIPT EXTRACTION CODE
@@ -711,7 +734,7 @@ def main():
     open_account_and_history(driver)
     click_load_more(driver)
 
-    existing_ids = read_existing_bet_ids("Bet_Tracking.csv")
+    existing_ids = _read_existing_ids_debug("Bet_Tracking.csv")
     expand_unlogged_bets(driver, existing_ids)
 
     new_bets = extract_bet_data(driver)
