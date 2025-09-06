@@ -1,10 +1,9 @@
 import os, sys, time
 from datetime import datetime
 import csv
-import random, tempfile
+import random
 import re
 import requests
-import undetected_chromedriver as uc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -14,7 +13,6 @@ import config
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -40,9 +38,14 @@ RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 def log(msg):
     try:
-        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
+        s = f"[{_ts()}][RUN {RUN_ID}] {msg}"
+        print(s)
     except Exception:
-        print(msg)
+        try:
+            s = f"[{_ts()}][RUN {RUN_ID}] {str(msg)}"
+            print(s.encode('ascii', 'replace').decode())
+        except Exception:
+            print(repr(msg))
 
 
 def _csv_path(name="Bet_Tracking.csv"):
@@ -85,7 +88,7 @@ def init_driver():
         port = getattr(config, "DEBUG_PORT", 9222)
         profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
         user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", "")
-        log(f"[Driver] ATTACH mode → 127.0.0.1:{port} | profile_dir={profile_dir} | user_data_dir={user_data_dir}")
+        log(f"[Driver] ATTACH mode -> 127.0.0.1:{port} | profile_dir={profile_dir} | user_data_dir={user_data_dir}")
         opts = Options()
         opts.debugger_address = f"127.0.0.1:{port}"
         opts.add_argument("--start-maximized")
@@ -125,7 +128,7 @@ def init_driver():
             opts.add_argument(arg)
         opts.add_argument("--remote-allow-origins=*")
         log(
-            f"[Driver] Selenium launch with profile → user_data_dir='{user_data_dir}', profile_dir='{profile_dir}'"
+            f"[Driver] Selenium launch with profile -> user_data_dir='{user_data_dir}', profile_dir='{profile_dir}'"
         )
         driver = webdriver.Chrome(options=opts)
         driver.execute_cdp_cmd(
@@ -136,24 +139,9 @@ def init_driver():
         )
         log("[Driver] ✅ Selenium driver launched with your profile.")
         return driver
-    except (SessionNotCreatedException, WebDriverException):
-        log("[Driver] [WARN] Selenium profile launch failed; trying UC temp profile…")
-        fresh = uc.ChromeOptions()
-        for arg in [
-            "--no-first-run",
-            "--no-default-browser-check",
-            "--disable-extensions",
-            "--disable-background-networking",
-            "--start-maximized",
-        ]:
-            fresh.add_argument(arg)
-        temp_profile = tempfile.mkdtemp()
-        fresh.add_argument(f"--user-data-dir={temp_profile}")
-        log("[Driver] [WARN] Falling back to undetected_chromedriver temp profile")
-        log(f"[Driver] UC temp user_data_dir='{temp_profile}'")
-        driver = uc.Chrome(options=fresh)
-        log("[Driver] ✅ UC driver launched (temp profile)")
-        return driver
+    except (SessionNotCreatedException, WebDriverException) as e:
+        log(f"[FATAL] Selenium launch failed: {e}")
+        raise
 
 
 def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
