@@ -270,17 +270,12 @@ def login_handshake(driver, max_wait_secs=120):
     if is_logged_in(driver):
         return True
 
-    print("[LOGIN] Not logged in. Opening login UI and waiting for you to sign in...")
-    try:
-        # Try explicit login route first (safer than a brittle popup)
-        driver.get("https://www.pinnacle.com/en/login")
-    except Exception:
-        pass
+    print("[LOGIN] Not logged in. Please log in in the opened Chrome window.")
 
-    # Fallback: click a visible login button if present
+    # Try to expose a login UI without navigating away.
     try:
         for sel in [
-            (By.XPATH, "//a[contains(., 'Log in') or contains(., 'Login')]") ,
+            (By.XPATH, "//a[contains(translate(., 'LOGIN', 'login'),'login')]") ,
             (By.CSS_SELECTOR, "a[href*='login']"),
             (By.CSS_SELECTOR, "button[data-test-id='Button']"),
         ]:
@@ -290,28 +285,29 @@ def login_handshake(driver, max_wait_secs=120):
                     driver.execute_script("arguments[0].click();", elems[0])
                     break
                 except Exception:
-                    pass
+                    continue
     except Exception:
         pass
 
     # Poll for login success up to max_wait_secs
     import sys, time
     deadline = time.time() + max_wait_secs
-    last_print = 0
-    print("[LOGIN] Please complete login in the opened Chrome window. Waiting up to", max_wait_secs, "seconds...")
-    while time.time() < deadline:
+    last_print = -1
+    while True:
         if is_logged_in(driver):
-            print("[LOGIN] Detected logged-in state. Continuing.")
+            print("\n[LOGIN] Detected logged-in state. Continuing.")
             return True
-        now = int(deadline - time.time())
-        if now != last_print:
-            last_print = now
-            sys.stdout.write(f"\r[LOGIN] {now:3d}s remaining... ")
+
+        remaining = int(deadline - time.time())
+        if remaining < 0:
+            print("\n[LOGIN] Timed out waiting for login.")
+            return False
+
+        if remaining != last_print:
+            last_print = remaining
+            sys.stdout.write(f"\r[LOGIN] {remaining:3d}s remaining...")
             sys.stdout.flush()
         time.sleep(1)
-
-    print("\n[LOGIN] Timed out waiting for login. Please try again.")
-    return False
 
 def open_account_and_history(driver):
     """
