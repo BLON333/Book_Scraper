@@ -1,9 +1,14 @@
 
 
 import csv
-import os, unicodedata, config
+import os, sys, unicodedata
 import datetime
 from typing import List, Dict, Tuple, Optional
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+import config
 
 import gspread
 from gspread import Worksheet
@@ -32,6 +37,17 @@ HEADER_ALIASES = {
     "Event ID": ["event id", "game id", "match id"],
     "Result": ["result", "status", "outcome"],
 }
+
+
+def _ts():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def dlog(msg):
+    try:
+        print(f"[{_ts()}][Sheets] {msg}")
+    except Exception:
+        print(msg)
 
 
 def _norm(s: str) -> str:
@@ -94,10 +110,10 @@ def read_csv_data(csv_file_path: str) -> List[Dict[str, str]]:
             with open(csv_file_path, mode="r", newline="", encoding=enc) as file:
                 reader = csv.DictReader(file)
                 data = list(reader)
-                print(f"CSV file successfully read with {enc} encoding.")
+                dlog(f"CSV file successfully read with {enc} encoding.")
                 return data
         except UnicodeDecodeError as e:
-            print(f"Failed to decode CSV file using {enc} encoding: {e}")
+            dlog(f"Failed to decode CSV file using {enc} encoding: {e}")
     raise UnicodeDecodeError(f"CSV file '{csv_file_path}' could not be decoded with tried encodings.")
 
 # -----------------------------
@@ -110,7 +126,7 @@ def connect_google_sheets() -> Worksheet:
     )
     client = gspread.authorize(creds)
     sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
-    print("Connected to Google Sheets.")
+    dlog("Connected to Google Sheets.")
     return sheet
 
 # -----------------------------
@@ -140,12 +156,12 @@ def sort_sheet(sheet: Worksheet, header_row: int, first_data_row: int, sheet_hea
     try:
         result_index = sheet_header.index("Result")
     except ValueError:
-        print("Error: 'Result' column not found in header during sort.")
+        dlog("Error: 'Result' column not found in header during sort.")
         return
     try:
         start_time_index = sheet_header.index("Start Time")
     except ValueError:
-        print("Error: 'Start Time' column not found in header during sort.")
+        dlog("Error: 'Start Time' column not found in header during sort.")
         return
 
     def sort_key(row):
@@ -168,7 +184,7 @@ def sort_sheet(sheet: Worksheet, header_row: int, first_data_row: int, sheet_hea
     end_cell = rowcol_to_a1(first_data_row + len(sorted_rows) - 1, len(sheet_header))
     range_address = f"{start_cell}:{end_cell}"
     sheet.update(range_address, sorted_rows, value_input_option="USER_ENTERED")
-    print("Sheet rows sorted: pending bets at the top, settled bets at the bottom, with pending bets ordered by start time.")
+    dlog("Sheet rows sorted: pending bets at the top, settled bets at the bottom, with pending bets ordered by start time.")
 
 # -----------------------------
 # EVENT ID BACKFILL (new)
@@ -187,13 +203,13 @@ def backfill_event_ids_from_live_odds(sh):
         ws_live = sh.worksheet(config.LIVE_ODDS_TAB)
         ws_bets = sh.worksheet(config.BET_SHEET_TAB)
     except Exception:
-        print("[Sheets Sync] Skipped Event ID backfill: Live Odds or Bets tab not found.")
+        dlog("[Sheets Sync] Skipped Event ID backfill: Live Odds or Bets tab not found.")
         return
 
     live_values = ws_live.get_all_values()
     bets_values = ws_bets.get_all_values()
     if not live_values or not bets_values:
-        print("[Sheets Sync] Skipped Event ID backfill: one of the tabs is empty.")
+        dlog("[Sheets Sync] Skipped Event ID backfill: one of the tabs is empty.")
         return
 
     # Live Odds headers are in the first row
@@ -201,7 +217,7 @@ def backfill_event_ids_from_live_odds(sh):
     # Bets headers are at BET_HEADER_ROW
     bets_header_row_idx = config.BET_HEADER_ROW - 1
     if bets_header_row_idx >= len(bets_values):
-        print("[Sheets Sync] Skipped Event ID backfill: Bets header row not found.")
+        dlog("[Sheets Sync] Skipped Event ID backfill: Bets header row not found.")
         return
     bets_header = bets_values[bets_header_row_idx]
 
@@ -219,7 +235,7 @@ def backfill_event_ids_from_live_odds(sh):
     bi_event_match = find_col(bets_header, "Event/Match")
 
     if min(li_event_id, li_event_match, bi_event_id, bi_event_match) < 0:
-        print("[Sheets Sync] Skipped Event ID backfill: required headers not found.")
+        dlog("[Sheets Sync] Skipped Event ID backfill: required headers not found.")
         return
 
     import re
@@ -272,29 +288,32 @@ def backfill_event_ids_from_live_odds(sh):
             updates.append((r, bi_event_id + 1, eid))
 
     if not updates:
-        print("[Sheets Sync] Backfilled 0 Event IDs from Live Odds (Sheet1).")
+        dlog("[Sheets Sync] Backfilled 0 Event IDs from Live Odds (Sheet1).")
         return
 
     for r, c, val in updates:
         ws_bets.update_cell(r, c, val)
 
-    print(f"[Sheets Sync] Backfilled {len(updates)} Event IDs from Live Odds (Sheet1).")
+    dlog(f"[Sheets Sync] Backfilled {len(updates)} Event IDs from Live Odds (Sheet1).")
 
 # -----------------------------
 # PARTIAL UPDATE FUNCTION (existing)
 # -----------------------------
 def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> gspread.Spreadsheet:
-    print("Starting Google Sheets sync from CSV...")
+    dlog("Starting Google Sheets sync from CSV...")
+    dlog(f"SHEET_ID={SHEET_ID}, SHEET_NAME='{SHEET_NAME}', HEADER_ROW={HEADER_ROW}, FIRST_DATA_ROW={FIRST_DATA_ROW}, CSV_FILE_PATH='{csv_file_path}'")
     sheet = connect_google_sheets()
+    dlog("Connected to Google Sheets.")
 
     sheet_header, sheet_data_rows = get_sheet_headers_from_row(sheet, HEADER_ROW)
     sheet_header = canonicalize_header_list(sheet_header)
+    dlog(f"Header row {HEADER_ROW} values: {sheet_header}")
 
     required_cols = ["Bet ID#", "Result", "Profit/Loss", "Date", "Start Time", "Event ID"]
     for col in required_cols:
         if col not in sheet_header:
-            print(f"❌ Column '{col}' is missing in row {HEADER_ROW} of the Google Sheet.")
-            print('Header row seen by script:', sheet_header)
+            dlog(f"❌ Column '{col}' is missing in row {HEADER_ROW} of the Google Sheet.")
+            dlog(f'Header row seen by script: {sheet_header}')
             return
 
     bet_id_index = sheet_header.index("Bet ID#")
@@ -307,21 +326,21 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> gspread.
     )
 
     csv_rows = read_csv_data(csv_file_path)
-    print(f"DEBUG: CSV has {len(csv_rows)} rows.")
+    dlog(f"CSV has {len(csv_rows)} rows (after decode).")
 
     updated_count = 0
     appended_count = 0
 
     for idx, csv_row in enumerate(csv_rows, start=1):
-        print(f"DEBUG: CSV row #{idx} => {csv_row}")
+        dlog(f"DEBUG: CSV row #{idx} => {csv_row}")
         bet_id = csv_row.get("Bet ID#", "").strip()
         if not bet_id:
-            print(f"WARNING: Row #{idx} has no 'Bet ID#'; skipping.")
+            dlog(f"WARNING: Row #{idx} has no 'Bet ID#'; skipping.")
             continue
 
         dt_obj = parse_event_datetime(csv_row.get("Date", "").strip(), csv_row.get("Start Time", "").strip())
         if dt_obj is None:
-            print(f"WARNING: Row #{idx} => cannot parse date/time; skipping.")
+            dlog(f"WARNING: Row #{idx} => cannot parse date/time; skipping.")
             continue
 
         csv_event_id = csv_row.get("Event ID", "").strip()
@@ -331,43 +350,43 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> gspread.
             try:
                 current_sheet_event_id = sheet.cell(row_num, event_id_index + 1).value or ""
             except Exception as e:
-                print(f"WARNING: Could not retrieve current event ID for Bet ID {bet_id} at row {row_num}: {e}")
+                dlog(f"WARNING: Could not retrieve current event ID for Bet ID {bet_id} at row {row_num}: {e}")
                 current_sheet_event_id = ""
 
             if csv_event_id and (not current_sheet_event_id or current_sheet_event_id.lower() == "unknown"):
-                print(f"Updating 'Event ID' for Bet ID {bet_id} in row {row_num}")
+                dlog(f"Updating Bet ID {bet_id} at row {row_num}")
                 try:
                     sheet.update_cell(row_num, event_id_index + 1, csv_event_id)
                     updated_count += 1
                 except Exception as e:
-                    print(f"Error updating 'Event ID' for Bet ID {bet_id}: {e}")
+                    dlog(f"Error updating 'Event ID' for Bet ID {bet_id}: {e}")
 
             try:
                 current_result = sheet.cell(row_num, sheet_header.index("Result") + 1).value or ""
             except Exception as e:
-                print(f"WARNING: Could not retrieve current result for Bet ID {bet_id} at row {row_num}: {e}")
+                dlog(f"WARNING: Could not retrieve current result for Bet ID {bet_id} at row {row_num}: {e}")
                 current_result = ""
 
             if current_result.strip().lower() in ["", "pending"]:
                 new_result = csv_row.get("Result", "").strip()
                 pl_value = convert_profit_loss(csv_row.get("Profit/Loss", "").strip())
-                print(f"Updating row {row_num} for Bet ID {bet_id}")
+                dlog(f"Updating Bet ID {bet_id} at row {row_num}")
                 try:
                     sheet.update_cell(row_num, sheet_header.index("Result") + 1, new_result)
                     pl_cell = rowcol_to_a1(row_num, sheet_header.index("Profit/Loss") + 1)
                     sheet.update(pl_cell, [[pl_value]], value_input_option="USER_ENTERED")
                     updated_count += 1
                 except Exception as e:
-                    print(f"Error updating row {row_num} for Bet ID {bet_id}: {e}")
+                    dlog(f"Error updating row {row_num} for Bet ID {bet_id}: {e}")
             else:
-                print(f"DEBUG: Row #{idx} => Bet ID {bet_id} is already settled with '{current_result}', skipping update.")
+                dlog(f"DEBUG: Row #{idx} => Bet ID {bet_id} is already settled with '{current_result}', skipping update.")
         else:
             current_date = datetime.datetime.now().date()
             if dt_obj.date() == current_date and dt_obj.time() < datetime.time(3, 0):
-                print(f"DEBUG: Row #{idx} => event is today with start time before 03:00; skipping new bet.")
+                dlog(f"DEBUG: Row #{idx} => event is today with start time before 03:00; skipping new bet.")
                 continue
             if not should_keep(dt_obj):
-                print(f"DEBUG: Row #{idx} => not in keep window; skipping new bet.")
+                dlog(f"DEBUG: Row #{idx} => not in keep window; skipping new bet.")
                 continue
 
             new_result = csv_row.get("Result", "").strip()
@@ -379,25 +398,28 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> gspread.
                     new_row_values.append(pl_value)
                 else:
                     new_row_values.append(csv_row.get(col_name, ""))
-            print(f"Appending new row for Bet ID {bet_id}: {new_row_values}")
+            dlog(f"Appending Bet ID {bet_id}")
             try:
                 sheet.append_row(new_row_values, value_input_option="USER_ENTERED")
                 appended_count += 1
             except Exception as e:
-                print(f"Error appending row for Bet ID {bet_id}: {e}")
+                dlog(f"Error appending row for Bet ID {bet_id}: {e}")
                 raise
 
-    print(f"CSV sync complete: {updated_count} rows updated, {appended_count} rows appended.")
+    dlog(f"CSV sync complete: {updated_count} rows updated, {appended_count} rows appended.")
 
     try:
+        dlog("Sorting rows...")
         sort_sheet(sheet, HEADER_ROW, FIRST_DATA_ROW, sheet_header)
+        dlog("Sorting complete.")
     except Exception as e:
-        print(f"Error sorting the sheet: {e}")
+        dlog(f"Error sorting the sheet: {e}")
 
     # -----------------------------
     # COPY FORMULA FROM N1/O1 DOWN TO LAST DATA ROW DYNAMICALLY
     # -----------------------------
     try:
+        dlog("Copying formulas from N1/O1 down to last data row...")
         all_values = sheet.get_all_values()
         last_row = len(all_values)
         if last_row >= FIRST_DATA_ROW:
@@ -454,13 +476,14 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> gspread.
                 "requests": [request_N, request_O]
             }
             sheet.spreadsheet.batch_update(body)
-            print(f"Formula in N1 copied down dynamically from N{FIRST_DATA_ROW} to N{last_row}.")
-            print(f"Formula in O1 copied down dynamically from O{FIRST_DATA_ROW} to O{last_row}.")
+            dlog(f"Formula in N1 copied down dynamically from N{FIRST_DATA_ROW} to N{last_row}.")
+            dlog(f"Formula in O1 copied down dynamically from O{FIRST_DATA_ROW} to O{last_row}.")
         else:
-            print("No data rows to copy formula into.")
+            dlog("No data rows to copy formula into.")
     except Exception as e:
-        print("Error copying formula from N1/O1 down:", e)
+        dlog(f"Error copying formula from N1/O1 down: {e}")
 
+    dlog("CSV sync complete.")
     return sheet.spreadsheet
 
 # -----------------------------
@@ -471,7 +494,7 @@ def main() -> None:
     try:
         sh = partial_update_google_sheets()
     except Exception as e:
-        print(f"An error occurred during Sheets sync: {e}")
+        dlog(f"An error occurred during Sheets sync: {e}")
     if sh:
         backfill_event_ids_from_live_odds(sh)
 
