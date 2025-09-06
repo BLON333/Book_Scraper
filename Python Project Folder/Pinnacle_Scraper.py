@@ -1,4 +1,5 @@
-import os, sys, time, datetime
+import os, sys, time
+from datetime import datetime
 import csv
 import random, tempfile
 import re
@@ -31,10 +32,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 def _ts():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-RUN_ID = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
 def log(msg):
