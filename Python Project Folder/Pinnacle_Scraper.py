@@ -3,13 +3,39 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-import time
+import config
 from datetime import datetime
+
+RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+def _ts():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def log(msg):
+    try:
+        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
+    except Exception:
+        try:
+            print((f"[{_ts()}][RUN {RUN_ID}] {str(msg)}").encode("ascii","replace").decode())
+        except Exception:
+            print(repr(msg))
+
+
+log(f"Config module: {getattr(config,'__file__','<unknown>')}")
+log(
+    f"Config: ATTACH_TO_RUNNING={getattr(config,'ATTACH_TO_RUNNING',None)}, "
+    f"CHROME_USER_DATA_DIR='{getattr(config,'CHROME_USER_DATA_DIR',None)}', "
+    f"CHROME_PROFILE_DIR='{getattr(config,'CHROME_PROFILE_DIR','Default')}', "
+    f"DEBUG_PORT={getattr(config,'DEBUG_PORT',None)}"
+)
+
+import time
 import csv
 import random
 import re
 import requests
-import config
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -27,23 +53,6 @@ from selenium.common.exceptions import (
 )
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
-
-RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-
-def _ts():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-def log(msg):
-    try:
-        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
-    except Exception:
-        try:
-            print((f"[{_ts()}][RUN {RUN_ID}] {str(msg)}").encode("ascii","replace").decode())
-        except Exception:
-            print(repr(msg))
 
 
 def repo_path(*parts):
@@ -115,11 +124,11 @@ def init_driver():
         return driver
 
     try:
-        user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", "")
-        profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
         opts = Options()
-        opts.add_argument(f"--user-data-dir={user_data_dir}")
-        opts.add_argument(f"--profile-directory={profile_dir}")
+        opts.add_argument(f"--user-data-dir={config.CHROME_USER_DATA_DIR}")
+        opts.add_argument(
+            f"--profile-directory={getattr(config, 'CHROME_PROFILE_DIR', 'Default')}"
+        )
         opts.add_experimental_option("excludeSwitches", ["enable-automation"])
         opts.add_experimental_option("useAutomationExtension", False)
         for arg in [
@@ -132,7 +141,7 @@ def init_driver():
             opts.add_argument(arg)
         opts.add_argument("--remote-allow-origins=*")
         log(
-            f"[Driver] Selenium launch with profile -> user_data_dir='{user_data_dir}', profile_dir='{profile_dir}'"
+            f"[Driver] Selenium launch with profile -> user_data_dir='{config.CHROME_USER_DATA_DIR}', profile_dir='{getattr(config, 'CHROME_PROFILE_DIR', 'Default')}'"
         )
         driver = webdriver.Chrome(options=opts)
         driver.execute_cdp_cmd(
@@ -141,7 +150,7 @@ def init_driver():
                 "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})",
             },
         )
-        log("[Driver] ✅ Selenium driver launched with your profile.")
+        log("[Driver] OK: Selenium driver launched with your profile.")
         return driver
     except (SessionNotCreatedException, WebDriverException) as e:
         log(f"[FATAL] Selenium launch failed: {e}")
