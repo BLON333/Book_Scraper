@@ -171,6 +171,79 @@ def sort_sheet(sheet: Worksheet, header_row: int, first_data_row: int, sheet_hea
     print("Sheet rows sorted: pending bets at the top, settled bets at the bottom, with pending bets ordered by start time.")
 
 # -----------------------------
+# EVENT ID BACKFILL (new)
+# -----------------------------
+def backfill_event_ids_from_live_odds(sh):
+    try:
+        ws_live = sh.worksheet(config.LIVE_ODDS_TAB)
+        ws_bets = sh.worksheet(config.BET_SHEET_TAB)
+    except Exception:
+        print("[Sheets Sync] Skipped Event ID backfill: Live Odds tab missing or headers not found.")
+        return
+
+    live_values = ws_live.get_all_values()
+    bets_values = ws_bets.get_all_values()
+    if not live_values or not bets_values:
+        print("[Sheets Sync] Skipped Event ID backfill: one of the tabs is empty.")
+        return
+
+    live_header = live_values[0]
+    try:
+        bets_header = bets_values[config.BET_HEADER_ROW - 1]
+    except IndexError:
+        print("[Sheets Sync] Skipped Event ID backfill: one of the tabs is empty.")
+        return
+
+    def find_col(header, name):
+        return header.index(name) if name in header else -1
+
+    li_event_id = find_col(live_header, "Event ID")
+    li_event_match = find_col(live_header, "Event/Match")
+    bi_event_id = find_col(bets_header, "Event ID")
+    bi_event_match = find_col(bets_header, "Event/Match")
+
+    if min(li_event_id, li_event_match, bi_event_id, bi_event_match) < 0:
+        print("[Sheets Sync] Skipped Event ID backfill: required headers not found.")
+        return
+
+    lookup = {}
+    for row in live_values[1:]:
+        if len(row) <= max(li_event_id, li_event_match):
+            continue
+        eid = row[li_event_id].strip()
+        em = row[li_event_match].strip()
+        if eid and em:
+            lookup[em] = eid
+
+    updates = []
+    start_row = config.BET_FIRST_DATA_ROW
+    for r, row in enumerate(bets_values[start_row - 1:], start=start_row):
+        if len(row) <= max(bi_event_id, bi_event_match):
+            continue
+        current_id = (row[bi_event_id] or "").strip()
+        if current_id:
+            continue
+        em = (row[bi_event_match] or "").strip()
+        if not em:
+            continue
+        new_id = lookup.get(em)
+        if new_id:
+            updates.append((r, bi_event_id + 1, new_id))
+
+    if not updates:
+        print(f"[Sheets Sync] Backfilled 0 Event IDs from Live Odds ({config.BET_SHEET_TAB}).")
+        return
+
+    cells = [gspread.Cell(row=r, col=c, value=v) for r, c, v in updates]
+    try:
+        ws_bets.update_cells(cells)
+    except Exception as e:
+        print(f"[Sheets Sync] Error applying Event ID backfill: {e}")
+        return
+
+    print(f"[Sheets Sync] Backfilled {len(updates)} Event IDs from Live Odds ({config.BET_SHEET_TAB}).")
+
+# -----------------------------
 # PARTIAL UPDATE FUNCTION (existing)
 # -----------------------------
 def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
@@ -350,6 +423,8 @@ def partial_update_google_sheets(csv_file_path: str = CSV_FILE_PATH) -> None:
             print("No data rows to copy formula into.")
     except Exception as e:
         print("Error copying formula from N1/O1 down:", e)
+
+    backfill_event_ids_from_live_odds(sheet.spreadsheet)
 
 # -----------------------------
 # MAIN FUNCTION
