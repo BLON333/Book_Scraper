@@ -1,11 +1,16 @@
-import os
-import time
+import os, sys, time, datetime
 import csv
 import random, tempfile
 import re
 import requests
 import undetected_chromedriver as uc
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 import config
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime, timedelta
@@ -14,10 +19,35 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import SessionNotCreatedException, WebDriverException, TimeoutException
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import (
+    SessionNotCreatedException,
+    WebDriverException,
+    TimeoutException,
+    NoSuchElementException,
+    StaleElementReferenceException,
+)
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+
+def _ts():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+RUN_ID = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+def log(msg):
+    try:
+        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
+    except Exception:
+        print(msg)
+
+
+def _csv_path(name="Bet_Tracking.csv"):
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.abspath(os.path.join(here, ".."))
+    return os.path.join(root, name)
 
 # -----------------------------------------------------------------------------
 # OFFICIAL TEAM MAPPING & CANONICALIZATION
@@ -51,33 +81,37 @@ def random_delay(base=1.0, variation=0.5):
 
 def init_driver():
     if getattr(config, "ATTACH_TO_RUNNING", False):
-        debug_port = getattr(config, "DEBUG_PORT", 9222)
-        print(f"Attaching to an already running Chrome (127.0.0.1:{debug_port})...")
+        port = getattr(config, "DEBUG_PORT", 9222)
+        profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
+        user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", "")
+        log(f"[Driver] ATTACH mode → 127.0.0.1:{port} | profile_dir={profile_dir} | user_data_dir={user_data_dir}")
         opts = Options()
-        opts.debugger_address = f"127.0.0.1:{debug_port}"
+        opts.debugger_address = f"127.0.0.1:{port}"
         opts.add_argument("--start-maximized")
         opts.add_argument("--remote-allow-origins=*")
-        url = f"http://127.0.0.1:{debug_port}/json/version"
+        url = f"http://127.0.0.1:{port}/json/version"
         try:
             resp = requests.get(url, timeout=2.0)
             if resp.status_code != 200:
-                print(f"[FATAL] DevTools not reachable at {url}")
+                log(f"[FATAL] DevTools not reachable at {url}")
                 raise RuntimeError("DevTools not reachable")
         except Exception:
-            print(f"[FATAL] DevTools not reachable at {url}")
+            log(f"[FATAL] DevTools not reachable at {url}")
             raise RuntimeError("DevTools not reachable")
         try:
             driver = webdriver.Chrome(options=opts)
         except Exception as e:
-            print(f"[FATAL] Failed to attach to running Chrome: {e}")
+            log(f"[FATAL] Failed to attach to running Chrome: {e}")
             raise
-        print("✅ Attached to running Chrome with your profile.")
+        log("[Driver] ✅ Attached to running Chrome with your profile.")
         return driver
 
     try:
+        user_data_dir = getattr(config, "CHROME_USER_DATA_DIR", "")
+        profile_dir = getattr(config, "CHROME_PROFILE_DIR", "Default")
         opts = Options()
-        opts.add_argument(f"--user-data-dir={config.CHROME_USER_DATA_DIR}")
-        opts.add_argument(f"--profile-directory={config.CHROME_PROFILE_DIR}")
+        opts.add_argument(f"--user-data-dir={user_data_dir}")
+        opts.add_argument(f"--profile-directory={profile_dir}")
         opts.add_experimental_option("excludeSwitches", ["enable-automation"])
         opts.add_experimental_option("useAutomationExtension", False)
         for arg in [
@@ -88,6 +122,10 @@ def init_driver():
             "--start-maximized",
         ]:
             opts.add_argument(arg)
+        opts.add_argument("--remote-allow-origins=*")
+        log(
+            f"[Driver] Selenium launch with profile → user_data_dir='{user_data_dir}', profile_dir='{profile_dir}'"
+        )
         driver = webdriver.Chrome(options=opts)
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
@@ -95,9 +133,10 @@ def init_driver():
                 "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})",
             },
         )
+        log("[Driver] ✅ Selenium driver launched with your profile.")
         return driver
     except (SessionNotCreatedException, WebDriverException):
-        print("[WARN] Selenium profile launch failed; trying UC temp profile…")
+        log("[Driver] [WARN] Selenium profile launch failed; trying UC temp profile…")
         fresh = uc.ChromeOptions()
         for arg in [
             "--no-first-run",
@@ -109,7 +148,10 @@ def init_driver():
             fresh.add_argument(arg)
         temp_profile = tempfile.mkdtemp()
         fresh.add_argument(f"--user-data-dir={temp_profile}")
+        log("[Driver] [WARN] Falling back to undetected_chromedriver temp profile")
+        log(f"[Driver] UC temp user_data_dir='{temp_profile}'")
         driver = uc.Chrome(options=fresh)
+        log("[Driver] ✅ UC driver launched (temp profile)")
         return driver
 
 
@@ -146,6 +188,7 @@ def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
         except Exception:
             pass
         if _loaded_on_target():
+            log(f"[Nav] Arrived at {driver.current_url}")
             return True
 
         # B) force via JS
@@ -154,6 +197,7 @@ def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
         except WebDriverException:
             pass
         if _loaded_on_target():
+            log(f"[Nav] Arrived at {driver.current_url}")
             return True
 
         # C) (optional) CDP fallback — keep if you already have CDP elsewhere
@@ -163,6 +207,7 @@ def navigate_with_retry(driver, url, max_attempts=3, timeout=20):
         except Exception:
             pass
         if _loaded_on_target():
+            log(f"[Nav] Arrived at {driver.current_url}")
             return True
 
     return False
@@ -270,7 +315,7 @@ def login_handshake(driver, max_wait_secs=120):
     if is_logged_in(driver):
         return True
 
-    print("[LOGIN] Not logged in. Please log in in the opened Chrome window.")
+    log("[LOGIN] Not logged in. Please log in in the opened Chrome window.")
 
     # Try to expose a login UI without navigating away.
     try:
@@ -279,6 +324,7 @@ def login_handshake(driver, max_wait_secs=120):
             (By.CSS_SELECTOR, "a[href*='login']"),
             (By.CSS_SELECTOR, "button[data-test-id='Button']"),
         ]:
+            log(f"[Login] Trying selector {sel}")
             elems = driver.find_elements(*sel)
             if elems:
                 try:
@@ -295,12 +341,12 @@ def login_handshake(driver, max_wait_secs=120):
     last_print = -1
     while True:
         if is_logged_in(driver):
-            print("\n[LOGIN] Detected logged-in state. Continuing.")
+            log("[Login] Login detected. Continuing.")
             return True
 
         remaining = int(deadline - time.time())
         if remaining < 0:
-            print("\n[LOGIN] Timed out waiting for login.")
+            log("[Login] Timed out waiting for login.")
             return False
 
         if remaining != last_print:
@@ -309,33 +355,74 @@ def login_handshake(driver, max_wait_secs=120):
             sys.stdout.flush()
         time.sleep(1)
 
-def open_account_and_history(driver):
-    """
-    Navigate to the account menu and open the betting history page.
-    """
-    wait = WebDriverWait(driver, 10)
+def open_account_and_history(driver, timeout=15):
+    wait = WebDriverWait(driver, timeout)
     try:
-        account_menu = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']")))
+        if "pinnacle" not in (driver.current_url or "").lower():
+            driver.get("https://www.pinnacle.ca/en/")
+            log("[Nav] Forced homepage load before account menu.")
+    except Exception as e:
+        log(f"[Nav][WARN] Could not force homepage: {e}")
+    try:
+        dismiss_cookie_banner(driver)
+        log("[Nav] Cookie banner dismissed (if present).")
+    except Exception:
+        pass
+
+    account_triggers = [
+        (By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']"),
+        (By.CSS_SELECTOR, "button[data-test-id='account-menu']"),
+        (By.XPATH, "//button[contains(., 'Account') or contains(., 'My Account')]")
+    ]
+    opened_menu = False
+    for by, sel in account_triggers:
         try:
-            account_menu.click()
-        except Exception:
-            driver.execute_script("arguments[0].click();", account_menu)
-    except Exception as e:
-        print(f"Error opening Account Menu: {e}")
+            elem = wait.until(EC.element_to_be_clickable((by, sel)))
+            try:
+                elem.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", elem)
+            log(f"[Nav] Clicked account trigger: {sel}")
+            opened_menu = True
+            break
+        except Exception as e:
+            log(f"[Nav] Account trigger not clickable: {sel} | {e}")
+            continue
+    if not opened_menu:
+        log("[Nav][ERR] Could not open Account menu (no trigger clickable).")
+        return
+
+    history_selectors = [
+        (By.XPATH, "//label[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
+        (By.XPATH, "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
+        (By.XPATH, "//span[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'betting history')]") ,
+    ]
+    clicked_history = False
+    for by, sel in history_selectors:
+        try:
+            item = wait.until(EC.element_to_be_clickable((by, sel)))
+            try:
+                item.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", item)
+            log(f"[Nav] Clicked Betting history item: {sel}")
+            clicked_history = True
+            break
+        except Exception as e:
+            log(f"[Nav] Betting history selector not clickable: {sel} | {e}")
+            continue
+    if not clicked_history:
+        log("[Nav][ERR] Could not click 'Betting history'.")
+        return
 
     try:
-        my_account = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "My Account")))
-        my_account.click()
-        time.sleep(2)
-    except Exception as e:
-        print(f"Error clicking 'My Account': {e}")
-
-    try:
-        betting_history = wait.until(EC.element_to_be_clickable((By.XPATH, "//label[contains(text(), 'Betting history')]")))
-        betting_history.click()
-        time.sleep(2)
-    except Exception as e:
-        print(f"Error opening Betting History: {e}")
+        wait.until(EC.any_of(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-test-id='betCard']")),
+            EC.presence_of_element_located((By.XPATH, "//*[contains(., 'Bet ID') or contains(., 'Wager')]") )
+        ))
+        log("[Nav] Betting history table detected.")
+    except TimeoutException:
+        log("[Nav][ERR] Betting history table did not appear within timeout.")
 
 def click_load_more(driver, max_attempts=3):
     """
@@ -359,10 +446,9 @@ def click_load_more(driver, max_attempts=3):
 # -----------------------------------------------------------------------------
 # CSV & BET-TRACKING FUNCTIONS
 # -----------------------------------------------------------------------------
-def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
-    """
-    Return a set of Bet ID#s that already exist in the CSV, to avoid duplicates.
-    """
+def read_existing_bet_ids(csv_file_path=None):
+    """Return a set of Bet ID#s that already exist in the CSV, to avoid duplicates."""
+    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
     existing_ids = set()
     if os.path.isfile(csv_file_path):
         with open(csv_file_path, newline="") as file:
@@ -373,50 +459,39 @@ def read_existing_bet_ids(csv_file_path="Bet_Tracking.csv"):
     return existing_ids
 
 def expand_unlogged_bets(driver, existing_ids, max_passes=3):
-    """
-    Expand any bet cards that are not already logged in the CSV, to reveal details.
-    Robust against DOM reflows/virtualization that cause stale element refs.
-    """
-    seen_ids = set()
-    passes = 0
-
+    wait = WebDriverWait(driver, 10)
+    try:
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-test-id='betCard']")))
+    except TimeoutException:
+        log("[Expand] No bet cards detected; nothing to expand.")
+        return
+    seen_ids, passes, expanded = set(), 0, 0
     while passes < max_passes:
         try:
             cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
         except Exception:
             cards = []
-
+        log(f"[Expand] Pass {passes+1}: found {len(cards)} cards.")
         if not cards:
             break
-
         for idx in range(len(cards)):
             try:
-                # Re-locate the card fresh each time to avoid stale refs
                 card_list = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
                 if idx >= len(card_list):
                     continue
                 card = card_list[idx]
-
-                # Extract Bet ID (fresh each iteration)
                 bet_id = None
                 try:
                     bid_elem = card.find_element(By.CSS_SELECTOR, ".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2")
                     bet_id = (bid_elem.text or "").strip().replace("#", "").replace(" ", "")
                 except Exception:
                     pass
-
-                # Skip duplicates/already-logged
                 if bet_id and (bet_id in existing_ids or bet_id in seen_ids):
                     continue
-
-                # Bring into view and expand
                 try:
                     driver.execute_script("arguments[0].scrollIntoView({block:'center'});", card)
                 except StaleElementReferenceException:
-                    # Reflow occurred; retry next loop
                     continue
-
-                # Click with JS (less brittle than ActionChains)
                 try:
                     driver.execute_script("arguments[0].click();", card)
                 except Exception:
@@ -424,19 +499,17 @@ def expand_unlogged_bets(driver, existing_ids, max_passes=3):
                         card.click()
                     except Exception:
                         pass
-
-                time.sleep(random.uniform(1.5, 3.0))
+                time.sleep(random.uniform(1.3, 2.6))
                 if bet_id:
                     seen_ids.add(bet_id)
-
+                expanded += 1
             except StaleElementReferenceException:
-                # Card became stale after scroll/expand; move on
                 continue
-            except Exception:
-                # Non-fatal; continue expanding other cards
+            except Exception as e:
+                log(f"[Expand][WARN] Error expanding card idx={idx}: {e}")
                 continue
-
         passes += 1
+    log(f"[Expand] Expanded ~{expanded} cards across {passes} pass(es).")
 
 # -----------------------------------------------------------------------------
 # JAVASCRIPT EXTRACTION CODE
@@ -685,10 +758,9 @@ def extract_bet_data(driver):
         return []
     return bets
 
-def update_csv(extracted_bets, csv_file_path="Bet_Tracking.csv"):
-    """
-    Append new bets to the CSV, avoiding duplicates by Bet ID#.
-    """
+def update_csv(extracted_bets, csv_file_path=None):
+    """Append new bets to the CSV, avoiding duplicates by Bet ID#."""
+    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
     file_exists = os.path.isfile(csv_file_path)
     existing_ids = set()
     if file_exists:
@@ -733,7 +805,7 @@ def update_csv(extracted_bets, csv_file_path="Bet_Tracking.csv"):
                     "Result": "Pending"
                 })
 
-def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
+def grade_settled_bets(driver, csv_file_path=None):
     """
     Check if any bets in the CSV have settled (Win/Loss/Refund) and update them.
     Also recalc CLV% and Profit/Loss where possible.
@@ -745,12 +817,18 @@ def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
         except:
             return None
 
+    csv_file_path = csv_file_path or _csv_path("Bet_Tracking.csv")
     if not os.path.isfile(csv_file_path):
         return
 
     with open(csv_file_path, newline="") as file:
         rows = list(csv.DictReader(file))
 
+    if not rows:
+        log(f"[Grade] '{csv_file_path}' has 0 data rows; skipping grade_settled_bets.")
+        return
+
+    updated_count = 0
     for row in rows:
         if row["Result"].strip() == "Pending":
             bet_id = row["Bet ID#"].strip()
@@ -774,6 +852,7 @@ def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
             new_status = driver.execute_script(js_snippet, bet_id)
             if new_status != "Pending":
                 row["Result"] = new_status
+                updated_count += 1
 
     for row in rows:
         try:
@@ -797,7 +876,6 @@ def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
         elif result == "refund":
             row["Profit/Loss"] = "0"
         else:
-            # "win" or "loss"
             orig_prob = american_to_probability(row["Odds"])
             if orig_prob and orig_prob > 0:
                 decimal_odds = 1.0 / orig_prob
@@ -811,11 +889,13 @@ def grade_settled_bets(driver, csv_file_path="Bet_Tracking.csv"):
                 )
 
     # Rewrite CSV
-    fieldnames = rows[0].keys()
+    fieldnames = rows[0].keys() if rows else []
     with open(csv_file_path, "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+    log(f"[Grade] Updated statuses for {updated_count} bets.")
 
 # -----------------------------------------------------------------------------
 # GOOGLE SHEETS: BUILD MATCHUP DICTIONARY & MERGE EVENT IDS
@@ -858,13 +938,14 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
 
     return matchup_dict
 
-def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
+def merge_event_ids_into_csv(csv_file=None,
                              spreadsheet_name="Live Odds",
                              sheet_name="Live Odds"):
     """
     Match unknown (pending) Event IDs in CSV with those from the Google Sheet
     using the canonicalized matchup strings.
     """
+    csv_file = csv_file or _csv_path("Bet_Tracking.csv")
     if not os.path.isfile(csv_file):
         return
 
@@ -903,12 +984,22 @@ def merge_event_ids_into_csv(csv_file="Bet_Tracking.csv",
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"Updated {updated_count} rows in '{csv_file}' with Event IDs (only future events).")
+    log(f"[Merge] Updated {updated_count} rows in '{csv_file}' with Event IDs (future events only).")
 
 # -----------------------------------------------------------------------------
 # MAIN FUNCTION
 # -----------------------------------------------------------------------------
 def main():
+    log("==== Pinnacle_Scraper starting ====")
+    try:
+        log(
+            f"Config: ATTACH_TO_RUNNING={getattr(config,'ATTACH_TO_RUNNING',None)}, "
+            f"CHROME_USER_DATA_DIR='{getattr(config,'CHROME_USER_DATA_DIR',None)}', "
+            f"CHROME_PROFILE_DIR='{getattr(config,'CHROME_PROFILE_DIR','Default')}', "
+            f"DEBUG_PORT={getattr(config,'DEBUG_PORT',None)}"
+        )
+    except Exception as e:
+        log(f"[WARN] Could not import/print config details: {e}")
     driver = init_driver()
     driver.get("about:blank")
     navigate_with_retry(
@@ -922,13 +1013,16 @@ def main():
             "window.location.href = arguments[0];",
             "https://www.pinnacle.ca/en/",
         )
+        log(f"[Nav] After script redirect: {driver.current_url}")
     if not driver.current_url.startswith("https://www.pinnacle"):
-        print("[FATAL] Could not reach Pinnacle after retries. Exiting.")
+        log("[FATAL] Could not reach Pinnacle after retries. Exiting.")
         driver.quit()
         return
     dismiss_cookie_banner(driver)
+    log("[Nav] dismiss_cookie_banner() called")
     time.sleep(random_delay(5, 2))
     # Ensure login before navigating to account/history
+    log("[Login] login_handshake(): started")
     if not login_handshake(driver, max_wait_secs=120):
         driver.quit()
         return
@@ -936,15 +1030,15 @@ def main():
     open_account_and_history(driver)
     click_load_more(driver)
 
-    existing_ids = read_existing_bet_ids("Bet_Tracking.csv")
+    existing_ids = read_existing_bet_ids(_csv_path("Bet_Tracking.csv"))
     expand_unlogged_bets(driver, existing_ids)
 
     new_bets = extract_bet_data(driver)
-    update_csv(new_bets, "Bet_Tracking.csv")
+    update_csv(new_bets, _csv_path("Bet_Tracking.csv"))
 
-    grade_settled_bets(driver, "Bet_Tracking.csv")
+    grade_settled_bets(driver, _csv_path("Bet_Tracking.csv"))
     merge_event_ids_into_csv(
-        csv_file="Bet_Tracking.csv",
+        csv_file=_csv_path("Bet_Tracking.csv"),
         spreadsheet_name="Live Odds",
         sheet_name="Live Odds"
     )
