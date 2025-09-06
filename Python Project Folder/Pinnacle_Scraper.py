@@ -60,8 +60,8 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
 )
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials as SA_Credentials
+import gspread, json, traceback
 
 
 def repo_path(*parts):
@@ -74,6 +74,22 @@ def csv_path(name="Bet_Tracking.csv"):
 
 def creds_path():
     return repo_path("credentials.json")
+
+SHEETS_SCOPES = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
+]
+
+
+def gs_client_debug(keyfile: str):
+    with open(keyfile, "r", encoding="utf-8") as fh:
+        info = json.load(fh)
+    sa_email = info.get("client_email", "<unknown>")
+    log(f"[Sheets] Service account: {sa_email}")
+    creds = SA_Credentials.from_service_account_info(info, scopes=SHEETS_SCOPES)
+    return gspread.authorize(creds)
 
 # -----------------------------------------------------------------------------
 # OFFICIAL TEAM MAPPING & CANONICALIZATION
@@ -976,25 +992,19 @@ def grade_settled_bets(driver, csv_file_path=None):
 # -----------------------------------------------------------------------------
 # GOOGLE SHEETS: BUILD MATCHUP DICTIONARY & MERGE EVENT IDS
 # -----------------------------------------------------------------------------
-def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="Live Odds"):
-    scope = [
-        "https://spreadsheets.google.com/feeds",
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive.file",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    try:
-        keyfile = creds_path()
-        if not os.path.isfile(keyfile):
-            log(f"[Sheets][ERR] credentials.json not found at {keyfile}")
-            return {}
-        log(f"[Sheets] Using credentials at: {keyfile}")
-        creds = ServiceAccountCredentials.from_json_keyfile_name(keyfile, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open(spreadsheet_name).worksheet(sheet_name)
-    except Exception as e:
-        log(f"[Sheets][ERR] Google Sheets auth failed: {e}")
+def build_matchup_dict_from_live_odds(spreadsheet_id="Live Odds", sheet_name="Live Odds"):
+    keyfile = creds_path()
+    log(f"[Sheets] Using credentials at: {keyfile}")
+    if not os.path.isfile(keyfile):
+        log(f"[Sheets][ERR] credentials.json not found at {keyfile}")
         return {}
+    try:
+        client = gs_client_debug(keyfile)
+        sheet = client.open_by_key(spreadsheet_id).worksheet(sheet_name)
+    except Exception as e:
+        log(f"[Sheets][ERR] {type(e).__name__}: {e}")
+        log(traceback.format_exc())
+        raise
 
     data = sheet.get_all_values()
     if len(data) < 2:
@@ -1020,7 +1030,7 @@ def build_matchup_dict_from_live_odds(spreadsheet_name="Live Odds", sheet_name="
     return matchup_dict
 
 def merge_event_ids_into_csv(csv_file=None,
-                             spreadsheet_name="Live Odds",
+                             spreadsheet_id="Live Odds",
                              sheet_name="Live Odds"):
     """
     Match unknown (pending) Event IDs in CSV with those from the Google Sheet
@@ -1030,7 +1040,7 @@ def merge_event_ids_into_csv(csv_file=None,
     if not os.path.isfile(csv_file):
         return
 
-    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_name, sheet_name)
+    matchup_dict = build_matchup_dict_from_live_odds(spreadsheet_id, sheet_name)
     if not matchup_dict:
         return
 
@@ -1122,7 +1132,7 @@ def main():
     grade_settled_bets(driver, csv_path("Bet_Tracking.csv"))
     merge_event_ids_into_csv(
         csv_file=csv_path("Bet_Tracking.csv"),
-        spreadsheet_name="Live Odds",
+        spreadsheet_id="Live Odds",
         sheet_name="Live Odds"
     )
 
