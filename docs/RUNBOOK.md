@@ -2,7 +2,7 @@
 1) Scrape Pinnacle → Bet_Tracking.csv
 2) python google_sheets_sync.py
 3) python odds_sync.py
-4) python clv_sync.py
+4) python clv_sync.py  # from repo root
 (or: python hybrid_script.py to run all)
 
 Troubleshooting:

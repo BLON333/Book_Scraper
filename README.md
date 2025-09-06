@@ -37,7 +37,7 @@ python hybrid_script.py
 ## Odds & CLV sync
 1. Fill `ODDS_API_KEY` and `GOOGLE_SHEET_ID` in `config.py`.
 2. Ensure Bet Tracking has `Event ID`, `Odds`, `Bookmaker`, `Market`, `Bet` columns.
-3. Update odds and CLV with:
+3. Update odds and CLV with the sync scripts in the repository root:
 
 ```bash
 python odds_sync.py
