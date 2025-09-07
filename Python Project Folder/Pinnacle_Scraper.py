@@ -433,116 +433,114 @@ def login_handshake(driver, max_wait_secs=120):
             sys.stdout.flush()
         time.sleep(1)
 
-def open_account_and_history(driver, timeout=15):
+def open_account_and_history(driver, timeout=20):
     """
-    Navigate to Pinnacle's 'Betting history' page (NOT 'Open bets') and verify it loaded.
-
-    Strategy:
-      - Open account menu (several selectors).
-      - Find a link/button whose text matches 'Betting history'/'Bet history'/'History',
-        explicitly skipping anything containing 'Open bets'.
-      - If not found in the menu, scan the whole page (left sidebar 'MY BETS').
-      - After clicking, verify: URL contains 'history' OR any bet card includes 'SETTLED'/'WIN'/'LOSS'.
+    Flow:
+      1) Click account icon (top-right).
+      2) In dropdown, click 'My account'.
+      3) Wait for account page to load.
+      4) Click 'Betting history' in left sidebar (NOT 'Open bets').
+      5) Verify history page.
+    Returns: True on success, False otherwise.
     """
     wait = WebDriverWait(driver, timeout)
 
-    # Optional: make sure we're on the site and clear cookie banner if we have helpers
-    try:
-        if "pinnacle" not in (driver.current_url or "").lower():
-            driver.get("https://www.pinnacle.ca/en/")
-            log("[Nav] Forced homepage load before account menu.")
-    except Exception as e:
-        log(f"[Nav][WARN] Could not force homepage: {e}")
+    def _safe_click(el):
+        try:
+            el.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", el)
 
-    try:
-        # If you have a helper, keep this call; otherwise it's a no-op
-        dismiss_cookie_banner(driver)
-        log("[Nav] Cookie banner dismissed (if present).")
-    except Exception:
-        pass
-
-    # 1) Open the account/user menu using several possible triggers
+    # 1) Open the account/user menu
     account_triggers = [
         (By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']"),
         (By.CSS_SELECTOR, "button[data-test-id='account-menu']"),
         (By.XPATH, "//button[contains(., 'Account') or contains(., 'My Account')]")
     ]
-    opened_menu = False
     for by, sel in account_triggers:
         try:
             elem = wait.until(EC.element_to_be_clickable((by, sel)))
-            try:
-                elem.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", elem)
+            _safe_click(elem)
             log(f"[Nav] Clicked account trigger: {sel}")
-            opened_menu = True
             break
         except Exception as e:
             log(f"[Nav] Account trigger not clickable: {sel} | {e}")
-    if not opened_menu:
-        log("[Nav][ERR] Could not open Account menu (no trigger clickable).")
+    else:
+        log("[Nav][ERR] Could not open Account menu.")
         return False
 
-    # Helper to find and click a 'Betting history' element under a given root
-    labels_priority = ["betting history", "bet history", "history"]
+    # 2) Click "My account" in dropdown (explicitly avoid 'Open bets')
+    def _click_my_account():
+        nodes = driver.find_elements(By.XPATH, "//a|//button|//div[@role='button']|//span")
+        for n in nodes:
+            try:
+                txt = (n.text or "").replace("\u00a0"," ").strip().lower()
+                if "my account" in txt and "open bets" not in txt:
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
+                    _safe_click(n)
+                    log("[Nav] Clicked 'My account' from dropdown.")
+                    return True
+            except StaleElementReferenceException:
+                continue
+        return False
 
-    def _try_click_betting_history(search_root):
+    if not _click_my_account():
+        log("[Nav][ERR] 'My account' not found/clickable in dropdown.")
+        return False
+
+    # 3) Wait for the account page to load (left sidebar visible OR URL hint)
+    def _account_loaded(d):
+        url = (d.current_url or "").lower()
+        if "account" in url or "my-account" in url:
+            return True
         try:
-            nodes = search_root.find_elements(
-                By.CSS_SELECTOR, "a, button, label, span, div[role='button']"
-            )
+            # Left nav with 'MY BETS' items typically appears on the account page
+            left_links = d.find_elements(By.XPATH, "//a|//button|//div[@role='button']")
+            for ln in left_links:
+                t = (ln.text or "").lower()
+                if "betting history" in t or "bet history" in t:
+                    return True
         except Exception:
-            nodes = []
-        for preferred in labels_priority:
+            pass
+        return False
+
+    try:
+        wait.until(_account_loaded)
+        log("[Nav] Account page detected.")
+    except TimeoutException:
+        log("[Nav][ERR] Account page did not load.")
+        return False
+
+    # 4) Click 'Betting history' (avoid 'Open bets')
+    def _click_betting_history():
+        nodes = driver.find_elements(By.XPATH, "//a|//button|//div[@role='button']|//span")
+        # strong preference for exact 'betting history'
+        targets = ["betting history", "bet history", "history"]
+        for preferred in targets:
             for n in nodes:
                 try:
-                    txt = (n.text or "").replace("\u00a0", " ").replace("\u200b", "").strip().lower()
+                    txt = (n.text or "").replace("\u00a0"," ").strip().lower()
                     if preferred in txt and "open bets" not in txt:
-                        try:
-                            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
-                        except Exception:
-                            pass
-                        try:
-                            n.click()
-                        except Exception:
-                            driver.execute_script("arguments[0].click();", n)
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
+                        _safe_click(n)
                         log(f"[Nav] Clicked '{txt}'")
                         return True
                 except StaleElementReferenceException:
                     continue
         return False
 
-    # 2) Try to click inside the opened account menu first
-    try:
-        # menu container often is parent/sibling; this heuristic is safe
-        menu_container = driver.find_element(By.TAG_NAME, "body")
-    except Exception:
-        menu_container = driver.find_element(By.TAG_NAME, "body")
-
-    clicked = _try_click_betting_history(menu_container)
-
-    # 3) Fallback: scan entire page (covers left sidebar 'MY BETS')
-    if not clicked:
-        log("[Nav] Didn't find 'Betting history' in account menu; scanning entire page.")
-        try:
-            page_root = driver.find_element(By.TAG_NAME, "body")
-            clicked = _try_click_betting_history(page_root)
-        except Exception:
-            clicked = False
-
-    if not clicked:
-        log("[Nav][ERR] Could not find any 'Betting history' link/button.")
+    if not _click_betting_history():
+        log("[Nav][ERR] Could not find 'Betting history' on account page.")
         return False
 
-    # 4) Verify we’re on the history page (URL or bet card badges)
+    # 5) Verify history page loaded
     def _history_loaded(d):
-        cur = (d.current_url or "").lower()
-        if "history" in cur:
+        url = (d.current_url or "").lower()
+        if "history" in url:
             return True
         try:
             cards = d.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard'], div.bet-card, div[class*='bet']")
-            for c in cards[:10]:
+            for c in cards[:12]:
                 t = (c.text or "").upper()
                 if "SETTLED" in t or "WIN" in t or "LOSS" in t:
                     return True
