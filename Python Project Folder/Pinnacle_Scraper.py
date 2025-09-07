@@ -10,21 +10,47 @@ _spec = importlib.util.spec_from_file_location("config", _cfg_path)
 config = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(config)
 
-RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
+# --- Robust helpers (add or replace) ---
 
+WAIT_SHORT = 2.0
+MAX_LOAD_MORE = 20
 
-def _ts():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-def log(msg):
+def log(msg: str):
+    # Keep project’s logger if it exists; otherwise a minimal fallback
     try:
-        print(f"[{_ts()}][RUN {RUN_ID}] {msg}")
+        _ = LOGGER  # type: ignore
+        LOGGER.info(msg)  # noqa
     except Exception:
-        try:
-            print((f"[{_ts()}][RUN {RUN_ID}] {str(msg)}").encode("ascii","replace").decode())
-        except Exception:
-            print(repr(msg))
+        print(msg)
+
+def norm_text(s: str) -> str:
+    return (s or "").replace("\u00a0"," ").replace("\u200b","").strip()
+
+def safe_click(driver, el):
+    try:
+        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+    except Exception:
+        pass
+    try:
+        el.click()
+    except Exception:
+        driver.execute_script("arguments[0].click();", el)
+
+def wait_any(driver, timeout, conditions):
+    wait = WebDriverWait(driver, timeout)
+    last_err = None
+    end = time.time() + timeout
+    while time.time() < end:
+        for cond in conditions:
+            try:
+                if cond(driver):
+                    return True
+            except Exception as e:
+                last_err = e
+        time.sleep(0.2)
+    if last_err:
+        log(f"[Wait][WARN] last error: {last_err}")
+    return False
 
 
 def _looks_like_sheet_id(value: str) -> bool:
@@ -435,69 +461,77 @@ def login_handshake(driver, max_wait_secs=120):
 
 def open_account_and_history(driver, timeout=20):
     """
-    Flow:
+    REQUIRED FLOW:
       1) Click account icon (top-right).
-      2) In dropdown, click 'My account'.
+      2) In dropdown, click 'My account' (NOT 'Open bets').
       3) Wait for account page to load.
-      4) Click 'Betting history' in left sidebar (NOT 'Open bets').
-      5) Verify history page.
+      4) Click 'Betting history' on account page (avoid 'Open bets').
+      5) Verify we're on history, else fail fast.
     Returns: True on success, False otherwise.
     """
     wait = WebDriverWait(driver, timeout)
 
-    def _safe_click(el):
-        try:
-            el.click()
-        except Exception:
-            driver.execute_script("arguments[0].click();", el)
+    # Optional: force homepage & dismiss cookie banner if helpers exist
+    try:
+        if "pinnacle" not in (driver.current_url or "").lower():
+            driver.get("https://www.pinnacle.ca/en/")
+            log("[Nav] Forced homepage load.")
+    except Exception as e:
+        log(f"[Nav][WARN] Homepage load not enforced: {e}")
+    try:
+        # If project has this helper, keep it; otherwise no-op
+        dismiss_cookie_banner(driver)  # type: ignore
+        log("[Nav] Cookie banner dismissed (if present).")
+    except Exception:
+        pass
 
-    # 1) Open the account/user menu
+    # 1) Click account icon
     account_triggers = [
         (By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']"),
         (By.CSS_SELECTOR, "button[data-test-id='account-menu']"),
         (By.XPATH, "//button[contains(., 'Account') or contains(., 'My Account')]")
     ]
+    triggered = False
     for by, sel in account_triggers:
         try:
             elem = wait.until(EC.element_to_be_clickable((by, sel)))
-            _safe_click(elem)
+            safe_click(driver, elem)
             log(f"[Nav] Clicked account trigger: {sel}")
+            triggered = True
             break
         except Exception as e:
             log(f"[Nav] Account trigger not clickable: {sel} | {e}")
-    else:
+    if not triggered:
         log("[Nav][ERR] Could not open Account menu.")
         return False
 
-    # 2) Click "My account" in dropdown (explicitly avoid 'Open bets')
-    def _click_my_account():
+    # 2) From dropdown, click 'My account' (avoid anything containing 'open bets')
+    def click_my_account():
         nodes = driver.find_elements(By.XPATH, "//a|//button|//div[@role='button']|//span")
         for n in nodes:
             try:
-                txt = (n.text or "").replace("\u00a0"," ").strip().lower()
+                txt = norm_text(n.text).lower()
                 if "my account" in txt and "open bets" not in txt:
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
-                    _safe_click(n)
+                    safe_click(driver, n)
                     log("[Nav] Clicked 'My account' from dropdown.")
                     return True
             except StaleElementReferenceException:
                 continue
         return False
 
-    if not _click_my_account():
+    if not click_my_account():
         log("[Nav][ERR] 'My account' not found/clickable in dropdown.")
         return False
 
-    # 3) Wait for the account page to load (left sidebar visible OR URL hint)
-    def _account_loaded(d):
+    # 3) Wait for account page
+    def account_loaded(d):
         url = (d.current_url or "").lower()
-        if "account" in url or "my-account" in url:
+        if "account" in url:
             return True
         try:
-            # Left nav with 'MY BETS' items typically appears on the account page
-            left_links = d.find_elements(By.XPATH, "//a|//button|//div[@role='button']")
-            for ln in left_links:
-                t = (ln.text or "").lower()
+            links = d.find_elements(By.XPATH, "//a|//button|//div[@role='button']")
+            for ln in links:
+                t = norm_text(ln.text).lower()
                 if "betting history" in t or "bet history" in t:
                     return True
         except Exception:
@@ -505,75 +539,83 @@ def open_account_and_history(driver, timeout=20):
         return False
 
     try:
-        wait.until(_account_loaded)
+        wait.until(account_loaded)
         log("[Nav] Account page detected.")
     except TimeoutException:
         log("[Nav][ERR] Account page did not load.")
         return False
 
-    # 4) Click 'Betting history' (avoid 'Open bets')
-    def _click_betting_history():
-        nodes = driver.find_elements(By.XPATH, "//a|//button|//div[@role='button']|//span")
-        # strong preference for exact 'betting history'
+    # 4) Click 'Betting history' (never 'Open bets')
+    def click_betting_history():
+        nodes = driver.find_elements(By.XPATH, "//a|//button|//label|//span|//div[@role='button']")
         targets = ["betting history", "bet history", "history"]
         for preferred in targets:
             for n in nodes:
                 try:
-                    txt = (n.text or "").replace("\u00a0"," ").strip().lower()
+                    txt = norm_text(n.text).lower()
                     if preferred in txt and "open bets" not in txt:
-                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
-                        _safe_click(n)
+                        safe_click(driver, n)
                         log(f"[Nav] Clicked '{txt}'")
                         return True
                 except StaleElementReferenceException:
                     continue
         return False
 
-    if not _click_betting_history():
+    if not click_betting_history():
         log("[Nav][ERR] Could not find 'Betting history' on account page.")
         return False
 
-    # 5) Verify history page loaded
-    def _history_loaded(d):
+    # 5) Verify history page (URL OR cards with settled/win/loss)
+    def history_loaded(d):
         url = (d.current_url or "").lower()
         if "history" in url:
             return True
         try:
             cards = d.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard'], div.bet-card, div[class*='bet']")
-            for c in cards[:12]:
-                t = (c.text or "").upper()
+            for c in cards[:15]:
+                t = norm_text(c.text).upper()
                 if "SETTLED" in t or "WIN" in t or "LOSS" in t:
                     return True
         except Exception:
             pass
         return False
 
-    try:
-        wait.until(_history_loaded)
-        log("[Nav] Betting history detected.")
-        return True
-    except TimeoutException:
+    if not wait_any(driver, timeout, [history_loaded]):
         log("[Nav][ERR] Betting history page did not load within timeout.")
         return False
 
-def click_load_more(driver, max_attempts=3):
+    log("[Nav] Betting history detected.")
+    return True
+
+def click_load_more_history(driver, max_clicks: int = MAX_LOAD_MORE):
     """
-    Click the 'Load More' button up to max_attempts times.
+    Repeatedly click 'Load More' / 'Show more' up to max_clicks.
+    Stops gracefully when no button is found/clickable.
     """
-    for attempt in range(max_attempts):
-        time.sleep(3)
-        buttons = driver.find_elements(By.XPATH, "//span[contains(text(), 'Load More')]")
-        if not buttons:
-            time.sleep(5)
-            buttons = driver.find_elements(By.XPATH, "//span[contains(text(), 'Load More')]")
-            if not buttons:
+    clicks = 0
+    while clicks < max_clicks:
+        try:
+            btn = None
+            # Prefer buttons, then spans that behave like buttons
+            candidates = driver.find_elements(By.XPATH,
+                "//button[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
+                " | //span[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
+            )
+            for c in candidates:
+                if c.is_displayed() and c.is_enabled():
+                    btn = c
+                    break
+            if not btn:
+                log(f"[Expand] No more 'Load More' buttons after {clicks} clicks.")
                 break
-        for button in buttons:
-            try:
-                button.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", button)
-            time.sleep(5)
+            safe_click(driver, btn)
+            clicks += 1
+            log(f"[Expand] Clicked Load More ({clicks}/{max_clicks}).")
+            time.sleep(WAIT_SHORT)
+        except Exception as e:
+            log(f"[Expand][WARN] Load More click failed at {clicks}: {e}")
+            break
+    return clicks
 
 # -----------------------------------------------------------------------------
 # CSV & BET-TRACKING FUNCTIONS
@@ -611,62 +653,44 @@ def _read_existing_ids_debug(csv_file_path=None):
     log(f"[CSV] Loaded {len(ids)} existing Bet IDs. Sample: {sample}")
     return ids
 
-def expand_unlogged_bets(driver, existing_ids, max_passes=3):
-    wait = WebDriverWait(driver, 10)
-    try:
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-test-id='betCard']")))
-    except TimeoutException:
-        log("[Expand] No bet cards detected; nothing to expand.")
-        return
-    log(f"[Expand] existing_ids count: {len(existing_ids)}")
-    seen_ids, passes, expanded = set(), 0, 0
+def find_bet_cards(driver):
+    # Prefer data-test-id selector; fall back to common class patterns
+    cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
+    if not cards:
+        cards = driver.find_elements(By.CSS_SELECTOR, "div.bet-card, div[class*='bet']")
+    return cards
+
+def expand_unlogged_bets(driver, max_passes: int = 2):
+    """
+    Light-touch expansion pass. If project has a stronger version, keep it.
+    Looks for 'Details'/'Show'/'Expand' buttons inside cards and clicks once.
+    """
+    passes = 0
     while passes < max_passes:
-        try:
-            cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-        except Exception:
-            cards = []
-        log(f"[Expand] Pass {passes+1}: found {len(cards)} cards.")
+        cards = find_bet_cards(driver)
         if not cards:
             break
-        for idx in range(len(cards)):
+        expanded_any = False
+        for c in cards:
             try:
-                card_list = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-                if idx >= len(card_list):
-                    continue
-                card = card_list[idx]
-                bet_id = None
-                try:
-                    bid_elem = card.find_element(By.CSS_SELECTOR, ".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2")
-                    bet_id = (bid_elem.text or "").strip().replace("#", "").replace(" ", "")
-                except Exception:
-                    pass
-                if bet_id and (bet_id in existing_ids or bet_id in seen_ids):
-                    continue
-                try:
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", card)
-                except StaleElementReferenceException:
-                    continue
-                try:
-                    driver.execute_script("arguments[0].click();", card)
-                except Exception:
-                    try:
-                        card.click()
-                    except Exception:
-                        pass
-                time.sleep(random.uniform(1.3, 2.6))
-                if bet_id:
-                    seen_ids.add(bet_id)
-                expanded += 1
+                # Common words seen on collapsible controls
+                btns = c.find_elements(By.XPATH, ".//button|.//a|.//div[@role='button']|.//span")
+                for b in btns:
+                    t = norm_text(b.text).lower()
+                    if any(k in t for k in ["details", "show", "expand", "more"]):
+                        safe_click(driver, b)
+                        expanded_any = True
+                        break
             except StaleElementReferenceException:
                 continue
-            except Exception as e:
-                log(f"[Expand][WARN] Error expanding card idx={idx}: {e}")
-                continue
         passes += 1
-    log(f"[Expand] Expanded ~{expanded} cards across {passes} pass(es).")
-    if expanded == 0:
-        log("[Expand] No new bet cards expanded; all bets may already be logged or no unexpanded cards were found.")
+        if not expanded_any:
+            break
+        time.sleep(WAIT_SHORT)
+    log(f"[Expand] Expansion passes: {passes}")
+    return passes
 
+    
 # -----------------------------------------------------------------------------
 # JAVASCRIPT EXTRACTION CODE
 # -----------------------------------------------------------------------------
@@ -1193,11 +1217,11 @@ def main():
         driver.quit()
         return
 
-    open_account_and_history(driver)
-    click_load_more(driver)
+    if not open_account_and_history(driver, timeout=20):
+        return
+    click_load_more_history(driver, max_clicks=MAX_LOAD_MORE)
 
-    existing_ids = _read_existing_ids_debug(csv_path("Bet_Tracking.csv"))
-    expand_unlogged_bets(driver, existing_ids)
+    expand_unlogged_bets(driver, max_passes=2)
 
     new_bets = extract_bet_data(driver)
     update_csv(new_bets, csv_path("Bet_Tracking.csv"))
