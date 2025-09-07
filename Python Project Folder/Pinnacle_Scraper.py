@@ -434,19 +434,34 @@ def login_handshake(driver, max_wait_secs=120):
         time.sleep(1)
 
 def open_account_and_history(driver, timeout=15):
+    """
+    Navigate to Pinnacle's 'Betting history' page (NOT 'Open bets') and verify it loaded.
+
+    Strategy:
+      - Open account menu (several selectors).
+      - Find a link/button whose text matches 'Betting history'/'Bet history'/'History',
+        explicitly skipping anything containing 'Open bets'.
+      - If not found in the menu, scan the whole page (left sidebar 'MY BETS').
+      - After clicking, verify: URL contains 'history' OR any bet card includes 'SETTLED'/'WIN'/'LOSS'.
+    """
     wait = WebDriverWait(driver, timeout)
+
+    # Optional: make sure we're on the site and clear cookie banner if we have helpers
     try:
         if "pinnacle" not in (driver.current_url or "").lower():
             driver.get("https://www.pinnacle.ca/en/")
             log("[Nav] Forced homepage load before account menu.")
     except Exception as e:
         log(f"[Nav][WARN] Could not force homepage: {e}")
+
     try:
+        # If you have a helper, keep this call; otherwise it's a no-op
         dismiss_cookie_banner(driver)
         log("[Nav] Cookie banner dismissed (if present).")
     except Exception:
         pass
 
+    # 1) Open the account/user menu using several possible triggers
     account_triggers = [
         (By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']"),
         (By.CSS_SELECTOR, "button[data-test-id='account-menu']"),
@@ -461,93 +476,87 @@ def open_account_and_history(driver, timeout=15):
             except Exception:
                 driver.execute_script("arguments[0].click();", elem)
             log(f"[Nav] Clicked account trigger: {sel}")
-            log(f"[Nav] Post-account-click URL: {driver.current_url}")
             opened_menu = True
             break
         except Exception as e:
             log(f"[Nav] Account trigger not clickable: {sel} | {e}")
-            continue
     if not opened_menu:
         log("[Nav][ERR] Could not open Account menu (no trigger clickable).")
-        return
-    # Locate account-menu container
-    container = None
-    try:
-        container = driver.find_element(By.CSS_SELECTOR, "div[data-gtm-id='super_nav_account']")
+        return False
+
+    # Helper to find and click a 'Betting history' element under a given root
+    labels_priority = ["betting history", "bet history", "history"]
+
+    def _try_click_betting_history(search_root):
         try:
-            container = container.find_element(By.XPATH, "..")
+            nodes = search_root.find_elements(
+                By.CSS_SELECTOR, "a, button, label, span, div[role='button']"
+            )
+        except Exception:
+            nodes = []
+        for preferred in labels_priority:
+            for n in nodes:
+                try:
+                    txt = (n.text or "").replace("\u00a0", " ").replace("\u200b", "").strip().lower()
+                    if preferred in txt and "open bets" not in txt:
+                        try:
+                            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", n)
+                        except Exception:
+                            pass
+                        try:
+                            n.click()
+                        except Exception:
+                            driver.execute_script("arguments[0].click();", n)
+                        log(f"[Nav] Clicked '{txt}'")
+                        return True
+                except StaleElementReferenceException:
+                    continue
+        return False
+
+    # 2) Try to click inside the opened account menu first
+    try:
+        # menu container often is parent/sibling; this heuristic is safe
+        menu_container = driver.find_element(By.TAG_NAME, "body")
+    except Exception:
+        menu_container = driver.find_element(By.TAG_NAME, "body")
+
+    clicked = _try_click_betting_history(menu_container)
+
+    # 3) Fallback: scan entire page (covers left sidebar 'MY BETS')
+    if not clicked:
+        log("[Nav] Didn't find 'Betting history' in account menu; scanning entire page.")
+        try:
+            page_root = driver.find_element(By.TAG_NAME, "body")
+            clicked = _try_click_betting_history(page_root)
+        except Exception:
+            clicked = False
+
+    if not clicked:
+        log("[Nav][ERR] Could not find any 'Betting history' link/button.")
+        return False
+
+    # 4) Verify we’re on the history page (URL or bet card badges)
+    def _history_loaded(d):
+        cur = (d.current_url or "").lower()
+        if "history" in cur:
+            return True
+        try:
+            cards = d.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard'], div.bet-card, div[class*='bet']")
+            for c in cards[:10]:
+                t = (c.text or "").upper()
+                if "SETTLED" in t or "WIN" in t or "LOSS" in t:
+                    return True
         except Exception:
             pass
-    except Exception:
-        pass
-    if not container:
-        try:
-            container = driver.find_element(By.TAG_NAME, "body")
-        except Exception:
-            log("[Nav][ERR] Could not locate account menu container.")
-            return
-
-    # Scan for history link within the account menu
-    keywords = [
-        "betting history",
-        "history",
-        "transactions",
-        "bets",
-        "account history",
-        "settled",
-        "wagers",
-    ]
-    candidates = []
-    try:
-        candidates = container.find_elements(By.CSS_SELECTOR, "a, button, label, span, div[role='button']")
-    except Exception:
-        pass
-    clicked_history = False
-    for item in candidates:
-        try:
-            text = item.text or ""
-            norm = (
-                text.replace("\u00a0", " ")
-                .replace("\u200b", "")
-                .strip()
-                .lower()
-            )
-            if any(k in norm for k in keywords):
-                try:
-                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", item)
-                except Exception:
-                    pass
-                try:
-                    item.click()
-                except Exception:
-                    driver.execute_script("arguments[0].click();", item)
-                log(f"[Nav] Matched history item text='{norm}' tag={item.tag_name}")
-                log(f"[Nav] Post-history-click URL: {driver.current_url}")
-                clicked_history = True
-                break
-        except StaleElementReferenceException:
-            continue
-    if not clicked_history:
-        try:
-            menu_text = container.text or ""
-            menu_text = menu_text.replace("\u00a0", " ").replace("\u200b", "")
-            log(f"[Nav][DBG] Account menu text (first 400 chars): {menu_text[:400]}")
-        except Exception:
-            log("[Nav][DBG] Account menu text unavailable.")
-        return
+        return False
 
     try:
-        wait.until(
-            lambda d: (
-                "account" in (d.current_url or "").lower()
-                or "history" in (d.current_url or "").lower()
-                or d.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-                or d.find_elements(By.XPATH, "//*[contains(., 'Bet ID') or contains(., 'Wager')]")
-            )
-        )
+        wait.until(_history_loaded)
         log("[Nav] Betting history detected.")
+        return True
     except TimeoutException:
         log("[Nav][ERR] Betting history page did not load within timeout.")
+        return False
 
 def click_load_more(driver, max_attempts=3):
     """
