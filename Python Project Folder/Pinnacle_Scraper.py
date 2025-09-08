@@ -1,5 +1,12 @@
-import os, sys, importlib.util
+import os
+import sys
+import importlib.util
+import time
 from datetime import datetime
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if REPO_ROOT not in sys.path:
@@ -13,7 +20,10 @@ _spec.loader.exec_module(config)
 # --- Robust helpers (add or replace) ---
 
 WAIT_SHORT = 2.0
-MAX_LOAD_MORE = 20
+
+# Tunables via environment variables
+PIN_HISTORY_SETTLE_SEC = float(os.getenv("PIN_HISTORY_SETTLE_SEC", "10"))  # seconds to let history mount
+PINNACLE_LOAD_MORE_MAX = int(os.getenv("PINNACLE_LOAD_MORE", "25"))        # max 'Load More' clicks
 
 def log(msg: str):
     # Keep project’s logger if it exists; otherwise a minimal fallback
@@ -53,6 +63,122 @@ def wait_any(driver, timeout, conditions):
     return False
 
 
+def pre_scroll_to_bottom(driver, n=3, pause=0.6):
+    """Nudge SPA to mount lazy content and reveal the Load More control."""
+    for _ in range(n):
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(pause)
+
+
+def find_bet_cards(driver):
+    """Prefer stable data-test-id; fall back to common class patterns."""
+    cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
+    if not cards:
+        cards = driver.find_elements(By.CSS_SELECTOR, "div.bet-card, div[class*='bet']")
+    return cards
+
+
+def find_load_more_button(driver):
+    """Tolerate slight text variations."""
+    xpath = ("//button[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
+             " | //span[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]")
+    btns = [b for b in driver.find_elements(By.XPATH, xpath) if b.is_displayed() and b.is_enabled()]
+    return btns[0] if btns else None
+
+
+def wait_network_quiet(driver, quiet_ms=800, max_wait=6.0):
+    """
+    Best-effort hint for SPAs: return True if resource count stays unchanged for quiet_ms.
+    Skips silently if 'performance' is blocked.
+    """
+    t0 = time.time()
+    try:
+        last = driver.execute_script("return performance.getEntriesByType('resource').length") or 0
+    except Exception:
+        return False
+    while time.time() - t0 < max_wait:
+        time.sleep(quiet_ms / 1000.0)
+        try:
+            cur = driver.execute_script("return performance.getEntriesByType('resource').length") or 0
+        except Exception:
+            return False
+        if cur == last:
+            return True
+        last = cur
+    return False
+
+
+def wait_for_history_ready(driver, settle_sec=PIN_HISTORY_SETTLE_SEC, min_cards=1):
+    """
+    Wait until the Betting history list has actually rendered:
+      ✓ 'Load more' visible, OR
+      ✓ >= min_cards bet cards present and stable across polls, OR
+      ✓ Card count stalls for ~2 consecutive polls.
+    Also does a short pre-scroll and a 'network quiet' hint between polls.
+    """
+    end = time.time() + settle_sec
+    last_count, stable_ticks = -1, 0
+
+    # Non-blocking doc ready; SPAs often render after 'complete'
+    try:
+        WebDriverWait(driver, 5).until(
+            lambda d: d.execute_script("return document.readyState") in ("interactive", "complete")
+        )
+    except Exception:
+        pass
+
+    # Kick content attachment
+    pre_scroll_to_bottom(driver, n=2, pause=0.4)
+
+    while time.time() < end:
+        # If the button exists, we’re good
+        if find_load_more_button(driver):
+            return True
+
+        # Watch card count for stability
+        count = len(find_bet_cards(driver))
+        if count >= min_cards:
+            if count == last_count:
+                stable_ticks += 1
+                if stable_ticks >= 2:
+                    return True
+            else:
+                stable_ticks = 0
+        last_count = count
+
+        # Nudge and wait briefly for network to settle
+        pre_scroll_to_bottom(driver, n=1, pause=0.3)
+        wait_network_quiet(driver, quiet_ms=700, max_wait=1.2)
+
+    return False
+
+
+def click_load_more_history(driver, max_clicks: int = PINNACLE_LOAD_MORE_MAX):
+    """
+    Repeatedly click 'Load More' / 'Show more' up to max_clicks.
+    Between clicks, re-scan and allow late button injection.
+    """
+    clicks = 0
+    while clicks < max_clicks:
+        btn = find_load_more_button(driver)
+        if not btn:
+            # Try to coax it into view once more
+            pre_scroll_to_bottom(driver, n=1, pause=0.4)
+            btn = find_load_more_button(driver)
+        if not btn:
+            print(f"[Expand] No more 'Load More' buttons after {clicks} clicks.")
+            break
+        try:
+            safe_click(driver, btn)
+            clicks += 1
+            print(f"[Expand] Clicked Load More ({clicks}/{max_clicks}).")
+            time.sleep(0.6)  # give the new batch time to mount
+        except Exception as e:
+            print(f"[Expand][WARN] Load More click failed at {clicks}: {e}")
+            break
+    return clicks
+
+
 def _looks_like_sheet_id(value: str) -> bool:
     """Return True if ``value`` resembles a Google Sheet ID."""
     if not isinstance(value, str):
@@ -88,7 +214,6 @@ log(
     )
 )
 
-import time
 import csv
 import random
 import re
@@ -97,16 +222,11 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from urllib.parse import urlparse
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import (
     SessionNotCreatedException,
     WebDriverException,
-    TimeoutException,
     NoSuchElementException,
-    StaleElementReferenceException,
 )
 from google.oauth2.service_account import Credentials as SA_Credentials
 import gspread, json, traceback
@@ -587,35 +707,6 @@ def open_account_and_history(driver, timeout=20):
     log("[Nav] Betting history detected.")
     return True
 
-def click_load_more_history(driver, max_clicks: int = MAX_LOAD_MORE):
-    """
-    Repeatedly click 'Load More' / 'Show more' up to max_clicks.
-    Stops gracefully when no button is found/clickable.
-    """
-    clicks = 0
-    while clicks < max_clicks:
-        try:
-            btn = None
-            # Prefer buttons, then spans that behave like buttons
-            candidates = driver.find_elements(By.XPATH,
-                "//button[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
-                " | //span[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
-            )
-            for c in candidates:
-                if c.is_displayed() and c.is_enabled():
-                    btn = c
-                    break
-            if not btn:
-                log(f"[Expand] No more 'Load More' buttons after {clicks} clicks.")
-                break
-            safe_click(driver, btn)
-            clicks += 1
-            log(f"[Expand] Clicked Load More ({clicks}/{max_clicks}).")
-            time.sleep(WAIT_SHORT)
-        except Exception as e:
-            log(f"[Expand][WARN] Load More click failed at {clicks}: {e}")
-            break
-    return clicks
 
 # -----------------------------------------------------------------------------
 # CSV & BET-TRACKING FUNCTIONS
@@ -653,12 +744,6 @@ def _read_existing_ids_debug(csv_file_path=None):
     log(f"[CSV] Loaded {len(ids)} existing Bet IDs. Sample: {sample}")
     return ids
 
-def find_bet_cards(driver):
-    # Prefer data-test-id selector; fall back to common class patterns
-    cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-    if not cards:
-        cards = driver.find_elements(By.CSS_SELECTOR, "div.bet-card, div[class*='bet']")
-    return cards
 
 def expand_unlogged_bets(driver, max_passes: int = 2):
     """
@@ -1219,7 +1304,14 @@ def main():
 
     if not open_account_and_history(driver, timeout=20):
         return
-    click_load_more_history(driver, max_clicks=MAX_LOAD_MORE)
+
+    # Wait for the history list to fully render
+    if not wait_for_history_ready(driver, settle_sec=PIN_HISTORY_SETTLE_SEC, min_cards=1):
+        print("[Nav][WARN] History list did not fully settle; proceeding cautiously.")
+
+    # Nudge once more, then try to load more pages
+    pre_scroll_to_bottom(driver, n=2, pause=0.6)
+    click_load_more_history(driver, max_clicks=PINNACLE_LOAD_MORE_MAX)
 
     expand_unlogged_bets(driver, max_passes=2)
 
