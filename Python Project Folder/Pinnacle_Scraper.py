@@ -747,33 +747,57 @@ def _read_existing_ids_debug(csv_file_path=None):
 
 def expand_unlogged_bets(driver, max_passes: int = 2):
     """
-    Light-touch expansion pass. If project has a stronger version, keep it.
-    Looks for 'Details'/'Show'/'Expand' buttons inside cards and clicks once.
+    Light-touch expansion pass.
+    Searches for text or icon-based toggles inside cards and verifies expansion
+    by checking for the date container. Logs total expanded vs detected.
     """
     passes = 0
+    total_cards = 0
+    expanded_cards = 0
+    keywords = ["details", "show", "expand", "more"]
     while passes < max_passes:
         cards = find_bet_cards(driver)
+        total_cards = max(total_cards, len(cards))
         if not cards:
             break
         expanded_any = False
         for c in cards:
+            # Skip already expanded cards
+            if c.find_elements(By.CSS_SELECTOR, ".container-_la1MytHEJ"):
+                continue
             try:
-                # Common words seen on collapsible controls
-                btns = c.find_elements(By.XPATH, ".//button|.//a|.//div[@role='button']|.//span")
+                btn_xpath = (
+                    ".//button|.//a|.//div[@role='button']|.//span|.//i|.//svg|"
+                    ".//*[@aria-label='Expand']|"
+                    ".//*[contains(@class,'caret') or contains(@class,'chevron')]"
+                )
+                btns = c.find_elements(By.XPATH, btn_xpath)
                 for b in btns:
-                    t = norm_text(b.text).lower()
-                    if any(k in t for k in ["details", "show", "expand", "more"]):
-                        safe_click(driver, b)
-                        expanded_any = True
-                        break
+                    text = norm_text(b.text).lower()
+                    label = (b.get_attribute("aria-label") or "").lower()
+                    classes = (b.get_attribute("class") or "").lower()
+                    if (
+                        any(k in text for k in keywords)
+                        or "expand" in label
+                        or any(k in classes for k in ["caret", "chevron"])
+                    ):
+                        for _ in range(2):
+                            safe_click(driver, b)
+                            time.sleep(0.2)
+                            if c.find_elements(By.CSS_SELECTOR, ".container-_la1MytHEJ"):
+                                expanded_any = True
+                                expanded_cards += 1
+                                break
+                        if expanded_any:
+                            break
             except StaleElementReferenceException:
                 continue
         passes += 1
         if not expanded_any:
             break
         time.sleep(WAIT_SHORT)
-    log(f"[Expand] Expansion passes: {passes}")
-    return passes
+    log(f"[Expand] Expanded {expanded_cards}/{total_cards} cards across {passes} passes")
+    return expanded_cards
 
     
 # -----------------------------------------------------------------------------
