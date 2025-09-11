@@ -25,6 +25,19 @@ WAIT_SHORT = 2.0
 PIN_HISTORY_SETTLE_SEC = float(os.getenv("PIN_HISTORY_SETTLE_SEC", "10"))  # seconds to let history mount
 PINNACLE_LOAD_MORE_MAX = int(os.getenv("PINNACLE_LOAD_MORE", "25"))        # max 'Load More' clicks
 
+# Locators
+ROW_LOCATOR = (
+    By.CSS_SELECTOR,
+    "div[data-test-id='betCard'],div.card-fHGTUKa_IT,div.bet-card,div[class*='bet-card'],div[class*='betCard']",
+)
+LIST_LOCATOR = (By.TAG_NAME, "body")
+LOAD_MORE_LOCATOR = (
+    By.XPATH,
+    "//button[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]"
+    " | //span[contains(., 'Load More') or contains(., 'Load more') or contains(., 'Show more')]",
+)
+CHILD_WITHIN_ROW_CSS = ".container-_la1MytHEJ"
+
 def log(msg: str):
     # Keep project’s logger if it exists; otherwise a minimal fallback
     try:
@@ -68,6 +81,27 @@ def pre_scroll_to_bottom(driver, n=3, pause=0.6):
     for _ in range(n):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(pause)
+
+
+def wait_rows_increase(driver, prev_count, timeout=4.0):
+    """Return True if the number of rows grows beyond prev_count within timeout."""
+    try:
+        WebDriverWait(driver, timeout).until(
+            lambda d: len(d.find_element(*LIST_LOCATOR).find_elements(*ROW_LOCATOR)) > prev_count
+        )
+        return True
+    except TimeoutException:
+        return False
+
+
+def safe_child_elements(parent, css_selector, retries=3):
+    """Retry fetching child elements to dodge staleness."""
+    for _ in range(retries):
+        try:
+            return parent.find_elements(By.CSS_SELECTOR, css_selector)
+        except StaleElementReferenceException:
+            continue
+    return []
 
 
 def find_bet_cards(driver):
@@ -772,58 +806,56 @@ def _read_existing_ids_debug(csv_file_path=None):
 
 
 def expand_unlogged_bets(driver, max_passes: int = 2):
-    """
-    Light-touch expansion pass.
-    Searches for text or icon-based toggles inside cards and verifies expansion
-    by checking for the date container. Logs total expanded vs detected.
-    """
+    """Expand bet rows while handling virtualization and stale elements."""
     passes = 0
-    total_cards = 0
-    expanded_cards = 0
+    expanded = 0
+    total_rows = 0
     keywords = ["details", "show", "expand", "more"]
     while passes < max_passes:
-        cards = find_bet_cards(driver)
-        total_cards = max(total_cards, len(cards))
-        if not cards:
+        rows = driver.find_elements(*ROW_LOCATOR)
+        total_rows = max(total_rows, len(rows))
+        if not rows:
             break
-        expanded_any = False
-        for c in cards:
-            # Skip already expanded cards
-            if c.find_elements(By.CSS_SELECTOR, ".container-_la1MytHEJ"):
-                continue
+        made_progress = False
+        for idx in range(len(rows)):
+            rows = driver.find_elements(*ROW_LOCATOR)
+            if idx >= len(rows):
+                break
+            row = rows[idx]
             try:
-                btn_xpath = (
-                    ".//button|.//a|.//div[@role='button']|.//span|.//i|.//svg|"
-                    ".//*[@aria-label='Expand']|"
-                    ".//*[contains(@class,'caret') or contains(@class,'chevron')]"
-                )
-                btns = c.find_elements(By.XPATH, btn_xpath)
-                for b in btns:
-                    text = norm_text(b.text).lower()
-                    label = (b.get_attribute("aria-label") or "").lower()
-                    classes = (b.get_attribute("class") or "").lower()
-                    if (
-                        any(k in text for k in keywords)
-                        or "expand" in label
-                        or any(k in classes for k in ["caret", "chevron"])
-                    ):
-                        for _ in range(2):
-                            safe_click(driver, b)
-                            time.sleep(0.2)
-                            if c.find_elements(By.CSS_SELECTOR, ".container-_la1MytHEJ"):
-                                expanded_any = True
-                                expanded_cards += 1
-                                break
-                        if expanded_any:
-                            break
-            except StaleElementReferenceException:
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", row)
+            except Exception:
+                pass
+            if safe_child_elements(row, CHILD_WITHIN_ROW_CSS):
                 continue
+            btn_css = "button,a,div[role='button'],span,i,svg,[aria-label='Expand'],[class*='caret'],[class*='chevron']"
+            for btn in safe_child_elements(row, btn_css):
+                text = norm_text(btn.text).lower()
+                label = (btn.get_attribute("aria-label") or "").lower()
+                classes = (btn.get_attribute("class") or "").lower()
+                if any(k in text for k in keywords) or "expand" in label or any(
+                    k in classes for k in ["caret", "chevron"]
+                ):
+                    safe_click(driver, btn)
+                    if safe_child_elements(row, CHILD_WITHIN_ROW_CSS):
+                        expanded += 1
+                        made_progress = True
+                        break
         passes += 1
-        if not expanded_any:
+        if not made_progress:
             break
-        time.sleep(WAIT_SHORT)
-    log(f"[Expand] Expanded {expanded_cards}/{total_cards} cards across {passes} passes")
-    return expanded_cards
+        prev = len(rows)
+        try:
+            btn = WebDriverWait(driver, 1).until(
+                EC.element_to_be_clickable(LOAD_MORE_LOCATOR)
+            )
+        except TimeoutException:
+            break
+        safe_click(driver, btn)
+        if not wait_rows_increase(driver, prev):
+            break
+    log(f"[Expand] Expanded {expanded}/{total_rows} cards across {passes} passes")
+    return expanded
 
     
 # -----------------------------------------------------------------------------
