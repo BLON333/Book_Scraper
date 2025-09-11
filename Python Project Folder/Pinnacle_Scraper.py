@@ -71,11 +71,37 @@ def pre_scroll_to_bottom(driver, n=3, pause=0.6):
 
 
 def find_bet_cards(driver):
-    """Prefer stable data-test-id; fall back to common class patterns."""
-    cards = driver.find_elements(By.CSS_SELECTOR, "div[data-test-id='betCard']")
-    if not cards:
-        cards = driver.find_elements(By.CSS_SELECTOR, "div.bet-card, div[class*='bet']")
-    return cards
+    """Return all bet cards from the history page.
+
+    Pinnacle occasionally renames the classes used for bet history cards. To
+    keep scraping resilient we look for a union of stable identifiers and known
+    class names.  This includes:
+
+    - ``div[data-test-id='betCard']`` – observed data-test-id on cards
+    - ``div.card-fHGTUKa_IT`` – current container class on some builds
+    - Fallbacks for older ``bet-card`` class patterns
+
+    The combined selector ensures we capture the full set of bet cards even if
+    multiple patterns appear on the same page.
+    """
+
+    selectors = [
+        "div[data-test-id='betCard']",
+        "div.card-fHGTUKa_IT",
+        "div.bet-card",
+        "div[class*='bet-card']",
+        "div[class*='betCard']",
+    ]
+    cards = driver.find_elements(By.CSS_SELECTOR, ", ".join(selectors))
+
+    # Selenium's CSS union shouldn't return duplicates, but deduplicate just in
+    # case multiple selectors match the same element.
+    seen, unique = set(), []
+    for el in cards:
+        if el.id not in seen:
+            seen.add(el.id)
+            unique.append(el)
+    return unique
 
 
 def find_load_more_button(driver):
