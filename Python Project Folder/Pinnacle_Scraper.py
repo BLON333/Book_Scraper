@@ -888,17 +888,17 @@ try {
       if (lower.includes("nfl")) return "NFL";
       return "Unknown";
     }
-    const betCards = document.querySelectorAll(".card-fHGTUKa_IT.row-rH355iHD4M");
+    const betCards = document.querySelectorAll("[data-test-id='betCard']");
     const extractedBets = [];
 
     betCards.forEach((betCard) => {
       // Bet ID
-      let betIdElem = betCard.querySelector(".betId-PSO7kpwKIQ > div.container-eyCI_sLCJ2");
+      let betIdElem = betCard.querySelector("[class*='betId'] > div");
       let rawBetId = betIdElem ? betIdElem.innerText.trim() : "Unknown";
       let betId = rawBetId.replace(/[#\s]/g, "") || "Unknown";
 
       // Event date/time
-      const eventDateElem = betCard.querySelector(".container-_la1MytHEJ span:nth-child(2)");
+      const eventDateElem = betCard.querySelector("[class^='container'] span:nth-child(2)");
       let eventDateRaw = eventDateElem ? eventDateElem.innerText.trim() : "Unknown Date";
       let eventDate = "Unknown Date";
       let startTime = "Unknown Time";
@@ -932,19 +932,19 @@ try {
       }
 
       // Default bet selection
-      const betSelectionElem = betCard.querySelector(".descriptionContainer-CuQLYa1d5n > div");
+      const betSelectionElem = betCard.querySelector("[class^='descriptionContainer'] > div");
       const defaultBetSelection = betSelectionElem ? betSelectionElem.innerText.trim() : "Unknown Bet";
 
       // Odds, stake, payout
-      const oddsElem = betCard.querySelector(".dataPoint-KuKWdXUdiS.odds-MLGLaEHCiw > div");
+      const oddsElem = betCard.querySelector("[class^='dataPoint'][class*='odds'] > div");
       const rawOdds = oddsElem ? oddsElem.innerText.trim().replace("@", "").replace(" ", "") : "Unknown Odds";
-      const stakeElem = betCard.querySelector(".value-tmg2dXHs9V > span");
+      const stakeElem = betCard.querySelector("[class^='value'] > span");
       const stakeAmount = stakeElem ? stakeElem.innerText.trim().replace("$", "").replace(",", "") : "0.00";
-      const payoutElem = betCard.querySelectorAll(".value-tmg2dXHs9V > span")[1];
+      const payoutElem = betCard.querySelectorAll("[class^='value'] > span")[1];
       const payoutAmount = payoutElem ? payoutElem.innerText.trim().replace("$", "").replace(",", "") : "0.00";
 
       // Market / league
-      const marketLeagueElem = betCard.querySelector(".descLabel-fP9i5Ni0Ml.marketLeague-rnbqoNqLUs");
+      const marketLeagueElem = betCard.querySelector("[class^='descLabel'][class*='marketLeague']");
       let marketLeagueText = marketLeagueElem ? marketLeagueElem.innerText.trim() : "Unknown Market - Unknown League";
       let shortLeague = parseShortLeague(marketLeagueText);
 
@@ -973,10 +973,10 @@ try {
       // Event match
       let eventMatch = "Unknown Match";
       if (possiblePlayerProp) {
-        let playerMatchElem = betCard.querySelector(".gamePropMatchName-t8XBnfgvDJ");
+        let playerMatchElem = betCard.querySelector("[class^='gamePropMatchName']");
         let candidateText = playerMatchElem ? playerMatchElem.innerText.trim() : "";
         if (!candidateText) {
-          let normalMatchElem = betCard.querySelector(".matchName-j2KqtMUVKC");
+          let normalMatchElem = betCard.querySelector("[class^='matchName']");
           candidateText = normalMatchElem ? normalMatchElem.innerText.trim() : "";
         }
         if (candidateText && isTeamMatchup(candidateText)) {
@@ -985,7 +985,7 @@ try {
           eventMatch = "Unknown PlayerProp Match";
         }
       } else {
-        let normalMatchElem = betCard.querySelector(".matchName-j2KqtMUVKC");
+        let normalMatchElem = betCard.querySelector("[class^='matchName']");
         eventMatch = normalMatchElem ? normalMatchElem.innerText.trim() : "Unknown Match";
       }
 
@@ -1022,11 +1022,11 @@ try {
       // Player prop bet selection refinement
       let finalBetSelection = defaultBetSelection;
       if (possiblePlayerProp) {
-        let playerNameElem = betCard.querySelector("div.container-q3o3TofZKK > div");
+        let playerNameElem = betCard.querySelector("div[class^='container'] > div");
         let rawPlayerName = playerNameElem ? playerNameElem.innerText.trim() : "";
         let playerName = rawPlayerName.replace(/\(.*?\)/, "").trim();
 
-        let oddsDescriptionElem = betCard.querySelector("div.participantOdds-KJqsjY1e9j > div.descriptionContainer-CuQLYa1d5n > div");
+        let oddsDescriptionElem = betCard.querySelector("div[class^='participantOdds'] > div[class^='descriptionContainer'] > div");
         let rawOddsDesc = oddsDescriptionElem ? oddsDescriptionElem.innerText.trim() : "";
         let cleanedOddsDesc = rawOddsDesc.replace(/\s*@\s*[-+]\d+.*$/, "").trim();
 
